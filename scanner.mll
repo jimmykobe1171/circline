@@ -36,7 +36,7 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | '->' { RIGHTLINK }
 | '<-' { LEFTLINK }
 (* primary type *)
-| variable as id{ ID(id) }
+| variable as id { ID(id) }
 | 'int' { INT }
 | 'float' { FLOAT }
 | 'string' { STRING }
