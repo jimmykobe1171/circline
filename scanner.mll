@@ -47,8 +47,8 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | 'dict' { DICT }
 | 'null' { NULL }
 (* integer and float *)
-| digit+ as lit { LITERAL(int_of_string lit) }
-| digit+'.'digit+ as lit { LITERAL(float_of_string lit) }
+| digit+ as lit { INT_LITERAL(int_of_string lit) }
+| digit+'.'digit+ as lit { FLOAT_LITERAL(float_of_string lit) }
 (* quote *)
 | '"'  { QUOTE }
 (* boolean operation *)
