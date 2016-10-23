@@ -1,5 +1,3 @@
-#!/bin/bash
-
 NC='\033[0m'
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
@@ -9,6 +7,8 @@ cd scanner
 make clean
 make
 cd ..
+
+result=true
 
 INPUT_FILES="scanner/*.in"
 printf "${CYAN}Running scanner tests...\n${NC}"
@@ -20,8 +20,12 @@ for input_file in $INPUT_FILES; do
        printf "%-65s ${GREEN}SUCCESS\n${NC}" "  - checking $input_file..."
     else
        printf "%-65s ${RED}ERROR\n${NC}" "  - checking $input_file..." 1>&2
-       exit 1
+    	result=false
     fi
 done
 
-exit 0
+if $result; then
+	exit 0
+else
+	exit 1
+fi
