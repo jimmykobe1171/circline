@@ -5,12 +5,17 @@ CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 
+cd scanner
+make clean
+make
+cd ..
+
 INPUT_FILES="scanner/*.in"
 printf "${CYAN}Running scanner tests...\n${NC}"
 
 for input_file in $INPUT_FILES; do
     output_file=${input_file/.in/.out}
-    scanner/tokenize < $input_file | cmp -s $output_file -
+    scanner/testScanner < $input_file | cmp -s $output_file -
     if [ "$?" -eq 0 ]; then
        printf "%-65s ${GREEN}SUCCESS\n${NC}" "  - checking $input_file..."
     else
