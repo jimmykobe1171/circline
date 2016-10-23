@@ -21,6 +21,7 @@ type token =
 |   FOR
 |   BREAK
 |   CONTINUE
+|   RETURN
 |   IN
 |   LINK
 |   RIGHTLINK
@@ -44,7 +45,7 @@ type token =
 |   LEFTROUNDBRACKET 
 |   RIGHTROUNDBRACKET
 |   EOF
-|   ID
-|   INT_LITERAL
-|   STRING_LITERAL
-|   FLOAT_LITERAL
+|   ID of string
+|   INT_LITERAL of int
+|   STRING_LITERAL of string
+|   FLOAT_LITERAL of float

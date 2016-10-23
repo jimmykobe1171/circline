@@ -1,5 +1,4 @@
 open Parser
-open Ast
 
 let stringify = function
   (* calculation *)
@@ -44,6 +43,7 @@ let stringify = function
   | INT_LITERAL(int) -> "INT_LITERAL"
   | FLOAT_LITERAL(float) -> "FLOAT_LITERAL"
   | STRING_LITERAL(string) -> "STRING_LITERAL"
+  | RETURN -> "RETURN"
 
 let _ = 
   let lexbuf = Lexing.from_channel stdin in

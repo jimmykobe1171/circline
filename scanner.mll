@@ -1,9 +1,11 @@
 { open Parser }
 let digit = ['0'-'9']
 let letter = ['a'-'z' 'A'-'Z']
-let variable = letter[letter digit '_']*
+let variable = letter (letter | digit | '_') *
 rule token =
 parse [' ' '\t' '\r' '\n'] { token lexbuf }
+(* comment *)
+| "/*" { comment lexbuf }
 (* calculation *)
 | '+' { PLUS }
 | '-' { MINUS }
@@ -17,44 +19,44 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | ':' { COLUMN }
 | '.' { DOT }
 (* logical operation *)
-| 'and' { AND }
-| 'or' { OR }
-| 'not' { NOT }
-| 'if' { IF }
-| 'else' { ELSE }
-| 'for' { FOR }
-| 'break' { BREAK }
-| 'continue' { CONTINUE }
-| 'in' { IN }
+| "and" { AND }
+| "or" { OR }
+| "not" { NOT }
+| "if" { IF }
+| "else" { ELSE }
+| "for" { FOR }
+| "break" { BREAK }
+| "continue" { CONTINUE }
+| "in" { IN }
+| "return" {RETURN}
 (* comparator *)
 | '>' { GREATER }
-| '>=' { GREATEREQUAL }
+| ">=" { GREATEREQUAL }
 | '<' { SMALLER }
-| '<=' { SMALLEREQUAL }
+| "<=" { SMALLEREQUAL }
 (* graph operator *)
-| '--' { LINK }
-| '->' { RIGHTLINK }
-| '<-' { LEFTLINK }
+| "--" { LINK }
+| "->" { RIGHTLINK }
+| "<-" { LEFTLINK }
 (* primary type *)
-| variable as id { ID(id) }
-| 'int' { INT }
-| 'float' { FLOAT }
-| 'string' { STRING }
-| 'bool' { BOOL }
-| 'node' { NODE }
-| 'graph' { GRAPH }
-| 'list' { LIST }
-| 'dict' { DICT }
-| 'null' { NULL }
+| "int" { INT }
+| "float" { FLOAT }
+| "string" { STRING }
+| "bool" { BOOL }
+| "node" { NODE }
+| "graph" { GRAPH }
+| "list" { LIST }
+| "dict" { DICT }
+| "null" { NULL }
 (* integer and float *)
 | digit+ as lit { INT_LITERAL(int_of_string lit) }
-| digit+'.'digit+ as lit { FLOAT_LITERAL(FLOAT_of_string lit) }
+| digit+'.'digit+ as lit { FLOAT_LITERAL(float_of_string lit) }
 | '"' (([^ '"'] | "\\\"")* as lit) '"' { STRING_LITERAL(lit) }
 (* quote *)
 | '"'  { QUOTE }
 (* boolean operation *)
-| 'true' { TRUE }
-| 'false' { FALSE }
+| "true" { TRUE }
+| "false" { FALSE }
 (* bracket *)
 | '[' { LEFTBRACKET }
 | ']' { RIGHTBRACKET }
@@ -62,10 +64,10 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | '}' { RIGHTCURLYBRACKET }
 | '(' { LEFTROUNDBRACKET }
 | ')' { RIGHTROUNDBRACKET }
-(* comment *)
-| '/*' { comment lexbuf }
+(* id *)
+| variable as id { ID(id) }
 | eof { EOF }
 
 and comment =
-    parse '*/' {token lexbuf}
+    parse "*/" {token lexbuf}
         | _ {comment lexbuf}
