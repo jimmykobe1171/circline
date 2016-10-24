@@ -6,4 +6,5 @@ before_install:
     - bash -ex config/ocaml_install.sh
 install: true
 script: 
-    - bash -ex tests/test_scanner.sh
+    - bash cd tests/
+    - bash -ex ./test_scanner.sh
