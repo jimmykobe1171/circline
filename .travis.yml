@@ -1,7 +1,9 @@
-language: ruby
-rvm:
- - 2.2
- - jruby
- - rbx-2
-# uncomment and edit the following line if your project needs to run something other than `rake`:
-# script: bundle exec rspec spec
+sudo: required
+language: python
+python: "2.7_with_system_site_packages"
+env: "OCAML_VERSION=4.01.0 OPAM_VERSION=1.2.0"
+before_install:
+    - bash -ex config/ocaml_install.sh
+install:
+    - sudo pip install -r config/requirements.txt
+script: make test
