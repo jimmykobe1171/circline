@@ -6,4 +6,4 @@ before_install:
     - bash -ex config/ocaml_install.sh
 install:
     - sudo pip install -r config/requirements.txt
-script: make test
+script: make tests/scanner
