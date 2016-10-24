@@ -5,4 +5,4 @@ env: "OCAML_VERSION=4.01.0 OPAM_VERSION=1.2.0"
 before_install:
     - bash -ex config/ocaml_install.sh
 install: true
-script: /tests/test_scanner.sh
+script: sh ./tests/test_scanner.sh
