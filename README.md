@@ -7,8 +7,9 @@ Language Guru: Zehao Song
 
 Tester: Qing Lan
 ## Current Target
-- Build the Travis CI
+- Build the Travis CI (done in 24-Oct)
 - Build the Ocaml Compiler
+- BUild the make file and test the program
 
 ## Recent Update 2016-10-22
 Figure out the major obstacle on the Scanner Part. User can run the test module by doing the follows:
