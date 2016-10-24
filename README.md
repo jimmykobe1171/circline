@@ -6,6 +6,9 @@ System Architecture: Haikuo Liu
 Language Guru: Zehao Song
 
 Tester: Qing Lan
+## Current Target
+- Build the Travis CI
+- Build the Ocaml Compiler
 
 ## Recent Update 2016-10-22
 Figure out the major obstacle on the Scanner Part. User can run the test module by doing the follows:
