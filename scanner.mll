@@ -34,6 +34,7 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | ">=" { GREATEREQUAL }
 | '<' { SMALLER }
 | "<=" { SMALLEREQUAL }
+| "==" { EQUAL}
 (* graph operator *)
 | "--" { LINK }
 | "->" { RIGHTLINK }

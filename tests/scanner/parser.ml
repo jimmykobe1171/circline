@@ -13,6 +13,7 @@ type token =
 |   GREATEREQUAL
 |   SMALLER
 |   SMALLEREQUAL
+|  	EQUAL 
 |   AND
 |   OR
 |   NOT
