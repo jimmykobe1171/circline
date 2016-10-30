@@ -14,6 +14,7 @@ type token =
 |   SMALLER
 |   SMALLEREQUAL
 |  	EQUAL 
+|   NOTEQUAL
 |   AND
 |   OR
 |   NOT
