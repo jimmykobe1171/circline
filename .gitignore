@@ -4,3 +4,5 @@
 *.cmi
 
 *.cmo
+
+tests/scanner/testScanner
