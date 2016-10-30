@@ -14,13 +14,14 @@ let stringify = function
   | NOT -> "NOT"      | IF -> "IF"
   | ELSE -> "ELSE"    | FOR -> "FOR"
   | BREAK -> "BREAK"  | CONTINUE -> "CONTINUE"
-  | IN -> "IN"  
+  | IN -> "IN"
   (* comparator *)
+  | EQUAL -> "EQUAL"          | NOTEQUAL -> "NOTEQUAL"
   | GREATER -> "GREATER"      | GREATEREQUAL -> "GREATEREQUAL"
   | SMALLER -> "SMALLER"      | SMALLEREQUAL -> "SMALLEREQUAL"
   (* graph operator *)
   | LINK -> "LINK"            | RIGHTLINK -> "RIGHTLINK"
-  | LEFTLINK -> "LEFTLINK"    
+  | LEFTLINK -> "LEFTLINK"
   (* identifier *)
   | ID(string) -> "ID"
   (* primary type *)
@@ -32,11 +33,11 @@ let stringify = function
   (* quote *)
   | QUOTE -> "QUOTE"
   (* boolean operation *)
-  | TRUE -> "TRUE" | FALSE -> "FALSE" 
+  | TRUE -> "TRUE" | FALSE -> "FALSE"
   (* bracket *)
-  | LEFTBRACKET -> "LEFTBRACKET"           | RIGHTBRACKET -> "RIGHTBRACKET" 
-  | LEFTCURLYBRACKET -> "LEFTCURLYBRACKET" | RIGHTCURLYBRACKET -> "RIGHTCURLYBRACKET" 
-  | LEFTROUNDBRACKET -> "LEFTROUNDBRACKET" | RIGHTROUNDBRACKET -> "RIGHTROUNDBRACKET" 
+  | LEFTBRACKET -> "LEFTBRACKET"           | RIGHTBRACKET -> "RIGHTBRACKET"
+  | LEFTCURLYBRACKET -> "LEFTCURLYBRACKET" | RIGHTCURLYBRACKET -> "RIGHTCURLYBRACKET"
+  | LEFTROUNDBRACKET -> "LEFTROUNDBRACKET" | RIGHTROUNDBRACKET -> "RIGHTROUNDBRACKET"
   (* End-of-File *)
   | EOF -> "EOF"
   (* Literals *)
@@ -45,7 +46,7 @@ let stringify = function
   | STRING_LITERAL(string) -> "STRING_LITERAL"
   | RETURN -> "RETURN"
 
-let _ = 
+let _ =
   let lexbuf = Lexing.from_channel stdin in
   let rec print_tokens = function
     | EOF -> " "
