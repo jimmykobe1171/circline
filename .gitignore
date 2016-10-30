@@ -1,2 +1,8 @@
 
 .DS_Store
+
+*.cmi
+
+*.cmi
+
+*.cmo
