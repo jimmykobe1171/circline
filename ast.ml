@@ -1,10 +1,7 @@
-type operator = Plus | Minus | Times | Divide | Mod
-type typ = Int| Float | String | Bool | Node | Graph | List | Dict
+type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | And | Not | Or | Mod
 
-
-(* type expr =
-Binop of expr * operator * expr
-| Lit of int
-| Seq of expr * expr
-| Asn of int * expr
-| Var of int *)
+type expr =
+		Int_Lit of int
+	| 	Float_Lit of float
+	| 	Binop of expr * op * expr
+	|  	Unop of op * expr
