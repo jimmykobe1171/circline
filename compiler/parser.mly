@@ -11,7 +11,7 @@
 %token GREATER GREATEREQUAL SMALLER SMALLEREQUAL EQUAL NOTEQUAL
 
 /* Logical Operators & Keywords*/
-%token AND OR NOT IF ELSE FOR BREAK CONTINUE IN
+%token AND OR NOT IF ELSE FOR BREAK CONTINUE IN RETURN
 
 /* Graph operator */
 %token LINK RIGHTLINK LEFTLINK
@@ -50,6 +50,9 @@
 %left  RIGHTROUNDBRACKET
 %right DOT
 
+%start expr
+%type < Ast.expr> expr
+
 %%
 
 expr:
@@ -68,9 +71,9 @@ expr:
 | expr MOD          expr 					{ Binop($1, Mod,   $3)}
 | NOT  expr 							        { Unop (Not,   $2) }
 | expr OR     expr 					      { Binop($1, Or,    $3) }
-| expr ASSIGN expr 					      { Assign($1, $3) }
+/*| expr ASSIGN expr 					      { Assign($1, $3) }*/
 | MINUS expr 							        { Unop (Sub, $2) }
 
 literals:
-  INT_LITERAL {Int_Lit($1)}
-| FLOAT_LITERAL {Float_Lit($1)}
+  INT_LITERAL {Num_Lit( Num_Int($1) )}
+| FLOAT_LITERAL {Num_Lit( Num_Float($1) )}

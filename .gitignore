@@ -8,3 +8,5 @@
 tests/scanner/testScanner
 
 tests/scanner/scanner.ml
+
+tests/parser/parserize
