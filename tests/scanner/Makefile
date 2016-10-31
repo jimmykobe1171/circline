@@ -3,8 +3,8 @@ OBJS = parser.cmo scanner.cmo tokenize.cmo
 testScanner : $(OBJS)
 	ocamlc -o testScanner $(OBJS)
 
-scanner.ml : ../../complier/scanner.mll
-	ocamllex -o scanner.ml ../../complier/scanner.mll
+scanner.ml : ../../compiler/scanner.mll
+	ocamllex -o scanner.ml ../../compiler/scanner.mll
 
 tokenize.cmo : ../tokenize.ml
 	ocamlc -o tokenize.cmo -c ../tokenize.ml
