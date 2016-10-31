@@ -7,7 +7,7 @@ all:
 	cd ..; make all
 
 test: build
-	./test_scanner.sh
+	sh ./test_scanner.sh
 
 build:
 	cd scanner; make
