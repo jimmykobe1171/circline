@@ -65,13 +65,32 @@ stmt_list:
 
 stmt:
 | expr SEMICOLUMN                       { Expr($1) }
-| primitive ID LEFTROUNDBRACKET RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
+| func_decl                             { Func($1) }
 
 
-primitive:
-  INT 								    {Int_t}
+var_type:
+  INT 								  {Int_t}
 | FLOAT 								{Float_t}
 | STRING 								{String_t}
+
+formal_list:
+| /* nothing */               { [] }
+| formal                      { [$1] }
+| formal_list SEQUENCE formal { $3 :: $1 }
+
+
+formal:
+| var_type ID           { Formal($1, $2) }
+
+func_decl:
+| var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET {
+  {
+    returnType = $1;
+    body = List.rev $7;
+    args = List.rev $4;
+    name = $2;
+  }
+}
 
 expr:
   literals {$1}
