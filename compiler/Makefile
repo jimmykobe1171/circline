@@ -1,8 +1,11 @@
 OBJS = parser.cmo scanner.cmo
 
-default: all
+default: circling
 
-all: $(OBJS)
+circling: $(OBJS)
+
+all:
+	cd ..; make all
 
 scanner.ml : scanner.mll
 	ocamllex scanner.mll
