@@ -1,33 +1,38 @@
+(* Binary Operators *)
 type binop =
-  Add
-| Sub
-| Mult
-| Div
-| Equal
-| Neq
-| Less
-| Leq
-| Greater
-| Geq
-| And
-| Or
-| Mod
+  Add         (* + *)
+| Sub         (* - *)
+| Mult        (* * *)
+| Div         (* / *)
+| Mod         (* % *)
+| Equal       (* == *)
+| Neq         (* != *)
+| Less        (* < *)
+| Leq         (* <= *)
+| Greater     (* > *)
+| Geq         (* >= *)
+| And         (* and *)
+| Or          (* or *)
 
+(* Unary Operators *)
 type unop =
-  Sub
-| Not
+  Sub         (* - *)
+| Not         (* not *)
 
+(* Numbers int | float *)
 type num =
-  Num_Int of int
-| Num_Float of float
+  Num_Int of int          (* 514 *)
+| Num_Float of float      (* 3.1415 *)
 
+(* Variable Type *)
 type var_type =
-  Int_t
-| Float_t
-| String_t
+  Int_t                   (* int *)
+| Float_t                 (* float *)
+| String_t                (* string *)
 
+(* Type Declaration *)
 type formal =
-| Formal of var_type * string
+| Formal of var_type * string   (* int aNum *)
 
 type expr =
     Num_Lit of num
@@ -42,6 +47,7 @@ type stmt =
   Expr of expr     (* set foo = bar + 3 *)
 | Func of func_decl
 
+(* Function Declaration *)
 and func_decl = {
   returnType: var_type;
   body: stmt list;

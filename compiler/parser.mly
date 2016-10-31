@@ -98,6 +98,7 @@ expr:
 | ID 					                    { Id($1) }
 | ID ASSIGN expr 					        { Assign($1, $3) }
 | LEFTBRACKET list RIGHTBRACKET   { ListP(List.rev $2) }
+| LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { $2 }
 
 /* Lists */
 list:
