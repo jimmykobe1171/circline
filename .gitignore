@@ -10,3 +10,11 @@ tests/scanner/testScanner
 tests/scanner/scanner.ml
 
 tests/parser/parserize
+
+compiler/parser.ml
+
+compiler/parser.mli
+
+compiler/scanner.ml
+
+tests/scanner/tokenize
