@@ -65,6 +65,13 @@ stmt_list:
 
 stmt:
 | expr SEMICOLUMN                       { Expr($1) }
+| primitive ID LEFTROUNDBRACKET RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
+
+
+primitive:
+  INT 								    {Int_t}
+| FLOAT 								{Float_t}
+| STRING 								{String_t}
 
 expr:
   literals {$1}

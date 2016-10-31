@@ -21,6 +21,11 @@ type num =
   Num_Int of int
 | Num_Float of float
 
+type primitive = 
+  Int_t
+| Float_t
+| String_t
+
 type expr =
     Num_Lit of num
 | 	Binop of expr * binop * expr
