@@ -52,5 +52,5 @@ type token =
   | STRING_LITERAL of (string)
   | FLOAT_LITERAL of (float)
 
-val expr :
-  (Lexing.lexbuf  -> token) -> Lexing.lexbuf ->  Ast.expr
+val program :
+  (Lexing.lexbuf  -> token) -> Lexing.lexbuf ->  Ast.program

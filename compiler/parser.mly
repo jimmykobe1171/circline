@@ -50,10 +50,21 @@
 %left  RIGHTROUNDBRACKET
 %right DOT
 
-%start expr
-%type < Ast.expr> expr
+%start program
+%type < Ast.program> program
 
 %%
+
+/* Program flow */
+program:
+  | stmt_list EOF                         { List.rev $1 }
+
+stmt_list:
+  | /* nothing */                         { [] }
+  | stmt_list stmt                        { $2 :: $1 }
+
+stmt:
+  | expr SEMICOLUMN                       { Expr($1) }
 
 expr:
   literals {$1}
@@ -65,14 +76,15 @@ expr:
 | expr NOTEQUAL     expr 					{ Binop($1, Neq,   $3) }
 | expr SMALLER      expr 					{ Binop($1, Less,  $3) }
 | expr SMALLEREQUAL expr 					{ Binop($1, Leq,   $3) }
-|	expr GREATER      expr 					{ Binop($1, Greater,  $3) }
+| expr GREATER      expr 					{ Binop($1, Greater,  $3) }
 | expr GREATEREQUAL expr 					{ Binop($1, Geq,   $3) }
 | expr AND          expr 					{ Binop($1, And,   $3) }
 | expr MOD          expr 					{ Binop($1, Mod,   $3)}
-| NOT  expr 							        { Unop (Not,   $2) }
-| expr OR     expr 					      { Binop($1, Or,    $3) }
-/*| expr ASSIGN expr 					      { Assign($1, $3) }*/
-| MINUS expr 							        { Unop (Sub, $2) }
+| NOT  expr 							    { Unop (Not,   $2) }
+| expr OR     expr                          { Binop($1, Or,    $3) }
+| ID 					                    { Id($1) }
+| ID ASSIGN expr 					        { Assign($1, $3) }
+| MINUS expr 							    { Unop (Sub, $2) }
 
 literals:
   INT_LITERAL {Num_Lit( Num_Int($1) )}

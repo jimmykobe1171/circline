@@ -1,5 +1,5 @@
 type binop =
-	Add
+  Add
 | Sub
 | Mult
 | Div
@@ -14,15 +14,23 @@ type binop =
 | Mod
 
 type unop =
-	Sub
+  Sub
 | Not
 
 type num =
-	Num_Int of int
+  Num_Int of int
 | Num_Float of float
 
 type expr =
-		Num_Lit of num
+    Num_Lit of num
 | 	Binop of expr * binop * expr
 |  	Unop of unop * expr
-(* |   Assign of string * expr *)
+|   Id of string
+|   Assign of string * expr
+
+(* Statements *)
+type stmt =
+  Expr of expr     (* set foo = bar + 3 *)
+
+(* Program entry point *)
+type program = stmt list
