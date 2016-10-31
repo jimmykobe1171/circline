@@ -78,7 +78,7 @@ expr:
 | arith_ops                       { $1 }
 | ID 					                    { Id($1) }
 | ID ASSIGN expr 					        { Assign($1, $3) }
-| LEFTBRACKET list RIGHTBRACKET           { List($2) }
+| LEFTBRACKET list RIGHTBRACKET   { ListP(List.rev $2) }
 
 /* Lists */
 list:

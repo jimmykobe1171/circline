@@ -36,7 +36,7 @@ let rec txt_of_expr = function
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
   | Id(x) -> sprintf "Id(%s)" x
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
-  | List(l) -> sprintf "List([%s])" (txt_of_list l)
+  | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
 
 (* Lists *)
 and txt_of_list = function
@@ -51,7 +51,7 @@ let txt_of_stmt = function
 
 let txt_of_stmts stmts =
   let rec aux acc = function
-      | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
+      | [] -> sprintf "%s;\n" (String.concat " ;\n" (List.rev acc))
       | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
   in aux [] stmts
 

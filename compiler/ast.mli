@@ -21,7 +21,7 @@ type num =
   Num_Int of int
 | Num_Float of float
 
-type primitive = 
+type primitive =
   Int_t
 | Float_t
 | String_t
@@ -32,7 +32,7 @@ type expr =
 |  	Unop of unop * expr
 |   Id of string
 |   Assign of string * expr
-|   List of expr list
+|   ListP of expr list
 
 (* Statements *)
 type stmt =
