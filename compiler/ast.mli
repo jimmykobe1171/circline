@@ -27,6 +27,7 @@ type expr =
 |  	Unop of unop * expr
 |   Id of string
 |   Assign of string * expr
+|   List of expr list
 
 (* Statements *)
 type stmt =

@@ -57,17 +57,29 @@
 
 /* Program flow */
 program:
-  | stmt_list EOF                         { List.rev $1 }
+| stmt_list EOF                         { List.rev $1 }
 
 stmt_list:
-  | /* nothing */                         { [] }
-  | stmt_list stmt                        { $2 :: $1 }
+| /* nothing */                         { [] }
+| stmt_list stmt                        { $2 :: $1 }
 
 stmt:
-  | expr SEMICOLUMN                       { Expr($1) }
+| expr SEMICOLUMN                       { Expr($1) }
 
 expr:
   literals {$1}
+| arith_ops                       { $1 }
+| ID 					                    { Id($1) }
+| ID ASSIGN expr 					        { Assign($1, $3) }
+| LEFTBRACKET list RIGHTBRACKET           { List($2) }
+
+/* Lists */
+list:
+| /* nothing */                         { [] }
+| expr                                  { [$1] }
+| list SEQUENCE expr                    { $3 :: $1 }
+
+arith_ops:
 | expr PLUS         expr 					{ Binop($1, Add,   $3) }
 | expr MINUS        expr 					{ Binop($1, Sub,   $3) }
 | expr TIMES        expr 					{ Binop($1, Mult,  $3) }
@@ -79,13 +91,11 @@ expr:
 | expr GREATER      expr 					{ Binop($1, Greater,  $3) }
 | expr GREATEREQUAL expr 					{ Binop($1, Geq,   $3) }
 | expr AND          expr 					{ Binop($1, And,   $3) }
-| expr MOD          expr 					{ Binop($1, Mod,   $3)}
-| NOT  expr 							    { Unop (Not,   $2) }
-| expr OR     expr                          { Binop($1, Or,    $3) }
-| ID 					                    { Id($1) }
-| ID ASSIGN expr 					        { Assign($1, $3) }
-| MINUS expr 							    { Unop (Sub, $2) }
+| expr MOD          expr 					{ Binop($1, Mod,   $3) }
+| expr OR     expr                { Binop($1, Or,    $3) }
+| NOT  expr 							        { Unop (Not,   $2) }
+| MINUS expr 							        { Unop (Sub, $2) }
 
 literals:
-  INT_LITERAL {Num_Lit( Num_Int($1) )}
+  INT_LITERAL   {Num_Lit( Num_Int($1) )}
 | FLOAT_LITERAL {Num_Lit( Num_Float($1) )}

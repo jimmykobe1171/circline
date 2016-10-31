@@ -36,6 +36,14 @@ let rec txt_of_expr = function
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
   | Id(x) -> sprintf "Id(%s)" x
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
+  | List(l) -> sprintf "List([%s])" (txt_of_list l)
+
+(* Lists *)
+and txt_of_list = function
+  | [] -> ""
+  | [x] -> txt_of_expr x
+  | _ as l -> String.concat " , " (List.map txt_of_expr l)
+
 
 (* Statements *)
 let txt_of_stmt = function
