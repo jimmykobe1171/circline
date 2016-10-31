@@ -6,4 +6,4 @@ before_install:
     - bash -ex config/ocaml_install.sh
 install: true
 script: 
-    - bash -ex ./tell_travis.sh
+    - make test
