@@ -34,7 +34,7 @@ let txt_of_formal = function
 
 let txt_of_formal_list formals =
   let rec aux acc = function
-    | [] -> sprintf "%s" (String.concat " , " (List.rev acc))
+    | [] -> sprintf "%s" (String.concat ", " (List.rev acc))
     | fml :: tl -> aux (txt_of_formal fml :: acc) tl
   in aux [] formals
 
@@ -56,21 +56,21 @@ let rec txt_of_expr = function
 and txt_of_list = function
   | [] -> ""
   | [x] -> txt_of_expr x
-  | _ as l -> String.concat " , " (List.map txt_of_expr l)
+  | _ as l -> String.concat ", " (List.map txt_of_expr l)
 
 (* Functions Declaration *)
 and txt_of_func_decl f =
-  sprintf "%s %s (%s) {\n%s}"
+  sprintf "%s %s (%s) {%s}"
     (txt_of_var_type f.returnType) f.name (txt_of_formal_list f.args) (txt_of_stmts f.body)
 
 (* Statements *)
 and txt_of_stmt = function
-  | Expr(expr) -> sprintf "Expr(%s);\n" (txt_of_expr expr)
-  | Func(f) -> sprintf "Func(%s)\n" (txt_of_func_decl f)
+  | Expr(expr) -> sprintf "Expr(%s);" (txt_of_expr expr)
+  | Func(f) -> sprintf "Func(%s)" (txt_of_func_decl f)
 
 and txt_of_stmts stmts =
   let rec aux acc = function
-      | [] -> sprintf "%s" (String.concat "" (List.rev acc))
+      | [] -> sprintf "%s" (String.concat "\n" (List.rev acc))
       | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
   in aux [] stmts
 

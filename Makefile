@@ -8,7 +8,7 @@ all: clean build
 build:
 	cd compiler; make
 
-test: build
+test: clean build
 	cd tests; make
 
 .PHONY: clean
