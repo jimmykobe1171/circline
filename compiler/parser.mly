@@ -40,6 +40,7 @@
 
 /* Order */
 %right ASSIGN
+%left LINK RIGHTLINK LEFTLINK
 %left AND OR
 %left EQUAL NOTEQUAL
 %left GREATER SMALLER GREATEREQUAL SMALLEREQUAL
@@ -95,6 +96,8 @@ func_decl:
 expr:
   literals {$1}
 | arith_ops                       { $1 }
+| graph_ops                       { $1 }
+| NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { Node($3) }
 | ID 					                    { Id($1) }
 | ID ASSIGN expr 					        { Assign($1, $3) }
 | LEFTBRACKET list RIGHTBRACKET   { ListP(List.rev $2) }
@@ -122,6 +125,11 @@ arith_ops:
 | expr OR     expr                { Binop($1, Or,    $3) }
 | NOT  expr 							        { Unop (Not,   $2) }
 | MINUS expr 							        { Unop (Sub, $2) }
+
+graph_ops:
+| expr LINK expr                  { Graph_Binop($1, Double_Link, $3) }
+| expr RIGHTLINK expr             { Graph_Binop($1, Right_Link, $3) }
+| expr LEFTLINK expr              { Graph_Binop($1, Left_Link, $3) }
 
 literals:
   INT_LITERAL   {Num_Lit( Num_Int($1) )}
