@@ -40,6 +40,9 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | "--" { LINK }
 | "->" { RIGHTLINK }
 | "<-" { LEFTLINK }
+| '@' { AT }
+| '&' { AMPERSAND }
+| '~' { SIMILARITY }
 (* primary type *)
 | "int" { INT }
 | "float" { FLOAT }
