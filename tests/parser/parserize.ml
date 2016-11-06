@@ -46,17 +46,26 @@ let txt_of_num = function
 let rec txt_of_expr = function
   | Num_Lit(x) -> sprintf "Num_Lit(%s)" (txt_of_num x)
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
+  | String_lit(x) -> sprintf "String_lit(%s)" x
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
   | Id(x) -> sprintf "Id(%s)" x
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
-
+  | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
+  | Dict_Key_Value(k, v) -> sprintf "k:%s,v:%s" (txt_of_expr k) (txt_of_expr v)
+  
 (* Lists *)
 and txt_of_list = function
   | [] -> ""
   | [x] -> txt_of_expr x
   | _ as l -> String.concat ", " (List.map txt_of_expr l)
+
+(* Dict *)
+and txt_of_dict = function
+  | [] -> ""
+  | [x] -> txt_of_expr x
+  | _ as d -> String.concat ", " (List.map txt_of_expr d)
 
 (* Functions Declaration *)
 and txt_of_func_decl f =

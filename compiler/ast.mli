@@ -36,11 +36,14 @@ type formal =
 
 type expr =
     Num_Lit of num
+|   String_lit of string      
 | 	Binop of expr * binop * expr
 |  	Unop of unop * expr
 |   Id of string
 |   Assign of string * expr
 |   ListP of expr list
+|   DictP of expr list
+|   Dict_Key_Value of expr * expr 
 
 (* Statements *)
 type stmt =
