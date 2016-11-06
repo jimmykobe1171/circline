@@ -12,7 +12,7 @@ printf "${CYAN}Running Parser tests...\n${NC}"
 
 for input_file in $INPUT_FILES; do
     output_file=${input_file/.in/.out}
-    scanner/tokenize < $input_file | cmp -s $output_file -
+    parser/parserize < $input_file | cmp -s $output_file -
     if [ "$?" -eq 0 ]; then
        printf "%-65s ${GREEN}SUCCESS\n${NC}" "  - checking $input_file..."
     else
