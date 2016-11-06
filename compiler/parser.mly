@@ -50,6 +50,7 @@
 %left SIMILARITY AT
 %right LEFTROUNDBRACKET
 %left  RIGHTROUNDBRACKET
+%right COLUMN
 %right DOT
 
 %start program
@@ -71,7 +72,7 @@ stmt:
 
 
 var_type:
-  INT 								  {Int_t}
+  INT 								  	{Int_t}
 | FLOAT 								{Float_t}
 | STRING 								{String_t}
 
@@ -101,8 +102,10 @@ expr:
 | NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { Node($3) }
 | ID 					                    { Id($1) }
 | ID ASSIGN expr 					        { Assign($1, $3) }
-| LEFTBRACKET list RIGHTBRACKET   { ListP(List.rev $2) }
-| LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { $2 }
+| LEFTBRACKET list RIGHTBRACKET   			{ ListP(List.rev $2) }
+| LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }
+| LEFTROUNDBRACKET expr RIGHTROUNDBRACKET 	{ $2 }
+| STRING_LITERAL COLUMN expr 				{Dict_Key_Value(String_lit($1), $3)}
 
 /* Lists */
 list:
@@ -120,6 +123,12 @@ list_graph_literal:
 | LEFTBRACKET list_graph RIGHTBRACKET   {
   { graphs = List.rev ($2).graphs; edges = List.rev ($2).edges }
 }
+
+/* dict */
+dict:
+| /* nothing */                     { [] }
+| expr 								{ [$1] }
+| dict SEQUENCE expr 				{$3 :: $1}
 
 arith_ops:
 | expr PLUS         expr 					{ Binop($1, Add,   $3) }
@@ -153,5 +162,6 @@ graph_ops:
 | expr LEFTLINK expr AMPERSAND expr   { Graph_Link($1, Left_Link, $5, $3) }
 
 literals:
-  INT_LITERAL   {Num_Lit( Num_Int($1) )}
-| FLOAT_LITERAL {Num_Lit( Num_Float($1) )}
+  INT_LITERAL   	{Num_Lit( Num_Int($1) )}
+| FLOAT_LITERAL 	{Num_Lit( Num_Float($1) )}
+| STRING_LITERAL    { String_lit($1) }
