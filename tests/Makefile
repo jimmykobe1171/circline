@@ -8,6 +8,7 @@ all:
 
 test: build
 	bash ./test_scanner.sh
+	bash ./test_parser.sh
 
 build:
 	cd scanner; make
