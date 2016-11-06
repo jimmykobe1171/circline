@@ -39,7 +39,7 @@
 %token <float> FLOAT_LITERAL
 
 /* Order */
-%right ASSIGN
+%right ASSIGN 
 %left LINK RIGHTLINK LEFTLINK
 %left AND OR
 %left EQUAL NOTEQUAL
@@ -49,6 +49,7 @@
 %right NOT
 %right LEFTROUNDBRACKET
 %left  RIGHTROUNDBRACKET
+%right COLUMN
 %right DOT
 
 %start program
