@@ -34,9 +34,16 @@ type var_type =
 type formal =
 | Formal of var_type * string   (* int aNum *)
 
+type graph_binop =
+| Right_Link
+| Left_Link
+| Double_Link
+
 type expr =
     Num_Lit of num
 |   String_lit of string      
+|   Node of expr
+| 	Graph_Binop of expr * graph_binop * expr
 | 	Binop of expr * binop * expr
 |  	Unop of unop * expr
 |   Id of string

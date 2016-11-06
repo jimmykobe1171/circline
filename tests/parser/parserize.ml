@@ -24,6 +24,11 @@ let txt_of_binop = function
   | Greater -> "Greater"
   | Geq -> "Geq"
 
+let txt_of_graph_binop = function
+  | Right_Link -> "->"
+  | Left_Link -> "<-"
+  | Double_Link -> "--"
+
 let txt_of_var_type = function
   | Int_t -> "int"
   | Float_t -> "float"
@@ -45,10 +50,13 @@ let txt_of_num = function
 (* Expressions *)
 let rec txt_of_expr = function
   | Num_Lit(x) -> sprintf "Num_Lit(%s)" (txt_of_num x)
+  | Node(x) -> sprintf "Node(%s)" (txt_of_expr x)
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
   | String_lit(x) -> sprintf "String_lit(%s)" x
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
+  | Graph_Binop(e1, op, e2) -> sprintf "Graph_Binop(%s, %s, %s)"
+      (txt_of_expr e1) (txt_of_graph_binop op) (txt_of_expr e2)
   | Id(x) -> sprintf "Id(%s)" x
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
