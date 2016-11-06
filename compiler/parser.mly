@@ -127,7 +127,6 @@ list:
 | list SEQUENCE expr                    { $3 :: $1 }
 
 list_graph:
-| /* nothing */               { { graphs = []; edges = [] } }
 | expr AMPERSAND expr         { { graphs = [$3]; edges = [$1] } }
 | list_graph SEQUENCE expr AMPERSAND expr
     { { graphs = $5 :: ($1).graphs; edges = $3 :: ($1).edges } }
