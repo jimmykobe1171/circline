@@ -64,6 +64,7 @@ let rec txt_of_expr = function
       (txt_of_expr e1) (txt_of_graph_op op1) (txt_of_expr e2) (txt_of_expr e3)
   | Id(x) -> sprintf "Id(%s)" x
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
+  | Noexpr -> sprintf "Noexpression"
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
   | Dict_Key_Value(k, v) -> sprintf "k:%s,v:%s" (txt_of_expr k) (txt_of_expr v)
@@ -89,6 +90,8 @@ and txt_of_func_decl f =
 and txt_of_stmt = function
   | Expr(expr) -> sprintf "Expr(%s);" (txt_of_expr expr)
   | Func(f) -> sprintf "Func(%s)" (txt_of_func_decl f)
+  | For(e1,e2,e3,s) ->sprintf "For(%s;%s;%s){%s}"
+    (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
 
 and txt_of_stmts stmts =
   let rec aux acc = function

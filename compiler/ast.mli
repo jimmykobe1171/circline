@@ -53,6 +53,7 @@ type expr =
 |  	Unop of unop * expr
 |   Id of string
 |   Assign of string * expr
+|   Noexpr
 |   ListP of expr list
 |   DictP of expr list
 |   Dict_Key_Value of expr * expr 
@@ -66,6 +67,7 @@ and edge_graph_list = {
 type stmt =
   Expr of expr     (* set foo = bar + 3 *)
 | Func of func_decl
+| For of expr * expr * expr * stmt list
 
 (* Function Declaration *)
 and func_decl = {
@@ -74,6 +76,7 @@ and func_decl = {
   args: formal list;
   name: string;
 }
+
 
 (* Program entry point *)
 type program = stmt list
