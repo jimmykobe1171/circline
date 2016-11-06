@@ -23,11 +23,15 @@ let txt_of_binop = function
   | Leq -> "Leq"
   | Greater -> "Greater"
   | Geq -> "Geq"
+  (* Graph *)
+  | ListNodesAt -> "Child_Nodes_At"
+  | ListEdgesAt -> "Child_Nodes&Edges_At"
+  | RootAs -> "Root_As"
 
-let txt_of_graph_binop = function
-  | Right_Link -> "->"
-  | Left_Link -> "<-"
-  | Double_Link -> "--"
+let txt_of_graph_op = function
+  | Right_Link -> "RLink"
+  | Left_Link -> "LLink"
+  | Double_Link -> "DLink"
 
 let txt_of_var_type = function
   | Int_t -> "int"
@@ -50,15 +54,17 @@ let txt_of_num = function
 (* Expressions *)
 let rec txt_of_expr = function
   | Num_Lit(x) -> sprintf "Num_Lit(%s)" (txt_of_num x)
+  | Null -> sprintf "Null"
   | Node(x) -> sprintf "Node(%s)" (txt_of_expr x)
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
   | String_lit(x) -> sprintf "String_lit(%s)" x
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
-  | Graph_Binop(e1, op, e2) -> sprintf "Graph_Binop(%s, %s, %s)"
-      (txt_of_expr e1) (txt_of_graph_binop op) (txt_of_expr e2)
+  | Graph_Link(e1, op1, e2, e3) -> sprintf "Graph_Link(%s, %s, %s, WithEdge, %s)"
+      (txt_of_expr e1) (txt_of_graph_op op1) (txt_of_expr e2) (txt_of_expr e3)
   | Id(x) -> sprintf "Id(%s)" x
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
+  | Noexpr -> sprintf "Noexpression"
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
   | Dict_Key_Value(k, v) -> sprintf "k:%s,v:%s" (txt_of_expr k) (txt_of_expr v)
@@ -86,6 +92,8 @@ and txt_of_stmt = function
   | Expr(expr) -> sprintf "Expr(%s);" (txt_of_expr expr)
   | Func(f) -> sprintf "Func(%s)" (txt_of_func_decl f)
   | Return(expr) -> sprintf "Return(%s);" (txt_of_expr expr)
+  | For(e1,e2,e3,s) ->sprintf "For(%s;%s;%s){%s}"
+    (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
 
 and txt_of_stmts stmts =
   let rec aux acc = function

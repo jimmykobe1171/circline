@@ -21,7 +21,8 @@ let stringify = function
   | SMALLER -> "SMALLER"      | SMALLEREQUAL -> "SMALLEREQUAL"
   (* graph operator *)
   | LINK -> "LINK"            | RIGHTLINK -> "RIGHTLINK"
-  | LEFTLINK -> "LEFTLINK"
+  | LEFTLINK -> "LEFTLINK"    | AT -> "AT"
+  | AMPERSAND -> "AMPERSAND"  | SIMILARITY -> "SIMILARITY"
   (* identifier *)
   | ID(string) -> "ID"
   (* primary type *)

@@ -14,7 +14,7 @@
 %token AND OR NOT IF ELSE FOR BREAK CONTINUE IN RETURN
 
 /* Graph operator */
-%token LINK RIGHTLINK LEFTLINK
+%token LINK RIGHTLINK LEFTLINK SIMILARITY AT AMPERSAND
 
 /* Primary Type */
 %token INT FLOAT STRING BOOL NODE GRAPH LIST DICT NULL
@@ -39,14 +39,15 @@
 %token <float> FLOAT_LITERAL
 
 /* Order */
-%right ASSIGN 
-%left LINK RIGHTLINK LEFTLINK
+%right ASSIGN
 %left AND OR
 %left EQUAL NOTEQUAL
 %left GREATER SMALLER GREATEREQUAL SMALLEREQUAL
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 %right NOT
+%right LINK RIGHTLINK LEFTLINK AMPERSAND
+%left SIMILARITY AT
 %right LEFTROUNDBRACKET
 %left  RIGHTROUNDBRACKET
 %right COLUMN
@@ -69,6 +70,8 @@ stmt:
 | expr SEMICOLUMN                       { Expr($1) }
 | func_decl                             { Func($1) }
 | RETURN expr SEMICOLUMN                { Return($2) }
+| FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
+  {For($3, $5, $7, List.rev $10)}
 
 
 var_type:
@@ -95,6 +98,12 @@ func_decl:
   }
 }
 
+
+/* For loop decl*/
+for_expr:
+| /* nothing */                         { Noexpr }
+| expr                                  { $1 }
+
 expr:
   literals {$1}
 | arith_ops                       { $1 }
@@ -115,12 +124,22 @@ list:
 | expr                                  { [$1] }
 | list SEQUENCE expr                    { $3 :: $1 }
 
+list_graph:
+| /* nothing */               { { graphs = []; edges = [] } }
+| expr AMPERSAND expr         { { graphs = [$3]; edges = [$1] } }
+| list_graph SEQUENCE expr AMPERSAND expr
+    { { graphs = $5 :: ($1).graphs; edges = $3 :: ($1).edges } }
+
+list_graph_literal:
+| LEFTBRACKET list_graph RIGHTBRACKET   {
+  { graphs = List.rev ($2).graphs; edges = List.rev ($2).edges }
+}
+
 /* dict */
 dict:
 | /* nothing */                     { [] }
 | expr 								{ [$1] }
 | dict SEQUENCE expr 				{$3 :: $1}
-
 
 arith_ops:
 | expr PLUS         expr 					{ Binop($1, Add,   $3) }
@@ -138,11 +157,20 @@ arith_ops:
 | expr OR     expr                { Binop($1, Or,    $3) }
 | NOT  expr 							        { Unop (Not,   $2) }
 | MINUS expr 							        { Unop (Sub, $2) }
+| expr SIMILARITY expr            { Binop($1, RootAs, $3) }
+| expr AT AT expr                 { Binop($1, ListEdgesAt, $4) }
+| expr AT expr                    { Binop($1, ListNodesAt, $3) }
 
 graph_ops:
-| expr LINK expr                  { Graph_Binop($1, Double_Link, $3) }
-| expr RIGHTLINK expr             { Graph_Binop($1, Right_Link, $3) }
-| expr LEFTLINK expr              { Graph_Binop($1, Left_Link, $3) }
+| expr LINK expr                      { Graph_Link($1, Double_Link, $3, Null) }
+| expr LINK list_graph_literal        { Graph_Link($1, Double_Link, ListP(($3).graphs), ListP(($3).edges)) }
+| expr LINK expr AMPERSAND expr       { Graph_Link($1, Double_Link, $5, $3) }
+| expr RIGHTLINK expr                 { Graph_Link($1, Right_Link, $3, Null) }
+| expr RIGHTLINK list_graph_literal   { Graph_Link($1, Right_Link, ListP(($3).graphs), ListP(($3).edges)) }
+| expr RIGHTLINK expr AMPERSAND expr  { Graph_Link($1, Right_Link, $5, $3) }
+| expr LEFTLINK expr                  { Graph_Link($1, Left_Link, $3, Null) }
+| expr LEFTLINK list_graph_literal    { Graph_Link($1, Left_Link, ListP(($3).graphs), ListP(($3).edges)) }
+| expr LEFTLINK expr AMPERSAND expr   { Graph_Link($1, Left_Link, $5, $3) }
 
 literals:
   INT_LITERAL   	{Num_Lit( Num_Int($1) )}
