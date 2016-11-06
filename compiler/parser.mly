@@ -68,6 +68,7 @@ stmt_list:
 stmt:
 | expr SEMICOLUMN                       { Expr($1) }
 | func_decl                             { Func($1) }
+| RETURN expr SEMICOLUMN                { Return($2) }
 
 
 var_type:
@@ -88,9 +89,9 @@ func_decl:
 | var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET {
   {
     returnType = $1;
-    body = List.rev $7;
-    args = List.rev $4;
     name = $2;
+    args = List.rev $4;
+    body = List.rev $7;
   }
 }
 
@@ -105,6 +106,8 @@ expr:
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }
 | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET 	{ $2 }
 | STRING_LITERAL COLUMN expr 				{Dict_Key_Value(String_lit($1), $3)}
+| ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call($1, $3) }
+
 
 /* Lists */
 list:

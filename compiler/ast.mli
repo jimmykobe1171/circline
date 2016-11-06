@@ -51,18 +51,21 @@ type expr =
 |   ListP of expr list
 |   DictP of expr list
 |   Dict_Key_Value of expr * expr 
+|   Call of string * expr list    (* function call *)
 
 (* Statements *)
 type stmt =
   Expr of expr     (* set foo = bar + 3 *)
 | Func of func_decl
+| Return of expr
+
 
 (* Function Declaration *)
 and func_decl = {
   returnType: var_type;
-  body: stmt list;
-  args: formal list;
   name: string;
+  args: formal list;
+  body: stmt list;
 }
 
 (* Program entry point *)

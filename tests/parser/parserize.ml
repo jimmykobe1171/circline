@@ -62,6 +62,7 @@ let rec txt_of_expr = function
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
   | Dict_Key_Value(k, v) -> sprintf "k:%s,v:%s" (txt_of_expr k) (txt_of_expr v)
+  | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args) 
   
 (* Lists *)
 and txt_of_list = function
@@ -84,6 +85,7 @@ and txt_of_func_decl f =
 and txt_of_stmt = function
   | Expr(expr) -> sprintf "Expr(%s);" (txt_of_expr expr)
   | Func(f) -> sprintf "Func(%s)" (txt_of_func_decl f)
+  | Return(expr) -> sprintf "Return(%s);" (txt_of_expr expr)
 
 and txt_of_stmts stmts =
   let rec aux acc = function
