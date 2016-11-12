@@ -68,9 +68,8 @@ let rec txt_of_expr = function
   | Noexpr -> sprintf "Noexpression"
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
-  | Dict_Key_Value(k, v) -> sprintf "key:%s,value:%s" (txt_of_expr k) (txt_of_expr v)
-  | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args) 
-  
+  | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args)
+
 (* Lists *)
 and txt_of_list = function
   | [] -> ""
@@ -78,10 +77,13 @@ and txt_of_list = function
   | _ as l -> String.concat ", " (List.map txt_of_expr l)
 
 (* Dict *)
+and txt_of_dict_key_value = function
+  | (key, value) -> sprintf "key:%s,value:%s" (txt_of_expr key) (txt_of_expr value)
+
 and txt_of_dict = function
   | [] -> ""
-  | [x] -> txt_of_expr x
-  | _ as d -> String.concat ", " (List.map txt_of_expr d)
+  | [x] -> txt_of_dict_key_value x
+  | _ as d -> String.concat ", " (List.map txt_of_dict_key_value d)
 
 (* Functions Declaration *)
 and txt_of_func_decl f =

@@ -119,9 +119,7 @@ expr:
 | LEFTBRACKET list RIGHTBRACKET   			{ ListP(List.rev $2) }
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }
 | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET 	{ $2 }
-| STRING_LITERAL COLUMN expr 				{Dict_Key_Value(String_Lit($1), $3)}
 | ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call($1, $3) }
-
 
 /* Lists */
 list:
@@ -139,11 +137,14 @@ list_graph_literal:
   { graphs = List.rev ($2).graphs; edges = List.rev ($2).edges }
 }
 
+dict_key_value:
+| STRING_LITERAL COLUMN expr { (String_Lit($1), $3) }
+
 /* dict */
 dict:
 | /* nothing */                     { [] }
-| expr 								{ [$1] }
-| dict SEQUENCE expr 				{$3 :: $1}
+| dict_key_value 								    { [$1] }
+| dict SEQUENCE dict_key_value 			{$3 :: $1}
 
 arith_ops:
 | expr PLUS         expr 					{ Binop($1, Add,   $3) }

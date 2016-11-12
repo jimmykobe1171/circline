@@ -46,8 +46,8 @@ type graph_op =
 type expr =
     Num_Lit of num
 |   Null
-|   String_Lit of string      
-|   Bool_lit of bool             
+|   String_Lit of string
+|   Bool_lit of bool
 |   Node of expr
 | 	Graph_Link of expr * graph_op * expr * expr
 | 	Binop of expr * binop * expr
@@ -56,8 +56,7 @@ type expr =
 |   Assign of string * expr
 |   Noexpr
 |   ListP of expr list
-|   DictP of expr list
-|   Dict_Key_Value of expr * expr 
+|   DictP of (expr * expr) list
 |   Call of string * expr list    (* function call *)
 
 and edge_graph_list = {
