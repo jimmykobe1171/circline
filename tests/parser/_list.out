@@ -1,0 +1,3 @@
+Expr(List());
+Expr(List(Num_Lit(1), Num_Lit(2), Num_Lit(3)));
+Expr(List(Num_Lit(1), String_Lit(2), Num_Lit(2.), Bool_lit(true), Bool_lit(false), Binop(Num_Lit(1), Add, Num_Lit(1))));
