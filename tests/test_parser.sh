@@ -21,6 +21,9 @@ for input_file in $INPUT_FILES; do
     fi
 done
 
+cd ../compiler;
+ocamlyacc -v parser.mly;
+
 if $result; then
 	exit 0
 else
