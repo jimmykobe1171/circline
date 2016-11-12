@@ -1,0 +1,1 @@
+ocamlyacc -v parser.mly

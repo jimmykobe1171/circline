@@ -41,7 +41,11 @@ let txt_of_var_type = function
   | Node_t -> "node"
   | Graph_t -> "graph"
   | List_t -> "list"
-  | Dict_t -> "dict"
+  | Dict_Int_t -> "dict<int>"
+  | Dict_Float_t -> "dict<float>"
+  | Dict_String_t -> "dict<string>"
+  | Dict_Node_t -> "dict<node>"
+  | Dict_Graph_t -> "dict<graph>"
 
 let txt_of_formal = function
 | Formal(vtype, name) -> sprintf "Formal(%s, %s)" (txt_of_var_type vtype) name
