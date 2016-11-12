@@ -80,6 +80,11 @@ var_type:
   INT 								  	{Int_t}
 | FLOAT 								{Float_t}
 | STRING 								{String_t}
+| BOOL {Bool_t}
+| NODE {Node_t}
+| GRAPH {Graph_t}
+| LIST {List_t}
+| DICT {Dict_t}
 
 formal_list:
 | /* nothing */               { [] }
@@ -112,6 +117,8 @@ expr:
 | graph_ops                       { $1 }
 | NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { Node($3) }
 | ID 					                    { Id($1) }
+| formal                          { Type_Decl($1, Noexpr) }
+| formal ASSIGN expr 					        { Type_Decl($1, $3) }
 | ID ASSIGN expr 					        { Assign($1, $3) }
 | LEFTBRACKET list RIGHTBRACKET   			{ ListP(List.rev $2) }
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }

@@ -37,9 +37,14 @@ let txt_of_var_type = function
   | Int_t -> "int"
   | Float_t -> "float"
   | String_t -> "string"
+  | Bool_t -> "bool"
+  | Node_t -> "node"
+  | Graph_t -> "graph"
+  | List_t -> "list"
+  | Dict_t -> "dict"
 
 let txt_of_formal = function
-| Formal(vtype, name) -> sprintf "%s %s" (txt_of_var_type vtype) name
+| Formal(vtype, name) -> sprintf "Formal(%s, %s)" (txt_of_var_type vtype) name
 
 let txt_of_formal_list formals =
   let rec aux acc = function
@@ -64,6 +69,7 @@ let rec txt_of_expr = function
   | Graph_Link(e1, op1, e2, e3) -> sprintf "Graph_Link(%s, %s, %s, WithEdge, %s)"
       (txt_of_expr e1) (txt_of_graph_op op1) (txt_of_expr e2) (txt_of_expr e3)
   | Id(x) -> sprintf "Id(%s)" x
+  | Type_Decl(f, e) -> sprintf "Type_Decl(%s, %s)" (txt_of_formal f) (txt_of_expr e)
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
   | Noexpr -> sprintf "Noexpression"
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)

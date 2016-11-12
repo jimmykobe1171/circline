@@ -33,6 +33,11 @@ type var_type =
   Int_t                   (* int *)
 | Float_t                 (* float *)
 | String_t                (* string *)
+| Bool_t
+| Node_t
+| Graph_t
+| List_t
+| Dict_t
 
 (* Type Declaration *)
 type formal =
@@ -53,6 +58,7 @@ type expr =
 | 	Binop of expr * binop * expr
 |  	Unop of unop * expr
 |   Id of string
+|   Type_Decl of formal * expr
 |   Assign of string * expr
 |   Noexpr
 |   ListP of expr list
