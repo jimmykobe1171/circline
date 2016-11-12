@@ -1,3 +1,5 @@
 Expr(Num_Lit(20));
 Expr(Num_Lit(20.));
 Expr(String_Lit(str));
+Expr(Bool_lit(true));
+Expr(Bool_lit(false));
