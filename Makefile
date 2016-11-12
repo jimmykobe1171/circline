@@ -7,6 +7,7 @@ all: clean build
 
 build:
 	cd compiler; make
+	cd tests; make build
 
 test: clean build
 	cd tests; make

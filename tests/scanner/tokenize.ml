@@ -34,7 +34,6 @@ let stringify = function
   (* quote *)
   | QUOTE -> "QUOTE"
   (* boolean operation *)
-  | TRUE -> "TRUE" | FALSE -> "FALSE"
   (* bracket *)
   | LEFTBRACKET -> "LEFTBRACKET"           | RIGHTBRACKET -> "RIGHTBRACKET"
   | LEFTCURLYBRACKET -> "LEFTCURLYBRACKET" | RIGHTCURLYBRACKET -> "RIGHTCURLYBRACKET"
@@ -45,6 +44,7 @@ let stringify = function
   | INT_LITERAL(int) -> "INT_LITERAL"
   | FLOAT_LITERAL(float) -> "FLOAT_LITERAL"
   | STRING_LITERAL(string) -> "STRING_LITERAL"
+  | BOOL_LITERAL(bool) -> "BOOL_LITERAL"
   | RETURN -> "RETURN"
 
 let _ =
