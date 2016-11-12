@@ -57,7 +57,7 @@ let rec txt_of_expr = function
   | Null -> sprintf "Null"
   | Node(x) -> sprintf "Node(%s)" (txt_of_expr x)
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
-  | String_lit(x) -> sprintf "String_lit(%s)" x
+  | String_Lit(x) -> sprintf "String_Lit(%s)" x
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
   | Graph_Link(e1, op1, e2, e3) -> sprintf "Graph_Link(%s, %s, %s, WithEdge, %s)"
@@ -67,7 +67,7 @@ let rec txt_of_expr = function
   | Noexpr -> sprintf "Noexpression"
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
-  | Dict_Key_Value(k, v) -> sprintf "k:%s,v:%s" (txt_of_expr k) (txt_of_expr v)
+  | Dict_Key_Value(k, v) -> sprintf "key:%s,value:%s" (txt_of_expr k) (txt_of_expr v)
   | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args) 
   
 (* Lists *)

@@ -46,7 +46,7 @@ type graph_op =
 type expr =
     Num_Lit of num
 |   Null
-|   String_lit of string      
+|   String_Lit of string      
 |   Node of expr
 | 	Graph_Link of expr * graph_op * expr * expr
 | 	Binop of expr * binop * expr

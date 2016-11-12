@@ -118,7 +118,7 @@ expr:
 | LEFTBRACKET list RIGHTBRACKET   			{ ListP(List.rev $2) }
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }
 | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET 	{ $2 }
-| STRING_LITERAL COLUMN expr 				{Dict_Key_Value(String_lit($1), $3)}
+| STRING_LITERAL COLUMN expr 				{Dict_Key_Value(String_Lit($1), $3)}
 | ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call($1, $3) }
 
 
@@ -178,4 +178,4 @@ graph_ops:
 literals:
   INT_LITERAL   	{Num_Lit( Num_Int($1) )}
 | FLOAT_LITERAL 	{Num_Lit( Num_Float($1) )}
-| STRING_LITERAL    { String_lit($1) }
+| STRING_LITERAL    { String_Lit($1) }
