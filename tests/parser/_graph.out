@@ -1,0 +1,4 @@
+Expr(Graph_Link(Id(a), DLink, Id(b), WithEdge, Null));
+Expr(Graph_Link(Id(a), DLink, Graph_Link(Id(b), DLink, Id(c), WithEdge, Num_Lit(4)), WithEdge, Num_Lit(2)));
+Expr(Graph_Link(Id(a), DLink, List(Graph_Link(Id(b), DLink, Id(c), WithEdge, Null), Id(f)), WithEdge, Num_Lit(2)));
+Expr(Graph_Link(Id(a), DLink, List(Graph_Link(Id(b), DLink, Id(c), WithEdge, Num_Lit(3)), Graph_Link(Id(d), DLink, List(Id(e), Graph_Link(Id(f), DLink, Id(g), WithEdge, Null)), WithEdge, Num_Lit(1))), WithEdge, List(Num_Lit(2), Num_Lit(1))));
