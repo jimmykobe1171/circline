@@ -13,8 +13,8 @@ let stringify = function
   | AND -> "AND"      | OR -> "OR"
   | NOT -> "NOT"      | IF -> "IF"
   | ELSE -> "ELSE"    | FOR -> "FOR"
-  | BREAK -> "BREAK"  | CONTINUE -> "CONTINUE"
-  | IN -> "IN"
+  | WHILE -> "WHILE"  | BREAK -> "BREAK"  
+  | CONTINUE -> "CONTINUE" | IN -> "IN"
   (* comparator *)
   | EQUAL -> "EQUAL"          | NOTEQUAL -> "NOTEQUAL"
   | GREATER -> "GREATER"      | GREATEREQUAL -> "GREATEREQUAL"

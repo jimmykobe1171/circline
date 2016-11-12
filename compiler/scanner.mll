@@ -25,6 +25,7 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | "if" { IF }
 | "else" { ELSE }
 | "for" { FOR }
+| "while" { WHILE}
 | "break" { BREAK }
 | "continue" { CONTINUE }
 | "in" { IN }
