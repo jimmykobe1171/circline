@@ -1,0 +1,4 @@
+Expr(Node(Num_Lit(1)));
+Expr(Node(String_Lit(a)));
+Expr(Node(Bool_lit(false)));
+Expr(Node(List(Num_Lit(1), String_Lit(2))));

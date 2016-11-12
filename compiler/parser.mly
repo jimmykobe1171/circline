@@ -77,14 +77,14 @@ stmt:
 
 
 var_type:
-  INT 								  	{Int_t}
+  INT 								  {Int_t}
 | FLOAT 								{Float_t}
 | STRING 								{String_t}
-| BOOL {Bool_t}
-| NODE {Node_t}
-| GRAPH {Graph_t}
-| LIST {List_t}
-| DICT {Dict_t}
+| BOOL                  {Bool_t}
+| NODE                  {Node_t}
+| GRAPH                 {Graph_t}
+| LIST                  {List_t}
+| DICT                  {Dict_t}
 
 formal_list:
 | /* nothing */               { [] }
@@ -182,7 +182,7 @@ graph_ops:
 | expr LEFTLINK expr AMPERSAND expr   { Graph_Link($1, Left_Link, $5, $3) }
 
 literals:
-  INT_LITERAL   	{Num_Lit( Num_Int($1) )}
-| FLOAT_LITERAL 	{Num_Lit( Num_Float($1) )}
-| STRING_LITERAL    { String_Lit($1) }
-| BOOL_LITERAL                          { Bool_lit($1) }
+  INT_LITERAL   	   {Num_Lit( Num_Int($1) )}
+| FLOAT_LITERAL 	   {Num_Lit( Num_Float($1) )}
+| STRING_LITERAL     {String_Lit($1) }
+| BOOL_LITERAL       {Bool_lit($1) }

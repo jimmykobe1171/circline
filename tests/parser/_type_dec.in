@@ -1,0 +1,14 @@
+int a;
+float a;
+bool a;
+node a;
+graph a;
+list a;
+dict a;
+int a = 1;
+float a = 1.0;
+bool a = true;
+node a = node(1);
+graph a = node(1)--node(2);
+list a = [];
+dict a = {};

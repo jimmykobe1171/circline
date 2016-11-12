@@ -1,4 +1,4 @@
-Func(int func (int a, int b) {Expr(Assign(c, Num_Lit(0)));
+Func(int func (Formal(int, a), Formal(int, b)) {Expr(Type_Decl(Formal(int, c), Num_Lit(0)));
 Return(Binop(Binop(Id(a), Add, Id(b)), Add, Id(c)));})
 Expr(Call(func, [Num_Lit(2), Num_Lit(1)]));
 Expr(Call(func, [Id(b), Id(a)]));

@@ -1,3 +1,4 @@
+/*
 aList = ["str1","str2","str3"];
 for(int i =0; i<= 5; i++)
     if (str == "str2"){
@@ -7,3 +8,4 @@ for(int i =0; i<= 5; i++)
         /* do something */
     }
 }
+*/
