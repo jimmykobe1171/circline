@@ -61,8 +61,7 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 (* quote *)
 | '"'  { QUOTE }
 (* boolean operation *)
-| "true" { TRUE }
-| "false" { FALSE }
+| "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
 (* bracket *)
 | '[' { LEFTBRACKET }
 | ']' { RIGHTBRACKET }

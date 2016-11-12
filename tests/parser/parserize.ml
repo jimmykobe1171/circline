@@ -54,10 +54,11 @@ let txt_of_num = function
 (* Expressions *)
 let rec txt_of_expr = function
   | Num_Lit(x) -> sprintf "Num_Lit(%s)" (txt_of_num x)
+  | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
+  | String_Lit(x) -> sprintf "String_Lit(%s)" x
   | Null -> sprintf "Null"
   | Node(x) -> sprintf "Node(%s)" (txt_of_expr x)
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
-  | String_Lit(x) -> sprintf "String_Lit(%s)" x
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
   | Graph_Link(e1, op1, e2, e3) -> sprintf "Graph_Link(%s, %s, %s, WithEdge, %s)"

@@ -1,0 +1,8 @@
+Expr(Binop(Num_Lit(1), Equal, Num_Lit(1)));
+Expr(Binop(Num_Lit(1), Neq, Num_Lit(1)));
+Expr(Binop(Num_Lit(1), Less, Num_Lit(1)));
+Expr(Binop(Num_Lit(1), Leq, Num_Lit(1)));
+Expr(Binop(Num_Lit(1), Greater, Num_Lit(1)));
+Expr(Binop(Num_Lit(1), Geq, Num_Lit(1)));
+Expr(Binop(Bool_lit(true), And, Bool_lit(true)));
+Expr(Binop(Bool_lit(true), Or, Bool_lit(false)));

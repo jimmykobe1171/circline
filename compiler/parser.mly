@@ -37,6 +37,7 @@
 %token <int> INT_LITERAL
 %token <string> STRING_LITERAL
 %token <float> FLOAT_LITERAL
+%token <bool> BOOL_LITERAL
 
 /* Order */
 %right ASSIGN
@@ -179,3 +180,4 @@ literals:
   INT_LITERAL   	{Num_Lit( Num_Int($1) )}
 | FLOAT_LITERAL 	{Num_Lit( Num_Float($1) )}
 | STRING_LITERAL    { String_Lit($1) }
+| BOOL_LITERAL                          { Bool_lit($1) }
