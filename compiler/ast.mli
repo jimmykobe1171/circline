@@ -37,7 +37,11 @@ type var_type =
 | Node_t
 | Graph_t
 | List_t
-| Dict_t
+| Dict_Int_t
+| Dict_Float_t
+| Dict_String_t
+| Dict_Node_t
+| Dict_Graph_t
 
 (* Type Declaration *)
 type formal =

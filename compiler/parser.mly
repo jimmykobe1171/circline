@@ -84,7 +84,12 @@ var_type:
 | NODE {Node_t}
 | GRAPH {Graph_t}
 | LIST {List_t}
-| DICT {Dict_t}
+| DICT SMALLER INT GREATER {Dict_Int_t}
+| DICT SMALLER FLOAT GREATER {Dict_Float_t}
+| DICT SMALLER STRING GREATER {Dict_String_t}
+| DICT SMALLER NODE GREATER {Dict_Node_t}
+| DICT SMALLER GRAPH GREATER {Dict_Graph_t}
+
 
 formal_list:
 | /* nothing */               { [] }
