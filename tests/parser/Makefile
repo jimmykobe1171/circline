@@ -1,4 +1,4 @@
-# Odds: test/parser Makefile
+# test/parser Makefile
 #  - builds the parserize executable for printing parsed strings from stdin
 
 OCAMLC = ocamlc
