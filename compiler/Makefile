@@ -1,4 +1,4 @@
-OBJS = parser.cmo scanner.cmo
+OBJS = parser.cmo scanner.cmo semant.cmo
 
 default: circling
 
