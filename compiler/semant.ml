@@ -70,7 +70,7 @@ let check program =
     (* collect global variable declarations *)
     let globals = collect_globals [] program in
 
-    (* Type of global variable *)
+    (* Type and value of global variable *)
     let globals_symbols = List.fold_left (fun m (name, (typ, v)) -> StringMap.add name (typ, v) m)
         StringMap.empty globals
     in
@@ -93,7 +93,7 @@ let check program =
     in
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
-        Num_Lit(Num_Int _) -> Int_t 
+          Num_Lit(Num_Int _) -> Int_t 
         | Num_Lit(Num_Float _) -> Float_t 
         | String_Lit _ -> String_t 
         | Bool_lit _ -> Bool_t
@@ -135,6 +135,7 @@ let check program =
     let stmt = function
         Expr(e) -> ignore (expr e)
         | Return e -> ignore (expr e)
+        | Local(a,b,c) -> ()
     in
 
     let rec stmt_list = function
@@ -142,8 +143,19 @@ let check program =
         | s::ss -> stmt s ; stmt_list ss
         | [] -> ()
     in
-    (**** Checking duplicated Global Variables ****)
+    let rec report_illgal_dec = function
+          h :: t when (snd (snd h)) = Noexpr -> report_illgal_dec t
+        | h :: t when (snd (snd h)) <> Noexpr -> 
+            let lt = fst (snd h) and rt = expr (snd (snd h)) in
+            ignore (check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+            " = " ^ string_of_typ rt)))
+        | _ :: t -> report_illgal_dec t
+        | [] -> ()
+    in
+    (**** Checking duplicated global variables ****)
     report_duplicate (fun n -> "duplicate global " ^ n) (List.map fst globals);
+    (**** Checking globals with illegal declaration ****)
+    report_illgal_dec globals;
     (**** Checking statements ****)
     stmt_list program;
 
