@@ -8,98 +8,100 @@
    4  stmt : expr SEMICOLUMN
    5       | func_decl
    6       | RETURN expr SEMICOLUMN
-   7       | FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
+   7       | FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
    8       | IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
    9       | IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   10       | WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
-  11       | var_type ID SEMICOLUMN
-  12       | var_type ID ASSIGN expr SEMICOLUMN
+  11       | var_decl SEMICOLUMN
 
-  13  var_type : INT
-  14           | FLOAT
-  15           | STRING
-  16           | BOOL
-  17           | NODE
-  18           | GRAPH
-  19           | LIST
-  20           | DICT SMALLER INT GREATER
-  21           | DICT SMALLER FLOAT GREATER
-  22           | DICT SMALLER STRING GREATER
-  23           | DICT SMALLER NODE GREATER
-  24           | DICT SMALLER GRAPH GREATER
+  12  var_decl : var_type ID
+  13           | var_type ID ASSIGN expr
 
-  25  formal_list :
-  26              | formal
-  27              | formal_list SEQUENCE formal
+  14  var_type : INT
+  15           | FLOAT
+  16           | STRING
+  17           | BOOL
+  18           | NODE
+  19           | GRAPH
+  20           | LIST
+  21           | DICT SMALLER INT GREATER
+  22           | DICT SMALLER FLOAT GREATER
+  23           | DICT SMALLER STRING GREATER
+  24           | DICT SMALLER NODE GREATER
+  25           | DICT SMALLER GRAPH GREATER
 
-  28  formal : var_type ID
+  26  formal_list :
+  27              | formal
+  28              | formal_list SEQUENCE formal
 
-  29  func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
+  29  formal : var_type ID
 
-  30  for_expr :
-  31           | expr
+  30  func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
 
-  32  expr : literals
-  33       | arith_ops
-  34       | graph_ops
-  35       | NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET
-  36       | ID
-  37       | ID ASSIGN expr
-  38       | LEFTBRACKET list RIGHTBRACKET
-  39       | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET
-  40       | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET
-  41       | ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET
+  31  for_expr :
+  32           | expr
 
-  42  list :
-  43       | expr
-  44       | list SEQUENCE expr
+  33  expr : literals
+  34       | arith_ops
+  35       | graph_ops
+  36       | NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET
+  37       | ID
+  38       | ID ASSIGN expr
+  39       | LEFTBRACKET list RIGHTBRACKET
+  40       | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET
+  41       | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET
+  42       | ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET
 
-  45  list_graph : expr AMPERSAND expr
-  46             | list_graph SEQUENCE expr AMPERSAND expr
+  43  list :
+  44       | expr
+  45       | list SEQUENCE expr
 
-  47  list_graph_literal : LEFTBRACKET list_graph RIGHTBRACKET
+  46  list_graph : expr AMPERSAND expr
+  47             | list_graph SEQUENCE expr AMPERSAND expr
 
-  48  dict_key_value : STRING_LITERAL COLUMN expr
+  48  list_graph_literal : LEFTBRACKET list_graph RIGHTBRACKET
 
-  49  dict :
-  50       | dict_key_value
-  51       | dict SEQUENCE dict_key_value
+  49  dict_key_value : STRING_LITERAL COLUMN expr
 
-  52  arith_ops : expr PLUS expr
-  53            | expr MINUS expr
-  54            | expr TIMES expr
-  55            | expr DIVIDE expr
-  56            | expr EQUAL expr
-  57            | expr NOTEQUAL expr
-  58            | expr SMALLER expr
-  59            | expr SMALLEREQUAL expr
-  60            | expr GREATER expr
-  61            | expr GREATEREQUAL expr
-  62            | expr AND expr
-  63            | expr MOD expr
-  64            | expr OR expr
-  65            | NOT expr
-  66            | MINUS expr
-  67            | expr SIMILARITY expr
-  68            | expr AT AT expr
-  69            | expr AT expr
+  50  dict :
+  51       | dict_key_value
+  52       | dict SEQUENCE dict_key_value
 
-  70  graph_ops : expr LINK expr
-  71            | expr LINK list_graph_literal
-  72            | expr LINK expr AMPERSAND expr
-  73            | expr RIGHTLINK expr
-  74            | expr RIGHTLINK list_graph_literal
-  75            | expr RIGHTLINK expr AMPERSAND expr
-  76            | expr LEFTLINK expr
-  77            | expr LEFTLINK list_graph_literal
-  78            | expr LEFTLINK expr AMPERSAND expr
+  53  arith_ops : expr PLUS expr
+  54            | expr MINUS expr
+  55            | expr TIMES expr
+  56            | expr DIVIDE expr
+  57            | expr EQUAL expr
+  58            | expr NOTEQUAL expr
+  59            | expr SMALLER expr
+  60            | expr SMALLEREQUAL expr
+  61            | expr GREATER expr
+  62            | expr GREATEREQUAL expr
+  63            | expr AND expr
+  64            | expr MOD expr
+  65            | expr OR expr
+  66            | NOT expr
+  67            | MINUS expr
+  68            | expr SIMILARITY expr
+  69            | expr AT AT expr
+  70            | expr AT expr
 
-  79  literals : INT_LITERAL
-  80           | FLOAT_LITERAL
-  81           | STRING_LITERAL
-  82           | BOOL_LITERAL
+  71  graph_ops : expr LINK expr
+  72            | expr LINK list_graph_literal
+  73            | expr LINK expr AMPERSAND expr
+  74            | expr RIGHTLINK expr
+  75            | expr RIGHTLINK list_graph_literal
+  76            | expr RIGHTLINK expr AMPERSAND expr
+  77            | expr LEFTLINK expr
+  78            | expr LEFTLINK list_graph_literal
+  79            | expr LEFTLINK expr AMPERSAND expr
 
-  83  %entry% : '\001' program
+  80  literals : INT_LITERAL
+  81           | FLOAT_LITERAL
+  82           | STRING_LITERAL
+  83           | BOOL_LITERAL
+
+  84  %entry% : '\001' program
 
 state 0
 	$accept : . %entry% $end  (0)
@@ -111,7 +113,7 @@ state 0
 
 
 state 1
-	%entry% : '\001' . program  (83)
+	%entry% : '\001' . program  (84)
 	stmt_list : .  (2)
 
 	.  reduce 2
@@ -127,9 +129,9 @@ state 2
 
 
 state 3
-	%entry% : '\001' program .  (83)
+	%entry% : '\001' program .  (84)
 
-	.  reduce 83
+	.  reduce 84
 
 
 state 4
@@ -164,40 +166,19 @@ state 4
 	stmt  goto 28
 	expr  goto 29
 	func_decl  goto 30
-	var_type  goto 31
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	var_decl  goto 31
+	var_type  goto 32
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 5
-	arith_ops : MINUS . expr  (66)
+	arith_ops : MINUS . expr  (67)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 36
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 6
-	arith_ops : NOT . expr  (65)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -209,30 +190,52 @@ state 6
 	.  error
 
 	expr  goto 37
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 6
+	arith_ops : NOT . expr  (66)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 38
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 7
 	stmt : IF . LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
 	stmt : IF . LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (9)
 
-	LEFTROUNDBRACKET  shift 38
+	LEFTROUNDBRACKET  shift 39
 	.  error
 
 
 state 8
-	stmt : FOR . LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+	stmt : FOR . LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
 
-	LEFTROUNDBRACKET  shift 39
+	LEFTROUNDBRACKET  shift 40
 	.  error
 
 
 state 9
 	stmt : WHILE . LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (10)
 
-	LEFTROUNDBRACKET  shift 40
+	LEFTROUNDBRACKET  shift 41
 	.  error
 
 
@@ -241,7 +244,7 @@ state 10
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -252,74 +255,74 @@ state 10
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 41
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	expr  goto 42
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 11
-	var_type : INT .  (13)
-
-	.  reduce 13
-
-
-state 12
-	var_type : FLOAT .  (14)
+	var_type : INT .  (14)
 
 	.  reduce 14
 
 
-state 13
-	var_type : STRING .  (15)
+state 12
+	var_type : FLOAT .  (15)
 
 	.  reduce 15
 
 
-state 14
-	var_type : BOOL .  (16)
+state 13
+	var_type : STRING .  (16)
 
 	.  reduce 16
 
 
-state 15
-	var_type : NODE .  (17)
-	expr : NODE . LEFTROUNDBRACKET expr RIGHTROUNDBRACKET  (35)
+state 14
+	var_type : BOOL .  (17)
 
-	LEFTROUNDBRACKET  shift 42
-	ID  reduce 17
+	.  reduce 17
+
+
+state 15
+	var_type : NODE .  (18)
+	expr : NODE . LEFTROUNDBRACKET expr RIGHTROUNDBRACKET  (36)
+
+	LEFTROUNDBRACKET  shift 43
+	ID  reduce 18
 
 
 state 16
-	var_type : GRAPH .  (18)
-
-	.  reduce 18
-
-
-state 17
-	var_type : LIST .  (19)
+	var_type : GRAPH .  (19)
 
 	.  reduce 19
 
 
-state 18
-	var_type : DICT . SMALLER INT GREATER  (20)
-	var_type : DICT . SMALLER FLOAT GREATER  (21)
-	var_type : DICT . SMALLER STRING GREATER  (22)
-	var_type : DICT . SMALLER NODE GREATER  (23)
-	var_type : DICT . SMALLER GRAPH GREATER  (24)
+state 17
+	var_type : LIST .  (20)
 
-	SMALLER  shift 43
+	.  reduce 20
+
+
+state 18
+	var_type : DICT . SMALLER INT GREATER  (21)
+	var_type : DICT . SMALLER FLOAT GREATER  (22)
+	var_type : DICT . SMALLER STRING GREATER  (23)
+	var_type : DICT . SMALLER NODE GREATER  (24)
+	var_type : DICT . SMALLER GRAPH GREATER  (25)
+
+	SMALLER  shift 44
 	.  error
 
 
 state 19
-	expr : LEFTBRACKET . list RIGHTBRACKET  (38)
-	list : .  (42)
+	expr : LEFTBRACKET . list RIGHTBRACKET  (39)
+	list : .  (43)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -328,34 +331,34 @@ state 19
 	STRING_LITERAL  shift 25
 	FLOAT_LITERAL  shift 26
 	BOOL_LITERAL  shift 27
-	SEQUENCE  reduce 42
-	RIGHTBRACKET  reduce 42
+	SEQUENCE  reduce 43
+	RIGHTBRACKET  reduce 43
 
-	expr  goto 44
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-	list  goto 45
+	expr  goto 45
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+	list  goto 46
 
 
 state 20
-	expr : LEFTCURLYBRACKET . dict RIGHTCURLYBRACKET  (39)
-	dict : .  (49)
+	expr : LEFTCURLYBRACKET . dict RIGHTCURLYBRACKET  (40)
+	dict : .  (50)
 
-	STRING_LITERAL  shift 46
-	SEQUENCE  reduce 49
-	RIGHTCURLYBRACKET  reduce 49
+	STRING_LITERAL  shift 47
+	SEQUENCE  reduce 50
+	RIGHTCURLYBRACKET  reduce 50
 
-	dict  goto 47
-	dict_key_value  goto 48
+	dict  goto 48
+	dict_key_value  goto 49
 
 
 state 21
-	expr : LEFTROUNDBRACKET . expr RIGHTROUNDBRACKET  (40)
+	expr : LEFTROUNDBRACKET . expr RIGHTROUNDBRACKET  (41)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -366,10 +369,10 @@ state 21
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 49
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	expr  goto 50
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 22
@@ -379,60 +382,60 @@ state 22
 
 
 state 23
-	expr : ID .  (36)
-	expr : ID . ASSIGN expr  (37)
-	expr : ID . LEFTROUNDBRACKET list RIGHTROUNDBRACKET  (41)
+	expr : ID .  (37)
+	expr : ID . ASSIGN expr  (38)
+	expr : ID . LEFTROUNDBRACKET list RIGHTROUNDBRACKET  (42)
 
-	ASSIGN  shift 50
-	LEFTROUNDBRACKET  shift 51
-	PLUS  reduce 36
-	MINUS  reduce 36
-	TIMES  reduce 36
-	DIVIDE  reduce 36
-	MOD  reduce 36
-	SEMICOLUMN  reduce 36
-	SEQUENCE  reduce 36
-	GREATER  reduce 36
-	GREATEREQUAL  reduce 36
-	SMALLER  reduce 36
-	SMALLEREQUAL  reduce 36
-	EQUAL  reduce 36
-	NOTEQUAL  reduce 36
-	AND  reduce 36
-	OR  reduce 36
-	LINK  reduce 36
-	RIGHTLINK  reduce 36
-	LEFTLINK  reduce 36
-	SIMILARITY  reduce 36
-	AT  reduce 36
-	AMPERSAND  reduce 36
-	RIGHTBRACKET  reduce 36
-	RIGHTCURLYBRACKET  reduce 36
-	RIGHTROUNDBRACKET  reduce 36
+	ASSIGN  shift 51
+	LEFTROUNDBRACKET  shift 52
+	PLUS  reduce 37
+	MINUS  reduce 37
+	TIMES  reduce 37
+	DIVIDE  reduce 37
+	MOD  reduce 37
+	SEMICOLUMN  reduce 37
+	SEQUENCE  reduce 37
+	GREATER  reduce 37
+	GREATEREQUAL  reduce 37
+	SMALLER  reduce 37
+	SMALLEREQUAL  reduce 37
+	EQUAL  reduce 37
+	NOTEQUAL  reduce 37
+	AND  reduce 37
+	OR  reduce 37
+	LINK  reduce 37
+	RIGHTLINK  reduce 37
+	LEFTLINK  reduce 37
+	SIMILARITY  reduce 37
+	AT  reduce 37
+	AMPERSAND  reduce 37
+	RIGHTBRACKET  reduce 37
+	RIGHTCURLYBRACKET  reduce 37
+	RIGHTROUNDBRACKET  reduce 37
 
 
 state 24
-	literals : INT_LITERAL .  (79)
-
-	.  reduce 79
-
-
-state 25
-	literals : STRING_LITERAL .  (81)
-
-	.  reduce 81
-
-
-state 26
-	literals : FLOAT_LITERAL .  (80)
+	literals : INT_LITERAL .  (80)
 
 	.  reduce 80
 
 
-state 27
-	literals : BOOL_LITERAL .  (82)
+state 25
+	literals : STRING_LITERAL .  (82)
 
 	.  reduce 82
+
+
+state 26
+	literals : FLOAT_LITERAL .  (81)
+
+	.  reduce 81
+
+
+state 27
+	literals : BOOL_LITERAL .  (83)
+
+	.  reduce 83
 
 
 state 28
@@ -443,51 +446,51 @@ state 28
 
 state 29
 	stmt : expr . SEMICOLUMN  (4)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	SEMICOLUMN  shift 57
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	SEMICOLUMN  shift 58
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	.  error
 
 
@@ -498,77 +501,138 @@ state 30
 
 
 state 31
-	stmt : var_type . ID SEMICOLUMN  (11)
-	stmt : var_type . ID ASSIGN expr SEMICOLUMN  (12)
-	func_decl : var_type . ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (29)
+	stmt : var_decl . SEMICOLUMN  (11)
 
-	ID  shift 71
+	SEMICOLUMN  shift 72
 	.  error
 
 
 state 32
-	expr : literals .  (32)
+	var_decl : var_type . ID  (12)
+	var_decl : var_type . ID ASSIGN expr  (13)
+	func_decl : var_type . ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (30)
 
-	.  reduce 32
+	ID  shift 73
+	.  error
 
 
 state 33
-	expr : arith_ops .  (33)
+	expr : literals .  (33)
 
 	.  reduce 33
 
 
 state 34
-	expr : graph_ops .  (34)
+	expr : arith_ops .  (34)
 
 	.  reduce 34
 
 
 state 35
-	expr : NODE . LEFTROUNDBRACKET expr RIGHTROUNDBRACKET  (35)
+	expr : graph_ops .  (35)
 
-	LEFTROUNDBRACKET  shift 42
-	.  error
+	.  reduce 35
 
 
 state 36
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : MINUS expr .  (66)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	expr : NODE . LEFTROUNDBRACKET expr RIGHTROUNDBRACKET  (36)
 
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	LEFTROUNDBRACKET  shift 43
+	.  error
+
+
+state 37
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : MINUS expr .  (67)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	PLUS  reduce 67
+	MINUS  reduce 67
+	SEMICOLUMN  reduce 67
+	SEQUENCE  reduce 67
+	GREATER  reduce 67
+	GREATEREQUAL  reduce 67
+	SMALLER  reduce 67
+	SMALLEREQUAL  reduce 67
+	EQUAL  reduce 67
+	NOTEQUAL  reduce 67
+	AND  reduce 67
+	OR  reduce 67
+	AMPERSAND  reduce 67
+	RIGHTBRACKET  reduce 67
+	RIGHTCURLYBRACKET  reduce 67
+	RIGHTROUNDBRACKET  reduce 67
+
+
+state 38
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : NOT expr .  (66)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	PLUS  reduce 66
 	MINUS  reduce 66
+	TIMES  reduce 66
+	DIVIDE  reduce 66
+	MOD  reduce 66
 	SEMICOLUMN  reduce 66
 	SEQUENCE  reduce 66
 	GREATER  reduce 66
@@ -585,67 +649,13 @@ state 36
 	RIGHTROUNDBRACKET  reduce 66
 
 
-state 37
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : NOT expr .  (65)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	PLUS  reduce 65
-	MINUS  reduce 65
-	TIMES  reduce 65
-	DIVIDE  reduce 65
-	MOD  reduce 65
-	SEMICOLUMN  reduce 65
-	SEQUENCE  reduce 65
-	GREATER  reduce 65
-	GREATEREQUAL  reduce 65
-	SMALLER  reduce 65
-	SMALLEREQUAL  reduce 65
-	EQUAL  reduce 65
-	NOTEQUAL  reduce 65
-	AND  reduce 65
-	OR  reduce 65
-	AMPERSAND  reduce 65
-	RIGHTBRACKET  reduce 65
-	RIGHTCURLYBRACKET  reduce 65
-	RIGHTROUNDBRACKET  reduce 65
-
-
-state 38
+state 39
 	stmt : IF LEFTROUNDBRACKET . expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
 	stmt : IF LEFTROUNDBRACKET . expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (9)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -656,42 +666,35 @@ state 38
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 72
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 39
-	stmt : FOR LEFTROUNDBRACKET . for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
-	for_expr : .  (30)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	SEMICOLUMN  reduce 30
-
-	expr  goto 73
-	for_expr  goto 74
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	expr  goto 74
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 40
+	stmt : FOR LEFTROUNDBRACKET . var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+
+	INT  shift 11
+	FLOAT  shift 12
+	STRING  shift 13
+	BOOL  shift 14
+	NODE  shift 75
+	GRAPH  shift 16
+	LIST  shift 17
+	DICT  shift 18
+	.  error
+
+	var_decl  goto 76
+	var_type  goto 77
+
+
+state 41
 	stmt : WHILE LEFTROUNDBRACKET . expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (10)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -702,68 +705,68 @@ state 40
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 75
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 41
-	stmt : RETURN expr . SEMICOLUMN  (6)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	SEMICOLUMN  shift 76
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	.  error
+	expr  goto 78
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 42
-	expr : NODE LEFTROUNDBRACKET . expr RIGHTROUNDBRACKET  (35)
+	stmt : RETURN expr . SEMICOLUMN  (6)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	SEMICOLUMN  shift 79
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	.  error
+
+
+state 43
+	expr : NODE LEFTROUNDBRACKET . expr RIGHTROUNDBRACKET  (36)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -774,234 +777,165 @@ state 42
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 77
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 43
-	var_type : DICT SMALLER . INT GREATER  (20)
-	var_type : DICT SMALLER . FLOAT GREATER  (21)
-	var_type : DICT SMALLER . STRING GREATER  (22)
-	var_type : DICT SMALLER . NODE GREATER  (23)
-	var_type : DICT SMALLER . GRAPH GREATER  (24)
-
-	INT  shift 78
-	FLOAT  shift 79
-	STRING  shift 80
-	NODE  shift 81
-	GRAPH  shift 82
-	.  error
+	expr  goto 80
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 44
-	list : expr .  (43)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	var_type : DICT SMALLER . INT GREATER  (21)
+	var_type : DICT SMALLER . FLOAT GREATER  (22)
+	var_type : DICT SMALLER . STRING GREATER  (23)
+	var_type : DICT SMALLER . NODE GREATER  (24)
+	var_type : DICT SMALLER . GRAPH GREATER  (25)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEQUENCE  reduce 43
-	RIGHTBRACKET  reduce 43
-	RIGHTROUNDBRACKET  reduce 43
-
-
-state 45
-	expr : LEFTBRACKET list . RIGHTBRACKET  (38)
-	list : list . SEQUENCE expr  (44)
-
-	SEQUENCE  shift 83
-	RIGHTBRACKET  shift 84
+	INT  shift 81
+	FLOAT  shift 82
+	STRING  shift 83
+	NODE  shift 84
+	GRAPH  shift 85
 	.  error
 
 
-state 46
-	dict_key_value : STRING_LITERAL . COLUMN expr  (48)
+state 45
+	list : expr .  (44)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	COLUMN  shift 85
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEQUENCE  reduce 44
+	RIGHTBRACKET  reduce 44
+	RIGHTROUNDBRACKET  reduce 44
+
+
+state 46
+	expr : LEFTBRACKET list . RIGHTBRACKET  (39)
+	list : list . SEQUENCE expr  (45)
+
+	SEQUENCE  shift 86
+	RIGHTBRACKET  shift 87
 	.  error
 
 
 state 47
-	expr : LEFTCURLYBRACKET dict . RIGHTCURLYBRACKET  (39)
-	dict : dict . SEQUENCE dict_key_value  (51)
+	dict_key_value : STRING_LITERAL . COLUMN expr  (49)
 
-	SEQUENCE  shift 86
-	RIGHTCURLYBRACKET  shift 87
+	COLUMN  shift 88
 	.  error
 
 
 state 48
-	dict : dict_key_value .  (50)
+	expr : LEFTCURLYBRACKET dict . RIGHTCURLYBRACKET  (40)
+	dict : dict . SEQUENCE dict_key_value  (52)
 
-	.  reduce 50
+	SEQUENCE  shift 89
+	RIGHTCURLYBRACKET  shift 90
+	.  error
 
 
 state 49
-	expr : LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET  (40)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	dict : dict_key_value .  (51)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	RIGHTROUNDBRACKET  shift 88
-	.  error
+	.  reduce 51
 
 
 state 50
-	expr : ID ASSIGN . expr  (37)
+	expr : LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET  (41)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	RIGHTROUNDBRACKET  shift 91
 	.  error
-
-	expr  goto 89
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
 
 
 state 51
-	expr : ID LEFTROUNDBRACKET . list RIGHTROUNDBRACKET  (41)
-	list : .  (42)
+	expr : ID ASSIGN . expr  (38)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	SEQUENCE  reduce 42
-	RIGHTROUNDBRACKET  reduce 42
-
-	expr  goto 44
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-	list  goto 90
-
-
-state 52
-	arith_ops : expr PLUS . expr  (52)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 91
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 53
-	arith_ops : expr MINUS . expr  (53)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1013,17 +947,18 @@ state 53
 	.  error
 
 	expr  goto 92
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 54
-	arith_ops : expr TIMES . expr  (54)
+state 52
+	expr : ID LEFTROUNDBRACKET . list RIGHTROUNDBRACKET  (42)
+	list : .  (43)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1032,20 +967,22 @@ state 54
 	STRING_LITERAL  shift 25
 	FLOAT_LITERAL  shift 26
 	BOOL_LITERAL  shift 27
-	.  error
+	SEQUENCE  reduce 43
+	RIGHTROUNDBRACKET  reduce 43
 
-	expr  goto 93
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	expr  goto 45
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+	list  goto 93
 
 
-state 55
-	arith_ops : expr DIVIDE . expr  (55)
+state 53
+	arith_ops : expr PLUS . expr  (53)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1057,17 +994,17 @@ state 55
 	.  error
 
 	expr  goto 94
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 56
-	arith_ops : expr MOD . expr  (63)
+state 54
+	arith_ops : expr MINUS . expr  (54)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1079,23 +1016,17 @@ state 56
 	.  error
 
 	expr  goto 95
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 57
-	stmt : expr SEMICOLUMN .  (4)
-
-	.  reduce 4
-
-
-state 58
-	arith_ops : expr GREATER . expr  (60)
+state 55
+	arith_ops : expr TIMES . expr  (55)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1107,17 +1038,17 @@ state 58
 	.  error
 
 	expr  goto 96
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 59
-	arith_ops : expr GREATEREQUAL . expr  (61)
+state 56
+	arith_ops : expr DIVIDE . expr  (56)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1129,17 +1060,17 @@ state 59
 	.  error
 
 	expr  goto 97
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 60
-	arith_ops : expr SMALLER . expr  (58)
+state 57
+	arith_ops : expr MOD . expr  (64)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1151,17 +1082,23 @@ state 60
 	.  error
 
 	expr  goto 98
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 61
-	arith_ops : expr SMALLEREQUAL . expr  (59)
+state 58
+	stmt : expr SEMICOLUMN .  (4)
+
+	.  reduce 4
+
+
+state 59
+	arith_ops : expr GREATER . expr  (61)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1173,17 +1110,17 @@ state 61
 	.  error
 
 	expr  goto 99
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 62
-	arith_ops : expr EQUAL . expr  (56)
+state 60
+	arith_ops : expr GREATEREQUAL . expr  (62)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1195,17 +1132,17 @@ state 62
 	.  error
 
 	expr  goto 100
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 63
-	arith_ops : expr NOTEQUAL . expr  (57)
+state 61
+	arith_ops : expr SMALLER . expr  (59)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1217,17 +1154,17 @@ state 63
 	.  error
 
 	expr  goto 101
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 64
-	arith_ops : expr AND . expr  (62)
+state 62
+	arith_ops : expr SMALLEREQUAL . expr  (60)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1239,17 +1176,17 @@ state 64
 	.  error
 
 	expr  goto 102
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 65
-	arith_ops : expr OR . expr  (64)
+state 63
+	arith_ops : expr EQUAL . expr  (57)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1261,20 +1198,40 @@ state 65
 	.  error
 
 	expr  goto 103
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 66
-	graph_ops : expr LINK . expr  (70)
-	graph_ops : expr LINK . list_graph_literal  (71)
-	graph_ops : expr LINK . expr AMPERSAND expr  (72)
+state 64
+	arith_ops : expr NOTEQUAL . expr  (58)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 104
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 104
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 65
+	arith_ops : expr AND . expr  (63)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
 	ID  shift 23
@@ -1285,21 +1242,42 @@ state 66
 	.  error
 
 	expr  goto 105
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-	list_graph_literal  goto 106
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 66
+	arith_ops : expr OR . expr  (65)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 106
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 67
-	graph_ops : expr RIGHTLINK . expr  (73)
-	graph_ops : expr RIGHTLINK . list_graph_literal  (74)
-	graph_ops : expr RIGHTLINK . expr AMPERSAND expr  (75)
+	graph_ops : expr LINK . expr  (71)
+	graph_ops : expr LINK . list_graph_literal  (72)
+	graph_ops : expr LINK . expr AMPERSAND expr  (73)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 104
+	NODE  shift 36
+	LEFTBRACKET  shift 107
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
 	ID  shift 23
@@ -1309,22 +1287,22 @@ state 67
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 107
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-	list_graph_literal  goto 108
+	expr  goto 108
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+	list_graph_literal  goto 109
 
 
 state 68
-	graph_ops : expr LEFTLINK . expr  (76)
-	graph_ops : expr LEFTLINK . list_graph_literal  (77)
-	graph_ops : expr LEFTLINK . expr AMPERSAND expr  (78)
+	graph_ops : expr RIGHTLINK . expr  (74)
+	graph_ops : expr RIGHTLINK . list_graph_literal  (75)
+	graph_ops : expr RIGHTLINK . expr AMPERSAND expr  (76)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 104
+	NODE  shift 36
+	LEFTBRACKET  shift 107
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
 	ID  shift 23
@@ -1334,20 +1312,22 @@ state 68
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 109
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-	list_graph_literal  goto 110
+	expr  goto 110
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+	list_graph_literal  goto 111
 
 
 state 69
-	arith_ops : expr SIMILARITY . expr  (67)
+	graph_ops : expr LEFTLINK . expr  (77)
+	graph_ops : expr LEFTLINK . list_graph_literal  (78)
+	graph_ops : expr LEFTLINK . expr AMPERSAND expr  (79)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
+	NODE  shift 36
+	LEFTBRACKET  shift 107
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
 	ID  shift 23
@@ -1357,20 +1337,19 @@ state 69
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 111
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	expr  goto 112
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+	list_graph_literal  goto 113
 
 
 state 70
-	arith_ops : expr AT . AT expr  (68)
-	arith_ops : expr AT . expr  (69)
+	arith_ops : expr SIMILARITY . expr  (68)
 
 	MINUS  shift 5
 	NOT  shift 6
-	AT  shift 112
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1381,306 +1360,271 @@ state 70
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 113
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	expr  goto 114
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 71
-	stmt : var_type ID . SEMICOLUMN  (11)
-	stmt : var_type ID . ASSIGN expr SEMICOLUMN  (12)
-	func_decl : var_type ID . LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (29)
+	arith_ops : expr AT . AT expr  (69)
+	arith_ops : expr AT . expr  (70)
 
-	SEMICOLUMN  shift 114
-	ASSIGN  shift 115
-	LEFTROUNDBRACKET  shift 116
+	MINUS  shift 5
+	NOT  shift 6
+	AT  shift 115
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
 	.  error
+
+	expr  goto 116
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 72
-	stmt : IF LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
-	stmt : IF LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (9)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	stmt : var_decl SEMICOLUMN .  (11)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	RIGHTROUNDBRACKET  shift 117
-	.  error
+	.  reduce 11
 
 
 state 73
-	for_expr : expr .  (31)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	var_decl : var_type ID .  (12)
+	var_decl : var_type ID . ASSIGN expr  (13)
+	func_decl : var_type ID . LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (30)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEMICOLUMN  reduce 31
-	RIGHTROUNDBRACKET  reduce 31
+	ASSIGN  shift 117
+	LEFTROUNDBRACKET  shift 118
+	SEMICOLUMN  reduce 12
 
 
 state 74
-	stmt : FOR LEFTROUNDBRACKET for_expr . SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+	stmt : IF LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
+	stmt : IF LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (9)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	SEMICOLUMN  shift 118
-	.  error
-
-
-state 75
-	stmt : WHILE LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (10)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	RIGHTROUNDBRACKET  shift 119
 	.  error
 
 
+state 75
+	var_type : NODE .  (18)
+
+	.  reduce 18
+
+
 state 76
+	stmt : FOR LEFTROUNDBRACKET var_decl . SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+
+	SEMICOLUMN  shift 120
+	.  error
+
+
+state 77
+	var_decl : var_type . ID  (12)
+	var_decl : var_type . ID ASSIGN expr  (13)
+
+	ID  shift 121
+	.  error
+
+
+state 78
+	stmt : WHILE LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (10)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	RIGHTROUNDBRACKET  shift 122
+	.  error
+
+
+state 79
 	stmt : RETURN expr SEMICOLUMN .  (6)
 
 	.  reduce 6
 
 
-state 77
-	expr : NODE LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET  (35)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	RIGHTROUNDBRACKET  shift 120
-	.  error
-
-
-state 78
-	var_type : DICT SMALLER INT . GREATER  (20)
-
-	GREATER  shift 121
-	.  error
-
-
-state 79
-	var_type : DICT SMALLER FLOAT . GREATER  (21)
-
-	GREATER  shift 122
-	.  error
-
-
 state 80
-	var_type : DICT SMALLER STRING . GREATER  (22)
+	expr : NODE LEFTROUNDBRACKET expr . RIGHTROUNDBRACKET  (36)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	GREATER  shift 123
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	RIGHTROUNDBRACKET  shift 123
 	.  error
 
 
 state 81
-	var_type : DICT SMALLER NODE . GREATER  (23)
+	var_type : DICT SMALLER INT . GREATER  (21)
 
 	GREATER  shift 124
 	.  error
 
 
 state 82
-	var_type : DICT SMALLER GRAPH . GREATER  (24)
+	var_type : DICT SMALLER FLOAT . GREATER  (22)
 
 	GREATER  shift 125
 	.  error
 
 
 state 83
-	list : list SEQUENCE . expr  (44)
+	var_type : DICT SMALLER STRING . GREATER  (23)
 
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
+	GREATER  shift 126
 	.  error
-
-	expr  goto 126
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
 
 
 state 84
-	expr : LEFTBRACKET list RIGHTBRACKET .  (38)
+	var_type : DICT SMALLER NODE . GREATER  (24)
 
-	.  reduce 38
+	GREATER  shift 127
+	.  error
 
 
 state 85
-	dict_key_value : STRING_LITERAL COLUMN . expr  (48)
+	var_type : DICT SMALLER GRAPH . GREATER  (25)
+
+	GREATER  shift 128
+	.  error
+
+
+state 86
+	list : list SEQUENCE . expr  (45)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -1691,186 +1635,160 @@ state 85
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 127
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 86
-	dict : dict SEQUENCE . dict_key_value  (51)
-
-	STRING_LITERAL  shift 46
-	.  error
-
-	dict_key_value  goto 128
+	expr  goto 129
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 87
-	expr : LEFTCURLYBRACKET dict RIGHTCURLYBRACKET .  (39)
+	expr : LEFTBRACKET list RIGHTBRACKET .  (39)
 
 	.  reduce 39
 
 
 state 88
-	expr : LEFTROUNDBRACKET expr RIGHTROUNDBRACKET .  (40)
+	dict_key_value : STRING_LITERAL COLUMN . expr  (49)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 130
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 89
+	dict : dict SEQUENCE . dict_key_value  (52)
+
+	STRING_LITERAL  shift 47
+	.  error
+
+	dict_key_value  goto 131
+
+
+state 90
+	expr : LEFTCURLYBRACKET dict RIGHTCURLYBRACKET .  (40)
 
 	.  reduce 40
 
 
-state 89
-	expr : ID ASSIGN expr .  (37)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEMICOLUMN  reduce 37
-	SEQUENCE  reduce 37
-	AMPERSAND  reduce 37
-	RIGHTBRACKET  reduce 37
-	RIGHTCURLYBRACKET  reduce 37
-	RIGHTROUNDBRACKET  reduce 37
-
-
-state 90
-	expr : ID LEFTROUNDBRACKET list . RIGHTROUNDBRACKET  (41)
-	list : list . SEQUENCE expr  (44)
-
-	SEQUENCE  shift 83
-	RIGHTROUNDBRACKET  shift 129
-	.  error
-
-
 state 91
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr PLUS expr .  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	expr : LEFTROUNDBRACKET expr RIGHTROUNDBRACKET .  (41)
 
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	PLUS  reduce 52
-	MINUS  reduce 52
-	SEMICOLUMN  reduce 52
-	SEQUENCE  reduce 52
-	GREATER  reduce 52
-	GREATEREQUAL  reduce 52
-	SMALLER  reduce 52
-	SMALLEREQUAL  reduce 52
-	EQUAL  reduce 52
-	NOTEQUAL  reduce 52
-	AND  reduce 52
-	OR  reduce 52
-	AMPERSAND  reduce 52
-	RIGHTBRACKET  reduce 52
-	RIGHTCURLYBRACKET  reduce 52
-	RIGHTROUNDBRACKET  reduce 52
+	.  reduce 41
 
 
 state 92
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr MINUS expr .  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	expr : ID ASSIGN expr .  (38)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 38
+	SEQUENCE  reduce 38
+	AMPERSAND  reduce 38
+	RIGHTBRACKET  reduce 38
+	RIGHTCURLYBRACKET  reduce 38
+	RIGHTROUNDBRACKET  reduce 38
+
+
+state 93
+	expr : ID LEFTROUNDBRACKET list . RIGHTROUNDBRACKET  (42)
+	list : list . SEQUENCE expr  (45)
+
+	SEQUENCE  shift 86
+	RIGHTROUNDBRACKET  shift 132
+	.  error
+
+
+state 94
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr PLUS expr .  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	PLUS  reduce 53
 	MINUS  reduce 53
 	SEMICOLUMN  reduce 53
@@ -1889,44 +1807,44 @@ state 92
 	RIGHTROUNDBRACKET  reduce 53
 
 
-state 93
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr TIMES expr .  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+state 95
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr MINUS expr .  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	PLUS  reduce 54
 	MINUS  reduce 54
-	TIMES  reduce 54
-	DIVIDE  reduce 54
-	MOD  reduce 54
 	SEMICOLUMN  reduce 54
 	SEQUENCE  reduce 54
 	GREATER  reduce 54
@@ -1943,39 +1861,39 @@ state 93
 	RIGHTROUNDBRACKET  reduce 54
 
 
-state 94
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr DIVIDE expr .  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+state 96
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr TIMES expr .  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	PLUS  reduce 55
 	MINUS  reduce 55
 	TIMES  reduce 55
@@ -1997,152 +1915,152 @@ state 94
 	RIGHTROUNDBRACKET  reduce 55
 
 
-state 95
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr MOD expr .  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	PLUS  reduce 63
-	MINUS  reduce 63
-	TIMES  reduce 63
-	DIVIDE  reduce 63
-	MOD  reduce 63
-	SEMICOLUMN  reduce 63
-	SEQUENCE  reduce 63
-	GREATER  reduce 63
-	GREATEREQUAL  reduce 63
-	SMALLER  reduce 63
-	SMALLEREQUAL  reduce 63
-	EQUAL  reduce 63
-	NOTEQUAL  reduce 63
-	AND  reduce 63
-	OR  reduce 63
-	AMPERSAND  reduce 63
-	RIGHTBRACKET  reduce 63
-	RIGHTCURLYBRACKET  reduce 63
-	RIGHTROUNDBRACKET  reduce 63
-
-
-state 96
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr GREATER expr .  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEMICOLUMN  reduce 60
-	SEQUENCE  reduce 60
-	GREATER  reduce 60
-	GREATEREQUAL  reduce 60
-	SMALLER  reduce 60
-	SMALLEREQUAL  reduce 60
-	EQUAL  reduce 60
-	NOTEQUAL  reduce 60
-	AND  reduce 60
-	OR  reduce 60
-	AMPERSAND  reduce 60
-	RIGHTBRACKET  reduce 60
-	RIGHTCURLYBRACKET  reduce 60
-	RIGHTROUNDBRACKET  reduce 60
-
-
 state 97
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr GREATEREQUAL expr .  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr DIVIDE expr .  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	PLUS  reduce 56
+	MINUS  reduce 56
+	TIMES  reduce 56
+	DIVIDE  reduce 56
+	MOD  reduce 56
+	SEMICOLUMN  reduce 56
+	SEQUENCE  reduce 56
+	GREATER  reduce 56
+	GREATEREQUAL  reduce 56
+	SMALLER  reduce 56
+	SMALLEREQUAL  reduce 56
+	EQUAL  reduce 56
+	NOTEQUAL  reduce 56
+	AND  reduce 56
+	OR  reduce 56
+	AMPERSAND  reduce 56
+	RIGHTBRACKET  reduce 56
+	RIGHTCURLYBRACKET  reduce 56
+	RIGHTROUNDBRACKET  reduce 56
+
+
+state 98
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr MOD expr .  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	PLUS  reduce 64
+	MINUS  reduce 64
+	TIMES  reduce 64
+	DIVIDE  reduce 64
+	MOD  reduce 64
+	SEMICOLUMN  reduce 64
+	SEQUENCE  reduce 64
+	GREATER  reduce 64
+	GREATEREQUAL  reduce 64
+	SMALLER  reduce 64
+	SMALLEREQUAL  reduce 64
+	EQUAL  reduce 64
+	NOTEQUAL  reduce 64
+	AND  reduce 64
+	OR  reduce 64
+	AMPERSAND  reduce 64
+	RIGHTBRACKET  reduce 64
+	RIGHTCURLYBRACKET  reduce 64
+	RIGHTROUNDBRACKET  reduce 64
+
+
+state 99
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr GREATER expr .  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	SEMICOLUMN  reduce 61
 	SEQUENCE  reduce 61
 	GREATER  reduce 61
@@ -2159,98 +2077,98 @@ state 97
 	RIGHTROUNDBRACKET  reduce 61
 
 
-state 98
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr SMALLER expr .  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+state 100
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr GREATEREQUAL expr .  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEMICOLUMN  reduce 58
-	SEQUENCE  reduce 58
-	GREATER  reduce 58
-	GREATEREQUAL  reduce 58
-	SMALLER  reduce 58
-	SMALLEREQUAL  reduce 58
-	EQUAL  reduce 58
-	NOTEQUAL  reduce 58
-	AND  reduce 58
-	OR  reduce 58
-	AMPERSAND  reduce 58
-	RIGHTBRACKET  reduce 58
-	RIGHTCURLYBRACKET  reduce 58
-	RIGHTROUNDBRACKET  reduce 58
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 62
+	SEQUENCE  reduce 62
+	GREATER  reduce 62
+	GREATEREQUAL  reduce 62
+	SMALLER  reduce 62
+	SMALLEREQUAL  reduce 62
+	EQUAL  reduce 62
+	NOTEQUAL  reduce 62
+	AND  reduce 62
+	OR  reduce 62
+	AMPERSAND  reduce 62
+	RIGHTBRACKET  reduce 62
+	RIGHTCURLYBRACKET  reduce 62
+	RIGHTROUNDBRACKET  reduce 62
 
 
-state 99
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr SMALLEREQUAL expr .  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+state 101
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr SMALLER expr .  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	SEMICOLUMN  reduce 59
 	SEQUENCE  reduce 59
 	GREATER  reduce 59
@@ -2267,102 +2185,102 @@ state 99
 	RIGHTROUNDBRACKET  reduce 59
 
 
-state 100
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr EQUAL expr .  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+state 102
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr SMALLEREQUAL expr .  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEMICOLUMN  reduce 56
-	SEQUENCE  reduce 56
-	EQUAL  reduce 56
-	NOTEQUAL  reduce 56
-	AND  reduce 56
-	OR  reduce 56
-	AMPERSAND  reduce 56
-	RIGHTBRACKET  reduce 56
-	RIGHTCURLYBRACKET  reduce 56
-	RIGHTROUNDBRACKET  reduce 56
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 60
+	SEQUENCE  reduce 60
+	GREATER  reduce 60
+	GREATEREQUAL  reduce 60
+	SMALLER  reduce 60
+	SMALLEREQUAL  reduce 60
+	EQUAL  reduce 60
+	NOTEQUAL  reduce 60
+	AND  reduce 60
+	OR  reduce 60
+	AMPERSAND  reduce 60
+	RIGHTBRACKET  reduce 60
+	RIGHTCURLYBRACKET  reduce 60
+	RIGHTROUNDBRACKET  reduce 60
 
 
-state 101
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr NOTEQUAL expr .  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+state 103
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr EQUAL expr .  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	SEMICOLUMN  reduce 57
 	SEQUENCE  reduce 57
 	EQUAL  reduce 57
@@ -2375,122 +2293,176 @@ state 101
 	RIGHTROUNDBRACKET  reduce 57
 
 
-state 102
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr AND expr .  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEMICOLUMN  reduce 62
-	SEQUENCE  reduce 62
-	AND  reduce 62
-	OR  reduce 62
-	AMPERSAND  reduce 62
-	RIGHTBRACKET  reduce 62
-	RIGHTCURLYBRACKET  reduce 62
-	RIGHTROUNDBRACKET  reduce 62
-
-
-state 103
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr OR expr .  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEMICOLUMN  reduce 64
-	SEQUENCE  reduce 64
-	AND  reduce 64
-	OR  reduce 64
-	AMPERSAND  reduce 64
-	RIGHTBRACKET  reduce 64
-	RIGHTCURLYBRACKET  reduce 64
-	RIGHTROUNDBRACKET  reduce 64
-
-
 state 104
-	expr : LEFTBRACKET . list RIGHTBRACKET  (38)
-	list_graph_literal : LEFTBRACKET . list_graph RIGHTBRACKET  (47)
-	list : .  (42)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr NOTEQUAL expr .  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 58
+	SEQUENCE  reduce 58
+	EQUAL  reduce 58
+	NOTEQUAL  reduce 58
+	AND  reduce 58
+	OR  reduce 58
+	AMPERSAND  reduce 58
+	RIGHTBRACKET  reduce 58
+	RIGHTCURLYBRACKET  reduce 58
+	RIGHTROUNDBRACKET  reduce 58
+
+
+state 105
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr AND expr .  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 63
+	SEQUENCE  reduce 63
+	AND  reduce 63
+	OR  reduce 63
+	AMPERSAND  reduce 63
+	RIGHTBRACKET  reduce 63
+	RIGHTCURLYBRACKET  reduce 63
+	RIGHTROUNDBRACKET  reduce 63
+
+
+state 106
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr OR expr .  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 65
+	SEQUENCE  reduce 65
+	AND  reduce 65
+	OR  reduce 65
+	AMPERSAND  reduce 65
+	RIGHTBRACKET  reduce 65
+	RIGHTCURLYBRACKET  reduce 65
+	RIGHTROUNDBRACKET  reduce 65
+
+
+state 107
+	expr : LEFTBRACKET . list RIGHTBRACKET  (39)
+	list_graph_literal : LEFTBRACKET . list_graph RIGHTBRACKET  (48)
+	list : .  (43)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -2499,113 +2471,910 @@ state 104
 	STRING_LITERAL  shift 25
 	FLOAT_LITERAL  shift 26
 	BOOL_LITERAL  shift 27
-	SEQUENCE  reduce 42
-	RIGHTBRACKET  reduce 42
+	SEQUENCE  reduce 43
+	RIGHTBRACKET  reduce 43
 
-	expr  goto 130
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-	list  goto 45
-	list_graph  goto 131
-
-
-state 105
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr LINK expr .  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr LINK expr . AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	AMPERSAND  shift 132
-	PLUS  reduce 70
-	MINUS  reduce 70
-	TIMES  reduce 70
-	DIVIDE  reduce 70
-	MOD  reduce 70
-	SEMICOLUMN  reduce 70
-	SEQUENCE  reduce 70
-	GREATER  reduce 70
-	GREATEREQUAL  reduce 70
-	SMALLER  reduce 70
-	SMALLEREQUAL  reduce 70
-	EQUAL  reduce 70
-	NOTEQUAL  reduce 70
-	AND  reduce 70
-	OR  reduce 70
-	RIGHTBRACKET  reduce 70
-	RIGHTCURLYBRACKET  reduce 70
-	RIGHTROUNDBRACKET  reduce 70
+	expr  goto 133
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+	list  goto 46
+	list_graph  goto 134
 
 
-state 106
-	graph_ops : expr LINK list_graph_literal .  (71)
+state 108
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr LINK expr .  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr LINK expr . AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	.  reduce 71
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	AMPERSAND  shift 135
+	PLUS  reduce 71
+	MINUS  reduce 71
+	TIMES  reduce 71
+	DIVIDE  reduce 71
+	MOD  reduce 71
+	SEMICOLUMN  reduce 71
+	SEQUENCE  reduce 71
+	GREATER  reduce 71
+	GREATEREQUAL  reduce 71
+	SMALLER  reduce 71
+	SMALLEREQUAL  reduce 71
+	EQUAL  reduce 71
+	NOTEQUAL  reduce 71
+	AND  reduce 71
+	OR  reduce 71
+	RIGHTBRACKET  reduce 71
+	RIGHTCURLYBRACKET  reduce 71
+	RIGHTROUNDBRACKET  reduce 71
 
 
-state 107
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr RIGHTLINK expr .  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr RIGHTLINK expr . AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+state 109
+	graph_ops : expr LINK list_graph_literal .  (72)
 
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	AMPERSAND  shift 133
+	.  reduce 72
+
+
+state 110
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr RIGHTLINK expr .  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr RIGHTLINK expr . AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	AMPERSAND  shift 136
+	PLUS  reduce 74
+	MINUS  reduce 74
+	TIMES  reduce 74
+	DIVIDE  reduce 74
+	MOD  reduce 74
+	SEMICOLUMN  reduce 74
+	SEQUENCE  reduce 74
+	GREATER  reduce 74
+	GREATEREQUAL  reduce 74
+	SMALLER  reduce 74
+	SMALLEREQUAL  reduce 74
+	EQUAL  reduce 74
+	NOTEQUAL  reduce 74
+	AND  reduce 74
+	OR  reduce 74
+	RIGHTBRACKET  reduce 74
+	RIGHTCURLYBRACKET  reduce 74
+	RIGHTROUNDBRACKET  reduce 74
+
+
+state 111
+	graph_ops : expr RIGHTLINK list_graph_literal .  (75)
+
+	.  reduce 75
+
+
+state 112
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr LEFTLINK expr .  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+	graph_ops : expr LEFTLINK expr . AMPERSAND expr  (79)
+
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	AMPERSAND  shift 137
+	PLUS  reduce 77
+	MINUS  reduce 77
+	TIMES  reduce 77
+	DIVIDE  reduce 77
+	MOD  reduce 77
+	SEMICOLUMN  reduce 77
+	SEQUENCE  reduce 77
+	GREATER  reduce 77
+	GREATEREQUAL  reduce 77
+	SMALLER  reduce 77
+	SMALLEREQUAL  reduce 77
+	EQUAL  reduce 77
+	NOTEQUAL  reduce 77
+	AND  reduce 77
+	OR  reduce 77
+	RIGHTBRACKET  reduce 77
+	RIGHTCURLYBRACKET  reduce 77
+	RIGHTROUNDBRACKET  reduce 77
+
+
+state 113
+	graph_ops : expr LEFTLINK list_graph_literal .  (78)
+
+	.  reduce 78
+
+
+state 114
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr SIMILARITY expr .  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	.  reduce 68
+
+
+state 115
+	arith_ops : expr AT AT . expr  (69)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 138
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 116
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	arith_ops : expr AT expr .  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	.  reduce 70
+
+
+state 117
+	var_decl : var_type ID ASSIGN . expr  (13)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 139
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 118
+	func_decl : var_type ID LEFTROUNDBRACKET . formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (30)
+	formal_list : .  (26)
+
+	INT  shift 11
+	FLOAT  shift 12
+	STRING  shift 13
+	BOOL  shift 14
+	NODE  shift 75
+	GRAPH  shift 16
+	LIST  shift 17
+	DICT  shift 18
+	SEQUENCE  reduce 26
+	RIGHTROUNDBRACKET  reduce 26
+
+	var_type  goto 140
+	formal_list  goto 141
+	formal  goto 142
+
+
+state 119
+	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
+	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (9)
+
+	LEFTCURLYBRACKET  shift 143
+	.  error
+
+
+state 120
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN . for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+	for_expr : .  (31)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	SEMICOLUMN  reduce 31
+
+	expr  goto 144
+	for_expr  goto 145
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 121
+	var_decl : var_type ID .  (12)
+	var_decl : var_type ID . ASSIGN expr  (13)
+
+	ASSIGN  shift 117
+	SEMICOLUMN  reduce 12
+
+
+state 122
+	stmt : WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (10)
+
+	LEFTCURLYBRACKET  shift 146
+	.  error
+
+
+state 123
+	expr : NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET .  (36)
+
+	.  reduce 36
+
+
+state 124
+	var_type : DICT SMALLER INT GREATER .  (21)
+
+	.  reduce 21
+
+
+state 125
+	var_type : DICT SMALLER FLOAT GREATER .  (22)
+
+	.  reduce 22
+
+
+state 126
+	var_type : DICT SMALLER STRING GREATER .  (23)
+
+	.  reduce 23
+
+
+state 127
+	var_type : DICT SMALLER NODE GREATER .  (24)
+
+	.  reduce 24
+
+
+state 128
+	var_type : DICT SMALLER GRAPH GREATER .  (25)
+
+	.  reduce 25
+
+
+state 129
+	list : list SEQUENCE expr .  (45)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEQUENCE  reduce 45
+	RIGHTBRACKET  reduce 45
+	RIGHTROUNDBRACKET  reduce 45
+
+
+state 130
+	dict_key_value : STRING_LITERAL COLUMN expr .  (49)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEQUENCE  reduce 49
+	RIGHTCURLYBRACKET  reduce 49
+
+
+state 131
+	dict : dict SEQUENCE dict_key_value .  (52)
+
+	.  reduce 52
+
+
+state 132
+	expr : ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET .  (42)
+
+	.  reduce 42
+
+
+state 133
+	list : expr .  (44)
+	list_graph : expr . AMPERSAND expr  (46)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	AMPERSAND  shift 147
+	SEQUENCE  reduce 44
+	RIGHTBRACKET  reduce 44
+
+
+state 134
+	list_graph : list_graph . SEQUENCE expr AMPERSAND expr  (47)
+	list_graph_literal : LEFTBRACKET list_graph . RIGHTBRACKET  (48)
+
+	SEQUENCE  shift 148
+	RIGHTBRACKET  shift 149
+	.  error
+
+
+state 135
+	graph_ops : expr LINK expr AMPERSAND . expr  (73)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 150
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 136
+	graph_ops : expr RIGHTLINK expr AMPERSAND . expr  (76)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 151
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 137
+	graph_ops : expr LEFTLINK expr AMPERSAND . expr  (79)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 152
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 138
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr AT AT expr .  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	.  reduce 69
+
+
+state 139
+	var_decl : var_type ID ASSIGN expr .  (13)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 13
+
+
+state 140
+	formal : var_type . ID  (29)
+
+	ID  shift 153
+	.  error
+
+
+state 141
+	formal_list : formal_list . SEQUENCE formal  (28)
+	func_decl : var_type ID LEFTROUNDBRACKET formal_list . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (30)
+
+	SEQUENCE  shift 154
+	RIGHTROUNDBRACKET  shift 155
+	.  error
+
+
+state 142
+	formal_list : formal .  (27)
+
+	.  reduce 27
+
+
+state 143
+	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
+	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (9)
+	stmt_list : .  (2)
+
+	.  reduce 2
+
+	stmt_list  goto 156
+
+
+state 144
+	for_expr : expr .  (32)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEMICOLUMN  reduce 32
+	RIGHTROUNDBRACKET  reduce 32
+
+
+state 145
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr . SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+
+	SEMICOLUMN  shift 157
+	.  error
+
+
+state 146
+	stmt : WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (10)
+	stmt_list : .  (2)
+
+	.  reduce 2
+
+	stmt_list  goto 158
+
+
+state 147
+	list_graph : expr AMPERSAND . expr  (46)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 159
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 148
+	list_graph : list_graph SEQUENCE . expr AMPERSAND expr  (47)
+
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	.  error
+
+	expr  goto 160
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
+
+
+state 149
+	list_graph_literal : LEFTBRACKET list_graph RIGHTBRACKET .  (48)
+
+	.  reduce 48
+
+
+state 150
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr LINK expr AMPERSAND expr .  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	PLUS  reduce 73
 	MINUS  reduce 73
 	TIMES  reduce 73
@@ -2621,52 +3390,45 @@ state 107
 	NOTEQUAL  reduce 73
 	AND  reduce 73
 	OR  reduce 73
+	AMPERSAND  reduce 73
 	RIGHTBRACKET  reduce 73
 	RIGHTCURLYBRACKET  reduce 73
 	RIGHTROUNDBRACKET  reduce 73
 
 
-state 108
-	graph_ops : expr RIGHTLINK list_graph_literal .  (74)
+state 151
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr RIGHTLINK expr AMPERSAND expr .  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	.  reduce 74
-
-
-state 109
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr LEFTLINK expr .  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-	graph_ops : expr LEFTLINK expr . AMPERSAND expr  (78)
-
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	AMPERSAND  shift 134
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
 	PLUS  reduce 76
 	MINUS  reduce 76
 	TIMES  reduce 76
@@ -2682,913 +3444,100 @@ state 109
 	NOTEQUAL  reduce 76
 	AND  reduce 76
 	OR  reduce 76
+	AMPERSAND  reduce 76
 	RIGHTBRACKET  reduce 76
 	RIGHTCURLYBRACKET  reduce 76
 	RIGHTROUNDBRACKET  reduce 76
 
 
-state 110
-	graph_ops : expr LEFTLINK list_graph_literal .  (77)
-
-	.  reduce 77
-
-
-state 111
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr SIMILARITY expr .  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	.  reduce 67
-
-
-state 112
-	arith_ops : expr AT AT . expr  (68)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 135
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 113
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	arith_ops : expr AT expr .  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	.  reduce 69
-
-
-state 114
-	stmt : var_type ID SEMICOLUMN .  (11)
-
-	.  reduce 11
-
-
-state 115
-	stmt : var_type ID ASSIGN . expr SEMICOLUMN  (12)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 136
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 116
-	func_decl : var_type ID LEFTROUNDBRACKET . formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (29)
-	formal_list : .  (25)
-
-	INT  shift 11
-	FLOAT  shift 12
-	STRING  shift 13
-	BOOL  shift 14
-	NODE  shift 137
-	GRAPH  shift 16
-	LIST  shift 17
-	DICT  shift 18
-	SEQUENCE  reduce 25
-	RIGHTROUNDBRACKET  reduce 25
-
-	var_type  goto 138
-	formal_list  goto 139
-	formal  goto 140
-
-
-state 117
-	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
-	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (9)
-
-	LEFTCURLYBRACKET  shift 141
-	.  error
-
-
-state 118
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN . for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
-	for_expr : .  (30)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	SEMICOLUMN  reduce 30
-
-	expr  goto 73
-	for_expr  goto 142
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 119
-	stmt : WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (10)
-
-	LEFTCURLYBRACKET  shift 143
-	.  error
-
-
-state 120
-	expr : NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET .  (35)
-
-	.  reduce 35
-
-
-state 121
-	var_type : DICT SMALLER INT GREATER .  (20)
-
-	.  reduce 20
-
-
-state 122
-	var_type : DICT SMALLER FLOAT GREATER .  (21)
-
-	.  reduce 21
-
-
-state 123
-	var_type : DICT SMALLER STRING GREATER .  (22)
-
-	.  reduce 22
-
-
-state 124
-	var_type : DICT SMALLER NODE GREATER .  (23)
-
-	.  reduce 23
-
-
-state 125
-	var_type : DICT SMALLER GRAPH GREATER .  (24)
-
-	.  reduce 24
-
-
-state 126
-	list : list SEQUENCE expr .  (44)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEQUENCE  reduce 44
-	RIGHTBRACKET  reduce 44
-	RIGHTROUNDBRACKET  reduce 44
-
-
-state 127
-	dict_key_value : STRING_LITERAL COLUMN expr .  (48)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEQUENCE  reduce 48
-	RIGHTCURLYBRACKET  reduce 48
-
-
-state 128
-	dict : dict SEQUENCE dict_key_value .  (51)
-
-	.  reduce 51
-
-
-state 129
-	expr : ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET .  (41)
-
-	.  reduce 41
-
-
-state 130
-	list : expr .  (43)
-	list_graph : expr . AMPERSAND expr  (45)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	AMPERSAND  shift 144
-	SEQUENCE  reduce 43
-	RIGHTBRACKET  reduce 43
-
-
-state 131
-	list_graph : list_graph . SEQUENCE expr AMPERSAND expr  (46)
-	list_graph_literal : LEFTBRACKET list_graph . RIGHTBRACKET  (47)
-
-	SEQUENCE  shift 145
-	RIGHTBRACKET  shift 146
-	.  error
-
-
-state 132
-	graph_ops : expr LINK expr AMPERSAND . expr  (72)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 147
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 133
-	graph_ops : expr RIGHTLINK expr AMPERSAND . expr  (75)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 148
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 134
-	graph_ops : expr LEFTLINK expr AMPERSAND . expr  (78)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 149
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 135
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr AT AT expr .  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	.  reduce 68
-
-
-state 136
-	stmt : var_type ID ASSIGN expr . SEMICOLUMN  (12)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	SEMICOLUMN  shift 150
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	.  error
-
-
-state 137
-	var_type : NODE .  (17)
-
-	.  reduce 17
-
-
-state 138
-	formal : var_type . ID  (28)
-
-	ID  shift 151
-	.  error
-
-
-state 139
-	formal_list : formal_list . SEQUENCE formal  (27)
-	func_decl : var_type ID LEFTROUNDBRACKET formal_list . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (29)
-
-	SEQUENCE  shift 152
-	RIGHTROUNDBRACKET  shift 153
-	.  error
-
-
-state 140
-	formal_list : formal .  (26)
-
-	.  reduce 26
-
-
-state 141
-	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
-	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (9)
-	stmt_list : .  (2)
-
-	.  reduce 2
-
-	stmt_list  goto 154
-
-
-state 142
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr . SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
-
-	SEMICOLUMN  shift 155
-	.  error
-
-
-state 143
-	stmt : WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (10)
-	stmt_list : .  (2)
-
-	.  reduce 2
-
-	stmt_list  goto 156
-
-
-state 144
-	list_graph : expr AMPERSAND . expr  (45)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 157
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 145
-	list_graph : list_graph SEQUENCE . expr AMPERSAND expr  (46)
-
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	.  error
-
-	expr  goto 158
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 146
-	list_graph_literal : LEFTBRACKET list_graph RIGHTBRACKET .  (47)
-
-	.  reduce 47
-
-
-state 147
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr LINK expr AMPERSAND expr .  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	PLUS  reduce 72
-	MINUS  reduce 72
-	TIMES  reduce 72
-	DIVIDE  reduce 72
-	MOD  reduce 72
-	SEMICOLUMN  reduce 72
-	SEQUENCE  reduce 72
-	GREATER  reduce 72
-	GREATEREQUAL  reduce 72
-	SMALLER  reduce 72
-	SMALLEREQUAL  reduce 72
-	EQUAL  reduce 72
-	NOTEQUAL  reduce 72
-	AND  reduce 72
-	OR  reduce 72
-	AMPERSAND  reduce 72
-	RIGHTBRACKET  reduce 72
-	RIGHTCURLYBRACKET  reduce 72
-	RIGHTROUNDBRACKET  reduce 72
-
-
-state 148
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr RIGHTLINK expr AMPERSAND expr .  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	PLUS  reduce 75
-	MINUS  reduce 75
-	TIMES  reduce 75
-	DIVIDE  reduce 75
-	MOD  reduce 75
-	SEMICOLUMN  reduce 75
-	SEQUENCE  reduce 75
-	GREATER  reduce 75
-	GREATEREQUAL  reduce 75
-	SMALLER  reduce 75
-	SMALLEREQUAL  reduce 75
-	EQUAL  reduce 75
-	NOTEQUAL  reduce 75
-	AND  reduce 75
-	OR  reduce 75
-	AMPERSAND  reduce 75
-	RIGHTBRACKET  reduce 75
-	RIGHTCURLYBRACKET  reduce 75
-	RIGHTROUNDBRACKET  reduce 75
-
-
-state 149
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
-	graph_ops : expr LEFTLINK expr AMPERSAND expr .  (78)
-
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	PLUS  reduce 78
-	MINUS  reduce 78
-	TIMES  reduce 78
-	DIVIDE  reduce 78
-	MOD  reduce 78
-	SEMICOLUMN  reduce 78
-	SEQUENCE  reduce 78
-	GREATER  reduce 78
-	GREATEREQUAL  reduce 78
-	SMALLER  reduce 78
-	SMALLEREQUAL  reduce 78
-	EQUAL  reduce 78
-	NOTEQUAL  reduce 78
-	AND  reduce 78
-	OR  reduce 78
-	AMPERSAND  reduce 78
-	RIGHTBRACKET  reduce 78
-	RIGHTCURLYBRACKET  reduce 78
-	RIGHTROUNDBRACKET  reduce 78
-
-
-state 150
-	stmt : var_type ID ASSIGN expr SEMICOLUMN .  (12)
-
-	.  reduce 12
-
-
-state 151
-	formal : var_type ID .  (28)
-
-	.  reduce 28
-
-
 state 152
-	formal_list : formal_list SEQUENCE . formal  (27)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+	graph_ops : expr LEFTLINK expr AMPERSAND expr .  (79)
 
-	INT  shift 11
-	FLOAT  shift 12
-	STRING  shift 13
-	BOOL  shift 14
-	NODE  shift 137
-	GRAPH  shift 16
-	LIST  shift 17
-	DICT  shift 18
-	.  error
-
-	var_type  goto 138
-	formal  goto 159
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	PLUS  reduce 79
+	MINUS  reduce 79
+	TIMES  reduce 79
+	DIVIDE  reduce 79
+	MOD  reduce 79
+	SEMICOLUMN  reduce 79
+	SEQUENCE  reduce 79
+	GREATER  reduce 79
+	GREATEREQUAL  reduce 79
+	SMALLER  reduce 79
+	SMALLEREQUAL  reduce 79
+	EQUAL  reduce 79
+	NOTEQUAL  reduce 79
+	AND  reduce 79
+	OR  reduce 79
+	AMPERSAND  reduce 79
+	RIGHTBRACKET  reduce 79
+	RIGHTCURLYBRACKET  reduce 79
+	RIGHTROUNDBRACKET  reduce 79
 
 
 state 153
-	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (29)
+	formal : var_type ID .  (29)
 
-	LEFTCURLYBRACKET  shift 160
-	.  error
+	.  reduce 29
 
 
 state 154
-	stmt_list : stmt_list . stmt  (3)
-	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
-	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (9)
+	formal_list : formal_list SEQUENCE . formal  (28)
 
-	MINUS  shift 5
-	NOT  shift 6
-	IF  shift 7
-	FOR  shift 8
-	WHILE  shift 9
-	RETURN  shift 10
 	INT  shift 11
 	FLOAT  shift 12
 	STRING  shift 13
 	BOOL  shift 14
-	NODE  shift 15
+	NODE  shift 75
 	GRAPH  shift 16
 	LIST  shift 17
 	DICT  shift 18
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	RIGHTCURLYBRACKET  shift 161
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
 	.  error
 
-	stmt  goto 28
-	expr  goto 29
-	func_decl  goto 30
-	var_type  goto 31
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	var_type  goto 140
+	formal  goto 161
 
 
 state 155
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN . for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
-	for_expr : .  (30)
+	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (30)
 
-	MINUS  shift 5
-	NOT  shift 6
-	NODE  shift 35
-	LEFTBRACKET  shift 19
-	LEFTCURLYBRACKET  shift 20
-	LEFTROUNDBRACKET  shift 21
-	ID  shift 23
-	INT_LITERAL  shift 24
-	STRING_LITERAL  shift 25
-	FLOAT_LITERAL  shift 26
-	BOOL_LITERAL  shift 27
-	RIGHTROUNDBRACKET  reduce 30
-
-	expr  goto 73
-	for_expr  goto 162
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	LEFTCURLYBRACKET  shift 162
+	.  error
 
 
 state 156
 	stmt_list : stmt_list . stmt  (3)
-	stmt : WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (10)
+	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
+	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (9)
 
 	MINUS  shift 5
 	NOT  shift 6
@@ -3618,132 +3567,196 @@ state 156
 	stmt  goto 28
 	expr  goto 29
 	func_decl  goto 30
-	var_type  goto 31
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	var_decl  goto 31
+	var_type  goto 32
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 157
-	list_graph : expr AMPERSAND expr .  (45)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN . for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+	for_expr : .  (31)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEQUENCE  reduce 45
-	RIGHTBRACKET  reduce 45
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 36
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
+	RIGHTROUNDBRACKET  reduce 31
+
+	expr  goto 144
+	for_expr  goto 164
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 158
-	list_graph : list_graph SEQUENCE expr . AMPERSAND expr  (46)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	stmt_list : stmt_list . stmt  (3)
+	stmt : WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (10)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	AMPERSAND  shift 164
+	MINUS  shift 5
+	NOT  shift 6
+	IF  shift 7
+	FOR  shift 8
+	WHILE  shift 9
+	RETURN  shift 10
+	INT  shift 11
+	FLOAT  shift 12
+	STRING  shift 13
+	BOOL  shift 14
+	NODE  shift 15
+	GRAPH  shift 16
+	LIST  shift 17
+	DICT  shift 18
+	LEFTBRACKET  shift 19
+	LEFTCURLYBRACKET  shift 20
+	RIGHTCURLYBRACKET  shift 165
+	LEFTROUNDBRACKET  shift 21
+	ID  shift 23
+	INT_LITERAL  shift 24
+	STRING_LITERAL  shift 25
+	FLOAT_LITERAL  shift 26
+	BOOL_LITERAL  shift 27
 	.  error
+
+	stmt  goto 28
+	expr  goto 29
+	func_decl  goto 30
+	var_decl  goto 31
+	var_type  goto 32
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 159
-	formal_list : formal_list SEQUENCE formal .  (27)
+	list_graph : expr AMPERSAND expr .  (46)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
 
-	.  reduce 27
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEQUENCE  reduce 46
+	RIGHTBRACKET  reduce 46
 
 
 state 160
-	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (29)
+	list_graph : list_graph SEQUENCE expr . AMPERSAND expr  (47)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	AMPERSAND  shift 166
+	.  error
+
+
+state 161
+	formal_list : formal_list SEQUENCE formal .  (28)
+
+	.  reduce 28
+
+
+state 162
+	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (30)
 	stmt_list : .  (2)
 
 	.  reduce 2
 
-	stmt_list  goto 165
+	stmt_list  goto 167
 
 
-state 161
+state 163
 	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET . ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
 	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET .  (9)
 
-	ELSE  shift 166
+	ELSE  shift 168
 	MINUS  reduce 9
 	NOT  reduce 9
 	IF  reduce 9
@@ -3770,25 +3783,25 @@ state 161
 	BOOL_LITERAL  reduce 9
 
 
-state 162
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
+state 164
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr . RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
 
-	RIGHTROUNDBRACKET  shift 167
+	RIGHTROUNDBRACKET  shift 169
 	.  error
 
 
-state 163
+state 165
 	stmt : WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET .  (10)
 
 	.  reduce 10
 
 
-state 164
-	list_graph : list_graph SEQUENCE expr AMPERSAND . expr  (46)
+state 166
+	list_graph : list_graph SEQUENCE expr AMPERSAND . expr  (47)
 
 	MINUS  shift 5
 	NOT  shift 6
-	NODE  shift 35
+	NODE  shift 36
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
 	LEFTROUNDBRACKET  shift 21
@@ -3799,15 +3812,15 @@ state 164
 	BOOL_LITERAL  shift 27
 	.  error
 
-	expr  goto 168
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	expr  goto 170
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 165
+state 167
 	stmt_list : stmt_list . stmt  (3)
-	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (29)
+	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (30)
 
 	MINUS  shift 5
 	NOT  shift 6
@@ -3825,7 +3838,7 @@ state 165
 	DICT  shift 18
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
-	RIGHTCURLYBRACKET  shift 169
+	RIGHTCURLYBRACKET  shift 171
 	LEFTROUNDBRACKET  shift 21
 	ID  shift 23
 	INT_LITERAL  shift 24
@@ -3837,101 +3850,102 @@ state 165
 	stmt  goto 28
 	expr  goto 29
 	func_decl  goto 30
-	var_type  goto 31
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
-
-
-state 166
-	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
-
-	LEFTCURLYBRACKET  shift 170
-	.  error
-
-
-state 167
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
-
-	LEFTCURLYBRACKET  shift 171
-	.  error
+	var_decl  goto 31
+	var_type  goto 32
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
 state 168
-	list_graph : list_graph SEQUENCE expr AMPERSAND expr .  (46)
-	arith_ops : expr . PLUS expr  (52)
-	arith_ops : expr . MINUS expr  (53)
-	arith_ops : expr . TIMES expr  (54)
-	arith_ops : expr . DIVIDE expr  (55)
-	arith_ops : expr . EQUAL expr  (56)
-	arith_ops : expr . NOTEQUAL expr  (57)
-	arith_ops : expr . SMALLER expr  (58)
-	arith_ops : expr . SMALLEREQUAL expr  (59)
-	arith_ops : expr . GREATER expr  (60)
-	arith_ops : expr . GREATEREQUAL expr  (61)
-	arith_ops : expr . AND expr  (62)
-	arith_ops : expr . MOD expr  (63)
-	arith_ops : expr . OR expr  (64)
-	arith_ops : expr . SIMILARITY expr  (67)
-	arith_ops : expr . AT AT expr  (68)
-	arith_ops : expr . AT expr  (69)
-	graph_ops : expr . LINK expr  (70)
-	graph_ops : expr . LINK list_graph_literal  (71)
-	graph_ops : expr . LINK expr AMPERSAND expr  (72)
-	graph_ops : expr . RIGHTLINK expr  (73)
-	graph_ops : expr . RIGHTLINK list_graph_literal  (74)
-	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (75)
-	graph_ops : expr . LEFTLINK expr  (76)
-	graph_ops : expr . LEFTLINK list_graph_literal  (77)
-	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (78)
+	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (8)
 
-	PLUS  shift 52
-	MINUS  shift 53
-	TIMES  shift 54
-	DIVIDE  shift 55
-	MOD  shift 56
-	GREATER  shift 58
-	GREATEREQUAL  shift 59
-	SMALLER  shift 60
-	SMALLEREQUAL  shift 61
-	EQUAL  shift 62
-	NOTEQUAL  shift 63
-	AND  shift 64
-	OR  shift 65
-	LINK  shift 66
-	RIGHTLINK  shift 67
-	LEFTLINK  shift 68
-	SIMILARITY  shift 69
-	AT  shift 70
-	SEQUENCE  reduce 46
-	RIGHTBRACKET  reduce 46
+	LEFTCURLYBRACKET  shift 172
+	.  error
 
 
 state 169
-	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET .  (29)
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET . LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET  (7)
 
-	.  reduce 29
+	LEFTCURLYBRACKET  shift 173
+	.  error
 
 
 state 170
+	list_graph : list_graph SEQUENCE expr AMPERSAND expr .  (47)
+	arith_ops : expr . PLUS expr  (53)
+	arith_ops : expr . MINUS expr  (54)
+	arith_ops : expr . TIMES expr  (55)
+	arith_ops : expr . DIVIDE expr  (56)
+	arith_ops : expr . EQUAL expr  (57)
+	arith_ops : expr . NOTEQUAL expr  (58)
+	arith_ops : expr . SMALLER expr  (59)
+	arith_ops : expr . SMALLEREQUAL expr  (60)
+	arith_ops : expr . GREATER expr  (61)
+	arith_ops : expr . GREATEREQUAL expr  (62)
+	arith_ops : expr . AND expr  (63)
+	arith_ops : expr . MOD expr  (64)
+	arith_ops : expr . OR expr  (65)
+	arith_ops : expr . SIMILARITY expr  (68)
+	arith_ops : expr . AT AT expr  (69)
+	arith_ops : expr . AT expr  (70)
+	graph_ops : expr . LINK expr  (71)
+	graph_ops : expr . LINK list_graph_literal  (72)
+	graph_ops : expr . LINK expr AMPERSAND expr  (73)
+	graph_ops : expr . RIGHTLINK expr  (74)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (75)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (76)
+	graph_ops : expr . LEFTLINK expr  (77)
+	graph_ops : expr . LEFTLINK list_graph_literal  (78)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (79)
+
+	PLUS  shift 53
+	MINUS  shift 54
+	TIMES  shift 55
+	DIVIDE  shift 56
+	MOD  shift 57
+	GREATER  shift 59
+	GREATEREQUAL  shift 60
+	SMALLER  shift 61
+	SMALLEREQUAL  shift 62
+	EQUAL  shift 63
+	NOTEQUAL  shift 64
+	AND  shift 65
+	OR  shift 66
+	LINK  shift 67
+	RIGHTLINK  shift 68
+	LEFTLINK  shift 69
+	SIMILARITY  shift 70
+	AT  shift 71
+	SEQUENCE  reduce 47
+	RIGHTBRACKET  reduce 47
+
+
+state 171
+	func_decl : var_type ID LEFTROUNDBRACKET formal_list RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET .  (30)
+
+	.  reduce 30
+
+
+state 172
 	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (8)
 	stmt_list : .  (2)
 
 	.  reduce 2
 
-	stmt_list  goto 172
+	stmt_list  goto 174
 
 
-state 171
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (7)
+state 173
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET . stmt_list RIGHTCURLYBRACKET  (7)
 	stmt_list : .  (2)
 
 	.  reduce 2
 
-	stmt_list  goto 173
+	stmt_list  goto 175
 
 
-state 172
+state 174
 	stmt_list : stmt_list . stmt  (3)
 	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (8)
 
@@ -3951,7 +3965,7 @@ state 172
 	DICT  shift 18
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
-	RIGHTCURLYBRACKET  shift 174
+	RIGHTCURLYBRACKET  shift 176
 	LEFTROUNDBRACKET  shift 21
 	ID  shift 23
 	INT_LITERAL  shift 24
@@ -3963,15 +3977,16 @@ state 172
 	stmt  goto 28
 	expr  goto 29
 	func_decl  goto 30
-	var_type  goto 31
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	var_decl  goto 31
+	var_type  goto 32
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 173
+state 175
 	stmt_list : stmt_list . stmt  (3)
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (7)
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list . RIGHTCURLYBRACKET  (7)
 
 	MINUS  shift 5
 	NOT  shift 6
@@ -3989,7 +4004,7 @@ state 173
 	DICT  shift 18
 	LEFTBRACKET  shift 19
 	LEFTCURLYBRACKET  shift 20
-	RIGHTCURLYBRACKET  shift 175
+	RIGHTCURLYBRACKET  shift 177
 	LEFTROUNDBRACKET  shift 21
 	ID  shift 23
 	INT_LITERAL  shift 24
@@ -4001,23 +4016,24 @@ state 173
 	stmt  goto 28
 	expr  goto 29
 	func_decl  goto 30
-	var_type  goto 31
-	literals  goto 32
-	arith_ops  goto 33
-	graph_ops  goto 34
+	var_decl  goto 31
+	var_type  goto 32
+	literals  goto 33
+	arith_ops  goto 34
+	graph_ops  goto 35
 
 
-state 174
+state 176
 	stmt : IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET .  (8)
 
 	.  reduce 8
 
 
-state 175
-	stmt : FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET .  (7)
+state 177
+	stmt : FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET .  (7)
 
 	.  reduce 7
 
 
-58 terminals, 19 nonterminals
-84 grammar rules, 176 states
+58 terminals, 20 nonterminals
+85 grammar rules, 178 states

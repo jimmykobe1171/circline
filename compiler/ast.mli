@@ -73,15 +73,18 @@ and edge_graph_list = {
   edges: expr list;
 }
 
+type var_decl = 
+| Local of var_type * string * expr
+
 (* Statements *)
 type stmt =
   Expr of expr     (* set foo = bar + 3 *)
 | Func of func_decl
 | Return of expr
-| For of expr * expr * expr * stmt list
+| For of var_decl * expr * expr * stmt list
 | If of expr * stmt list * stmt list
 | While of expr * stmt list
-| Local of var_type * string * expr
+| Var_dec of var_decl
 
 (* Function Declaration *)
 and func_decl = {

@@ -50,6 +50,7 @@ let txt_of_var_type = function
 let txt_of_formal = function
 | Formal(vtype, name) -> sprintf "Formal(%s, %s)" (txt_of_var_type vtype) name
 
+
 let txt_of_formal_list formals =
   let rec aux acc = function
     | [] -> sprintf "%s" (String.concat ", " (List.rev acc))
@@ -79,6 +80,11 @@ let rec txt_of_expr = function
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
   | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args)
 
+(*Variable Declaration*)
+and txt_of_var_decl = function
+  | Local(var, name, e1) -> sprintf "Local(%s, %s, %s)"
+    (txt_of_var_type var) name (txt_of_expr e1)
+
 (* Lists *)
 and txt_of_list = function
   | [] -> ""
@@ -105,13 +111,12 @@ and txt_of_stmt = function
   | Func(f) -> sprintf "Func(%s)" (txt_of_func_decl f)
   | Return(expr) -> sprintf "Return(%s);" (txt_of_expr expr)
   | For(e1,e2,e3,s) -> sprintf "For(%s;%s;%s){%s}"
-    (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
-  | Local(var, name, e1) -> sprintf "Local(%s, %s, %s)"
-    (txt_of_var_type var) name (txt_of_expr e1)
+    (txt_of_var_decl e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
   | If(e1,s1,s2) -> sprintf "If(%s){%s} Else{%s}"
     (txt_of_expr e1) (txt_of_stmts s1) (txt_of_stmts s2)
   | While(e1, s) -> sprintf "While(%s){%s}"
     (txt_of_expr e1) (txt_of_stmts s)
+  | Var_dec(var) -> sprintf "Var_dec(%s);" (txt_of_var_decl var)
 and txt_of_stmts stmts =
   let rec aux acc = function
       | [] -> sprintf "%s" (String.concat "\n" (List.rev acc))

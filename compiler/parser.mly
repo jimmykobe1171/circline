@@ -68,7 +68,7 @@ stmt:
 | expr SEMICOLUMN                       { Expr($1) }
 | func_decl                             { Func($1) }
 | RETURN expr SEMICOLUMN                { Return($2) }
-| FOR LEFTROUNDBRACKET for_expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
+| FOR LEFTROUNDBRACKET var_decl SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   {For($3, $5, $7, List.rev $10)}
 | IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   {If($3,List.rev $6,List.rev $10)}
@@ -76,9 +76,11 @@ stmt:
   {If($3,List.rev $6,[])}
 | WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   {While($3, List.rev $6)}
-|   var_type ID SEMICOLUMN        { Local($1, $2, Noexpr) }
-|   var_type ID ASSIGN expr SEMICOLUMN  { Local($1, $2, $4) }
+| var_decl SEMICOLUMN                   { Var_dec($1)}
 
+var_decl:
+| var_type ID              { Local($1, $2, Noexpr) }
+| var_type ID ASSIGN expr  { Local($1, $2, $4) }
 
 var_type:
   INT 								  {Int_t}

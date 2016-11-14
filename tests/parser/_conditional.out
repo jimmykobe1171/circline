@@ -1,0 +1,2 @@
+Expr(Assign(aList, List(String_Lit(str1), String_Lit(str2), String_Lit(str3))));
+For(Local(int, i, Num_Lit(0));Binop(Id(i), Leq, Num_Lit(5));Assign(i, Binop(Id(i), Add, Num_Lit(1)))){If(Binop(Id(str), Equal, String_Lit(str2))){Expr(Binop(Num_Lit(3), Add, Num_Lit(2)));} Else{}}

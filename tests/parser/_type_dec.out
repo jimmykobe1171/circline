@@ -1,18 +1,18 @@
-Local(int, a, Noexpression)
-Local(float, a, Noexpression)
-Local(bool, a, Noexpression)
-Local(node, a, Noexpression)
-Local(graph, a, Noexpression)
-Local(list, a, Noexpression)
-Local(dict<int>, a, Noexpression)
-Local(dict<float>, a, Noexpression)
-Local(dict<string>, a, Noexpression)
-Local(dict<node>, a, Noexpression)
-Local(dict<graph>, a, Noexpression)
-Local(int, a, Num_Lit(1))
-Local(float, a, Num_Lit(1.))
-Local(bool, a, Bool_lit(true))
-Local(node, a, Node(Num_Lit(1)))
-Local(graph, a, Graph_Link(Node(Num_Lit(1)), DLink, Node(Num_Lit(2)), WithEdge, Null))
-Local(list, a, List())
-Local(dict<int>, a, Dict())
+Var_dec(Local(int, a, Noexpression));
+Var_dec(Local(float, a, Noexpression));
+Var_dec(Local(bool, a, Noexpression));
+Var_dec(Local(node, a, Noexpression));
+Var_dec(Local(graph, a, Noexpression));
+Var_dec(Local(list, a, Noexpression));
+Var_dec(Local(dict<int>, a, Noexpression));
+Var_dec(Local(dict<float>, a, Noexpression));
+Var_dec(Local(dict<string>, a, Noexpression));
+Var_dec(Local(dict<node>, a, Noexpression));
+Var_dec(Local(dict<graph>, a, Noexpression));
+Var_dec(Local(int, a, Num_Lit(1)));
+Var_dec(Local(float, a, Num_Lit(1.)));
+Var_dec(Local(bool, a, Bool_lit(true)));
+Var_dec(Local(node, a, Node(Num_Lit(1))));
+Var_dec(Local(graph, a, Graph_Link(Node(Num_Lit(1)), DLink, Node(Num_Lit(2)), WithEdge, Null)));
+Var_dec(Local(list, a, List()));
+Var_dec(Local(dict<int>, a, Dict()));
