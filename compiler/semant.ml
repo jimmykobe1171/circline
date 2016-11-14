@@ -127,10 +127,10 @@ let check program =
     let stmt = function
         Expr(e) -> ignore (expr e)
         | Return e -> ignore (expr e)
-        (* | Var_dec(Local(typ, name, e)) when e <> Noexpr -> let lt = typ and rt = expr e in
-            check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-            " = " ^ string_of_typ rt ^ " in " ^ string_of_typ lt ^ " " ^ name ^ " = " ^ string_of_expr e)) *)
-        | Var_dec(Local(typ, name, e)) -> ignore (expr e)
+        | Var_dec(Local(typ, name, e)) when e <> Noexpr -> let lt = typ and rt = expr e in
+            ignore(check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+            " = " ^ string_of_typ rt ^ " in " ^ string_of_typ lt ^ " " ^ name ^ " = " ^ string_of_expr e)))
+        | Var_dec(Local(typ, name, e)) when e = Noexpr -> ()
     in
 
     let rec stmt_list = function
