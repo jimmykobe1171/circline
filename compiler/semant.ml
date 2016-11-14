@@ -37,9 +37,6 @@ let string_of_uop = function
     Sub -> "-"
   | Not -> "!"
 
-let string_of_formal = function
-    Formal(var_type, var_name) -> string_of_typ var_type ^ " " ^ var_name
-
 let rec string_of_expr = function
     Num_Lit(Num_Int(l)) -> string_of_int l
   | Num_Lit(Num_Float(l)) -> string_of_float l
@@ -52,10 +49,8 @@ let rec string_of_expr = function
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Node(e) -> "node(" ^ string_of_expr e ^ ")"
-  (* | Type_Decl(formal, e) -> string_of_formal formal ^ " = " ^ string_of_expr e *)
   | Null -> "null"
   | Noexpr -> ""
-
 
 
 module StringMap = Map.Make(String)
@@ -64,7 +59,7 @@ let check program =
     (* loop through the stmt_list of program to collect global variable declarations *)
     let rec collect_globals list = function
         [] -> list
-        | Local(typ, name, v) :: t -> (name, (typ, v)) :: collect_globals list t
+        | Var_dec(Local(typ, name, v)) :: t -> (name, (typ, v)) :: collect_globals list t
         | _ :: t -> collect_globals list t
     in
     (* collect global variable declarations *)
@@ -124,9 +119,6 @@ let check program =
             | Not when t = Bool_t -> Bool_t
             | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
                     string_of_typ t ^ " in " ^ string_of_expr ex)))
-        (* | Type_Decl(Formal(typ, name), e) as ex -> let lt = typ and rt = expr e in
-            check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-            " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex)) *)
         | Assign(var, e) as ex -> let lt = type_of_identifier var and rt = expr e in
             check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
             " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
@@ -135,7 +127,10 @@ let check program =
     let stmt = function
         Expr(e) -> ignore (expr e)
         | Return e -> ignore (expr e)
-        | Local(a,b,c) -> ()
+        (* | Var_dec(Local(typ, name, e)) when e <> Noexpr -> let lt = typ and rt = expr e in
+            check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+            " = " ^ string_of_typ rt ^ " in " ^ string_of_typ lt ^ " " ^ name ^ " = " ^ string_of_expr e)) *)
+        | Var_dec(Local(typ, name, e)) -> ignore (expr e)
     in
 
     let rec stmt_list = function
@@ -143,19 +138,10 @@ let check program =
         | s::ss -> stmt s ; stmt_list ss
         | [] -> ()
     in
-    let rec report_illgal_dec = function
-          h :: t when (snd (snd h)) = Noexpr -> report_illgal_dec t
-        | h :: t when (snd (snd h)) <> Noexpr -> 
-            let lt = fst (snd h) and rt = expr (snd (snd h)) in
-            ignore (check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-            " = " ^ string_of_typ rt)))
-        | _ :: t -> report_illgal_dec t
-        | [] -> ()
-    in
+
     (**** Checking duplicated global variables ****)
     report_duplicate (fun n -> "duplicate global " ^ n) (List.map fst globals);
-    (**** Checking globals with illegal declaration ****)
-    report_illgal_dec globals;
+
     (**** Checking statements ****)
     stmt_list program;
 
