@@ -64,18 +64,18 @@ let check program =
     (* loop through the stmt_list of program to collect global variable declarations *)
     let rec collect_globals list = function
         [] -> list
-        | Local(typ, name, e) :: t -> (typ, name) :: collect_globals list t
+        | Local(typ, name, v) :: t -> (name, (typ, v)) :: collect_globals list t
         | _ :: t -> collect_globals list t
     in
     (* collect global variable declarations *)
     let globals = collect_globals [] program in
 
     (* Type of global variable *)
-    let globals_symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+    let globals_symbols = List.fold_left (fun m (name, (typ, v)) -> StringMap.add name (typ, v) m)
         StringMap.empty globals
     in
     let type_of_identifier s =
-      try StringMap.find s globals_symbols
+      try fst (StringMap.find s globals_symbols)
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
     (* Raise an exception of the given rvalue type cannot be assigned to
@@ -143,7 +143,7 @@ let check program =
         | [] -> ()
     in
     (**** Checking duplicated Global Variables ****)
-    report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
+    report_duplicate (fun n -> "duplicate global " ^ n) (List.map fst globals);
     (**** Checking statements ****)
     stmt_list program;
 
