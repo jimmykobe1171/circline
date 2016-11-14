@@ -73,7 +73,6 @@ let rec txt_of_expr = function
   | Graph_Link(e1, op1, e2, e3) -> sprintf "Graph_Link(%s, %s, %s, WithEdge, %s)"
       (txt_of_expr e1) (txt_of_graph_op op1) (txt_of_expr e2) (txt_of_expr e3)
   | Id(x) -> sprintf "Id(%s)" x
-  | Type_Decl(f, e) -> sprintf "Type_Decl(%s, %s)" (txt_of_formal f) (txt_of_expr e)
   | Assign(e1, e2) -> sprintf "Assign(%s, %s)" e1 (txt_of_expr e2)
   | Noexpr -> sprintf "Noexpression"
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
@@ -107,6 +106,8 @@ and txt_of_stmt = function
   | Return(expr) -> sprintf "Return(%s);" (txt_of_expr expr)
   | For(e1,e2,e3,s) -> sprintf "For(%s;%s;%s){%s}"
     (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
+  | Local(var, name, e1)
+    (txt_of_var_type var) name (txt_of_expr e1)
   | If(e1,s1,s2) -> sprintf "If(%s){%s} Else{%s}"
     (txt_of_expr e1) (txt_of_stmts s1) (txt_of_stmts s2)
   | While(e1, s) -> sprintf "While(%s){%s}"

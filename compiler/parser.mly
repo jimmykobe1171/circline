@@ -74,6 +74,8 @@ stmt:
   {If($3,List.rev $6,List.rev $10)}
 | WHILE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   {While($3, List.rev $6)}
+|   var_type ID SEMICOLUMN        { Local($1, $2, Noexpr) }
+|   var_type ID ASSIGN expr SEMICOLUMN  { Local($1, $2, $4) }
 
 
 var_type:
@@ -121,8 +123,6 @@ expr:
 | graph_ops                       { $1 }
 | NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { Node($3) }
 | ID 					                    { Id($1) }
-| formal                          { Type_Decl($1, Noexpr) }
-| formal ASSIGN expr 					        { Type_Decl($1, $3) }
 | ID ASSIGN expr 					        { Assign($1, $3) }
 | LEFTBRACKET list RIGHTBRACKET   			{ ListP(List.rev $2) }
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }

@@ -82,6 +82,7 @@ type stmt =
 | For of expr * expr * expr * stmt list
 | If of expr * stmt list * stmt list
 | While of expr * stmt list
+| Local of var_type * string * expr
 
 (* Function Declaration *)
 and func_decl = {
