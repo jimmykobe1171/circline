@@ -62,7 +62,6 @@ type expr =
 | 	Binop of expr * binop * expr
 |  	Unop of unop * expr
 |   Id of string
-|   Type_Decl of formal * expr
 |   Assign of string * expr
 |   Noexpr
 |   ListP of expr list

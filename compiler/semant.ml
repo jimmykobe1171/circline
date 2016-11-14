@@ -52,7 +52,7 @@ let rec string_of_expr = function
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Node(e) -> "node(" ^ string_of_expr e ^ ")"
-  | Type_Decl(formal, e) -> string_of_formal formal ^ " = " ^ string_of_expr e
+  (* | Type_Decl(formal, e) -> string_of_formal formal ^ " = " ^ string_of_expr e *)
   | Null -> "null"
   | Noexpr -> ""
 
@@ -64,7 +64,7 @@ let check program =
     (* loop through the stmt_list of program to collect global variable declarations *)
     let rec collect_globals list = function
         [] -> list
-        | Expr(Type_Decl((Formal(typ, name)), e)) :: t -> (typ, name) :: collect_globals list t
+        | Local(typ, name, e) :: t -> (typ, name) :: collect_globals list t
         | _ :: t -> collect_globals list t
     in
     (* collect global variable declarations *)
@@ -124,9 +124,9 @@ let check program =
             | Not when t = Bool_t -> Bool_t
             | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
                     string_of_typ t ^ " in " ^ string_of_expr ex)))
-        | Type_Decl(Formal(typ, name), e) as ex -> let lt = typ and rt = expr e in
+        (* | Type_Decl(Formal(typ, name), e) as ex -> let lt = typ and rt = expr e in
             check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-            " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
+            " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex)) *)
         | Assign(var, e) as ex -> let lt = type_of_identifier var and rt = expr e in
             check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
             " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))

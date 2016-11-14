@@ -106,7 +106,7 @@ and txt_of_stmt = function
   | Return(expr) -> sprintf "Return(%s);" (txt_of_expr expr)
   | For(e1,e2,e3,s) -> sprintf "For(%s;%s;%s){%s}"
     (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
-  | Local(var, name, e1)
+  | Local(var, name, e1) -> sprintf "Local(%s, %s, %s)"
     (txt_of_var_type var) name (txt_of_expr e1)
   | If(e1,s1,s2) -> sprintf "If(%s){%s} Else{%s}"
     (txt_of_expr e1) (txt_of_stmts s1) (txt_of_stmts s2)

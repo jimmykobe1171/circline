@@ -1,18 +1,18 @@
-Expr(Type_Decl(Formal(int, a), Noexpression));
-Expr(Type_Decl(Formal(float, a), Noexpression));
-Expr(Type_Decl(Formal(bool, a), Noexpression));
-Expr(Type_Decl(Formal(node, a), Noexpression));
-Expr(Type_Decl(Formal(graph, a), Noexpression));
-Expr(Type_Decl(Formal(list, a), Noexpression));
-Expr(Type_Decl(Formal(dict<int>, a), Noexpression));
-Expr(Type_Decl(Formal(dict<float>, a), Noexpression));
-Expr(Type_Decl(Formal(dict<string>, a), Noexpression));
-Expr(Type_Decl(Formal(dict<node>, a), Noexpression));
-Expr(Type_Decl(Formal(dict<graph>, a), Noexpression));
-Expr(Type_Decl(Formal(int, a), Num_Lit(1)));
-Expr(Type_Decl(Formal(float, a), Num_Lit(1.)));
-Expr(Type_Decl(Formal(bool, a), Bool_lit(true)));
-Expr(Type_Decl(Formal(node, a), Node(Num_Lit(1))));
-Expr(Type_Decl(Formal(graph, a), Graph_Link(Node(Num_Lit(1)), DLink, Node(Num_Lit(2)), WithEdge, Null)));
-Expr(Type_Decl(Formal(list, a), List()));
-Expr(Type_Decl(Formal(dict<int>, a), Dict()));
+Local(int, a, Noexpression)
+Local(float, a, Noexpression)
+Local(bool, a, Noexpression)
+Local(node, a, Noexpression)
+Local(graph, a, Noexpression)
+Local(list, a, Noexpression)
+Local(dict<int>, a, Noexpression)
+Local(dict<float>, a, Noexpression)
+Local(dict<string>, a, Noexpression)
+Local(dict<node>, a, Noexpression)
+Local(dict<graph>, a, Noexpression)
+Local(int, a, Num_Lit(1))
+Local(float, a, Num_Lit(1.))
+Local(bool, a, Bool_lit(true))
+Local(node, a, Node(Num_Lit(1)))
+Local(graph, a, Graph_Link(Node(Num_Lit(1)), DLink, Node(Num_Lit(2)), WithEdge, Null))
+Local(list, a, List())
+Local(dict<int>, a, Dict())
