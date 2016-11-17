@@ -25,3 +25,7 @@ echo "yes" | opam init opam install llvm.3.4 ocamlfind
 
 echo OCaml version
 ocaml -version
+
+cd compiler/
+make
+cd ..
