@@ -21,4 +21,8 @@ compiler/parser.mli
 
 compiler/scanner.ml
 
+compiler/_build
+
 tests/scanner/tokenize
+
+compiler/circline.native
