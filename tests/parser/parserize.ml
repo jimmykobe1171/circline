@@ -34,6 +34,8 @@ let txt_of_graph_op = function
   | Double_Link -> "DLink"
 
 let txt_of_var_type = function
+  | Void_t -> "void"
+  | Null_t -> "null"
   | Int_t -> "int"
   | Float_t -> "float"
   | String_t -> "string"

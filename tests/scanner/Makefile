@@ -2,8 +2,8 @@
 #  - builds the tokenize executable for printing scanned tokens from stdin
 
 OCAMLC = ocamlc
-OBJS = ../../compiler/scanner.cmo tokenize.cmo
-INCLUDES = -I ../../compiler
+OBJS = ../../compiler/_build/scanner.cmo tokenize.cmo
+INCLUDES = -I ../../compiler/_build
 
 default: tokenize
 

@@ -2,8 +2,8 @@
 #  - builds the semantic_check executable for semantic checking strings from stdin
 
 OCAMLC = ocamlc
-OBJS = ../../compiler/parser.cmo ../../compiler/scanner.cmo ../../compiler/semant.cmo semantic_check.cmo
-INCLUDES = -I ../../compiler
+OBJS = ../../compiler/_build/parser.cmo ../../compiler/_build/scanner.cmo ../../compiler/_build/semant.cmo semantic_check.cmo
+INCLUDES = -I ../../compiler/_build
 
 default: semantic_check
 
