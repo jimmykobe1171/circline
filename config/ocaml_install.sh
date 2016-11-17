@@ -21,7 +21,7 @@ echo "yes" | opam init
 
 eval `opam config env`
 
-opam install llvm.3.4 ocamlfind
+echo "yes" | opam initopam install llvm.3.4 ocamlfind
 
 echo OCaml version
 ocaml -version
