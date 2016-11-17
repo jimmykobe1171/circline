@@ -1,0 +1,80 @@
+### Starting build.
+# Target: circline.ml.depends, tags: { package(llvm), package(llvm.analysis), extension:ml, file:circline.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package llvm.analysis -package llvm -modules circline.ml > circline.ml.depends
+# Target: codegen.ml.depends, tags: { package(llvm), package(llvm.analysis), extension:ml, file:codegen.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package llvm.analysis -package llvm -modules codegen.ml > codegen.ml.depends # cached
+# Target: ast.ml.depends, tags: { package(llvm), package(llvm.analysis), extension:ml, file:ast.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package llvm.analysis -package llvm -modules ast.ml > ast.ml.depends # cached
+# Target: ast.cmo, tags: { package(llvm), package(llvm.analysis), byte, compile, extension:cmo, extension:ml, file:ast.cmo, file:ast.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w +a-4 -package llvm.analysis -package llvm -o ast.cmo ast.ml # cached
+# Target: codegen.cmo, tags: { package(llvm), package(llvm.analysis), byte, compile, extension:cmo, extension:ml, file:codegen.cmo, file:codegen.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w +a-4 -package llvm.analysis -package llvm -o codegen.cmo codegen.ml # cached
+# Target: parser.mly, tags: { package(llvm), package(llvm.analysis), extension:mly, file:parser.mly, infer, ocaml, ocamlyacc, parser, quiet }
+ocamlyacc parser.mly # cached
+# Target: parser.mli.depends, tags: { package(llvm), package(llvm.analysis), extension:mli, file:parser.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package llvm.analysis -package llvm -modules parser.mli > parser.mli.depends # cached
+# Target: parser.cmi, tags: { package(llvm), package(llvm.analysis), byte, compile, extension:mli, file:parser.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -w +a-4 -package llvm.analysis -package llvm -o parser.cmi parser.mli # cached
+# Target: scanner.mll, tags: { package(llvm), package(llvm.analysis), extension:mll, file:scanner.mll, lexer, ocaml, ocamllex, quiet }
+ocamllex.opt -q scanner.mll # cached
+# Target: scanner.ml.depends, tags: { package(llvm), package(llvm.analysis), extension:ml, file:scanner.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package llvm.analysis -package llvm -modules scanner.ml > scanner.ml.depends # cached
+# Target: scanner.cmo, tags: { package(llvm), package(llvm.analysis), byte, compile, extension:cmo, extension:ml, file:scanner.cmo, file:scanner.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w +a-4 -package llvm.analysis -package llvm -o scanner.cmo scanner.ml # cached
+# Target: circline.cmo, tags: { package(llvm), package(llvm.analysis), byte, compile, extension:cmo, extension:ml, file:circline.cmo, file:circline.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w +a-4 -package llvm.analysis -package llvm -o circline.cmo circline.ml
++ ocamlfind ocamlc -c -w +a-4 -package llvm.analysis -package llvm -o circline.cmo circline.ml
+File "circline.ml", line 15, characters 2-289:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Ast
+# Target: ast.cmx, tags: { package(llvm), package(llvm.analysis), compile, extension:cmx, extension:ml, file:ast.cmx, file:ast.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o ast.cmx ast.ml
+# Target: parser.ml.depends, tags: { package(llvm), package(llvm.analysis), extension:ml, file:parser.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package llvm.analysis -package llvm -modules parser.ml > parser.ml.depends
+# Target: parser.cmx, tags: { package(llvm), package(llvm.analysis), compile, extension:cmx, extension:ml, file:parser.cmx, file:parser.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o parser.cmx parser.ml
++ ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o parser.cmx parser.ml
+File "parser.mly", line 163, characters 42-45:
+Warning 42: this use of Sub required disambiguation.
+# Target: codegen.cmx, tags: { package(llvm), package(llvm.analysis), compile, extension:cmx, extension:ml, file:codegen.cmx, file:codegen.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o codegen.cmx codegen.ml
++ ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o codegen.cmx codegen.ml
+File "codegen.ml", line 23, characters 14-20:
+Warning 27: unused variable expr.
+File "codegen.ml", line 24, characters 14-17:
+Warning 27: unused variable f.
+File "codegen.ml", line 25, characters 16-22:
+Warning 27: unused variable expr.
+File "codegen.ml", line 26, characters 14-16:
+Warning 27: unused variable e1.
+File "codegen.ml", line 26, characters 17-19:
+Warning 27: unused variable e2.
+File "codegen.ml", line 26, characters 20-22:
+Warning 27: unused variable e3.
+File "codegen.ml", line 26, characters 23-24:
+Warning 27: unused variable s.
+File "codegen.ml", line 27, characters 13-15:
+Warning 27: unused variable e1.
+File "codegen.ml", line 27, characters 16-18:
+Warning 27: unused variable s1.
+File "codegen.ml", line 27, characters 19-21:
+Warning 27: unused variable s2.
+File "codegen.ml", line 28, characters 16-18:
+Warning 27: unused variable e1.
+File "codegen.ml", line 28, characters 20-21:
+Warning 27: unused variable s.
+File "codegen.ml", line 29, characters 17-22:
+Warning 27: unused variable var.
+# Target: scanner.cmx, tags: { package(llvm), package(llvm.analysis), compile, extension:cmx, extension:ml, file:scanner.cmx, file:scanner.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o scanner.cmx scanner.ml
+# Target: circline.cmx, tags: { package(llvm), package(llvm.analysis), compile, extension:cmx, extension:ml, file:circline.cmx, file:circline.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o circline.cmx circline.ml
++ ocamlfind ocamlopt -c -w +a-4 -package llvm.analysis -package llvm -o circline.cmx circline.ml
+File "circline.ml", line 15, characters 2-289:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Ast
+# Target: circline.native, tags: { package(llvm), package(llvm.analysis), dont_link_with, extension:native, file:circline.native, link, native, ocaml, program, quiet }
+ocamlfind ocamlopt -linkpkg -package llvm.analysis -package llvm ast.cmx codegen.cmx parser.cmx scanner.cmx circline.cmx -o circline.native
+# Compilation successful.
