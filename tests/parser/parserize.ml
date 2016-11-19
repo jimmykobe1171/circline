@@ -113,7 +113,7 @@ and txt_of_stmt = function
   | Func(f) -> sprintf "Func(%s)" (txt_of_func_decl f)
   | Return(expr) -> sprintf "Return(%s);" (txt_of_expr expr)
   | For(e1,e2,e3,s) -> sprintf "For(%s;%s;%s){%s}"
-    (txt_of_var_decl e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
+    (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
   | If(e1,s1,s2) -> sprintf "If(%s){%s} Else{%s}"
     (txt_of_expr e1) (txt_of_stmts s1) (txt_of_stmts s2)
   | While(e1, s) -> sprintf "While(%s){%s}"
