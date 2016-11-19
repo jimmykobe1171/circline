@@ -81,6 +81,7 @@ let rec txt_of_expr = function
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
   | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args)
+  | CallDefault(e, f, args) -> sprintf "CallDefault(%s, %s, [%s])" (txt_of_expr e) f (txt_of_list args)
 
 (*Variable Declaration*)
 and txt_of_var_decl = function

@@ -132,6 +132,7 @@ expr:
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }
 | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET 	{ $2 }
 | ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call($1, $3) }
+| expr DOT ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET   {CallDefault($1, $3, $5)}
 
 /* Lists */
 list:

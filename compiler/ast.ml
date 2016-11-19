@@ -69,6 +69,7 @@ type expr =
 |   ListP of expr list
 |   DictP of (expr * expr) list
 |   Call of string * expr list    (* function call *)
+|   CallDefault of expr * string * expr list
 
 and edge_graph_list = {
   graphs: expr list;
