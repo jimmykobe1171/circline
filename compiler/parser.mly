@@ -89,12 +89,16 @@ var_type:
 | BOOL {Bool_t}
 | NODE {Node_t}
 | GRAPH {Graph_t}
-| LIST {List_t}
 | DICT SMALLER INT GREATER {Dict_Int_t}
 | DICT SMALLER FLOAT GREATER {Dict_Float_t}
 | DICT SMALLER STRING GREATER {Dict_String_t}
 | DICT SMALLER NODE GREATER {Dict_Node_t}
 | DICT SMALLER GRAPH GREATER {Dict_Graph_t}
+| LIST SMALLER INT GREATER {List_Int_t}
+| LIST SMALLER FLOAT GREATER {List_Float_t}
+| LIST SMALLER STRING GREATER {List_String_t}
+| LIST SMALLER NODE GREATER {List_Node_t}
+| LIST SMALLER GRAPH GREATER {List_Graph_t}
 
 formal_list:
 | /* nothing */               { [] }

@@ -36,12 +36,16 @@ type var_type =
 | Bool_t
 | Node_t
 | Graph_t
-| List_t
 | Dict_Int_t
 | Dict_Float_t
 | Dict_String_t
 | Dict_Node_t
 | Dict_Graph_t
+| List_Int_t
+| List_Float_t
+| List_String_t
+| List_Node_t
+| List_Graph_t
 | Void_t
 | Null_t
 
