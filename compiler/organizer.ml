@@ -43,29 +43,19 @@ let convert_var_type = function
   | A.Void_t -> C.Void_t
   | A.Null_t -> C.Null_t
 
-let tnp = function
-    C.Add -> C.Add
-  | _ -> C.Sub
-;;
-tnp(convert_num (A.Num_Float(1.5213)));;
+
+
+
+
+let rec convert list = function
+   [] -> list
+  | s::ss -> [stmt s :: convert list ss]
+
+convert [] stmt_list;;
 
 (*
 (* Variable Type *)
-let Convert_var_type = function
-    A.Int_t -> C.Int_t                
-  | A.Float_t -> C.Float_t                
-  | A.String_t -> C.String_t
-  | A.Bool_t -> C.Bool_t
-  | A.Node_t -> C.Node_t
-  | A.Graph_t -> C.Graph_t
-  | A.List_t -> C.List_t
-  | A.Dict_Int_t -> C.Dict_Int_t
-  | A.Dict_Float_t -> C.Dict_Float_t
-  | A.Dict_String_t -> C.Dict_String_t
-  | A.Dict_Node_t -> C.Dict_Node_t
-  | A.Dict_Graph_t -> C.Dict_Graph_t
-  | A.Void_t -> C.Void_t
-  | A.Null_t -> C.Null_t
+
 
 let Convert_formal = function
   | A.Formal() -> C.Formal 
