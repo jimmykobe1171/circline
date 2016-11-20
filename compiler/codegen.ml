@@ -89,10 +89,10 @@ let translate raw_stmts =
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m (A.Func(fdecl)) =
-      (* (match fdecl.A.name with
-        | "a" -> raise (Failure (L.string_of_lltype (ltype_of_typ fdecl.A.returnType)))
+      (match fdecl.A.name with
+        | "a" -> ignore(print_endline( (L.string_of_lltype (ltype_of_typ fdecl.A.returnType)) ))
         | _ -> ()
-      ); *)
+      );
       let name = fdecl.A.name
       and formal_types =
 	       Array.of_list (List.map (fun (A.Formal(t, _)) -> ltype_of_typ t) fdecl.A.args)
