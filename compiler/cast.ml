@@ -95,8 +95,8 @@ type stmt =
 (* Function Declaration *)
 and func_decl = {
   returnType: var_type;
-  fname: string;
-  formals: formal list;
+  name: string;
+  args: formal list;
   body: stmt list;
   locals: formal list;
   pname: string; (* parent func name *)
