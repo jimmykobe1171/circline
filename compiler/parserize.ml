@@ -4,7 +4,7 @@ open Printf
 (* Unary operators *)
 let txt_of_unop = function
   | Not -> "Not"
-  | Sub -> "Sub"
+  | Neg -> "Sub"
 
 (* Binary operators *)
 let txt_of_binop = function

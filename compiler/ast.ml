@@ -20,7 +20,7 @@ type binop =
 
 (* Unary Operators *)
 type unop =
-  Sub         (* - *)
+  Neg         (* - *)
 | Not         (* not *)
 
 (* Numbers int | float *)
