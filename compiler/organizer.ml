@@ -1,7 +1,7 @@
 module A = Ast
 module C = Cast
 
-let binop_convert = function
+let convert_binop = function
     A.Add -> C.Add
   | A.Sub -> C.Sub
   | A.Mult -> C.Mult
@@ -18,6 +18,10 @@ let binop_convert = function
   | A.ListNodesAt -> C.ListNodesAt 
   | A.ListEdgesAt -> C.ListEdgesAt
   | A.RootAs -> C.RootAs
+
+let convert_unop = function
+  A.Neg -> C.Neg 
+| A.Not -> C.Not
 
 let convert_num = function
     A.Num_Int(a) -> C.Num_Int(a)
@@ -43,15 +47,46 @@ let convert_var_type = function
   | A.Void_t -> C.Void_t
   | A.Null_t -> C.Null_t
 
+let convert_graph_op = function
+| A.Right_Link -> C.Right_Link
+| A.Left_Link -> C.Right_Link
+| A.Double_Link -> C.Double_Link
+
+let rec convert_expr = function
+    A.Num_Lit(a) -> C.Num_Lit(convert_num a)
+|   A.Null -> C.Null
+|   A.String_Lit(a) -> C.String_Lit(a)
+|   A.Bool_lit(a) -> C.Bool_lit(a)
+|   A.Node(a) -> C.Node(convert_expr a)
+|   A.Graph_Link(a,b,c,d) -> C.Graph_Link(convert_expr a, convert_graph_op b, convert_expr c, convert_expr d)
+|   A.Binop(a,b,c) -> C.Binop(convert_expr a, convert_binop b, convert_expr c)
+|   A.Unop(a,b) -> C.Unop(convert_unop a, convert_expr b)
+|   A.Id(a) -> C.Id(a)
+|   A.Assign(a,b) -> C.Assign(a, convert_expr b)
+|   A.Noexpr -> C.Noexpr
+|   A.ListP(a) -> C.ListP(expr_looper [] a)
+|   A.DictP(a) -> C.DictP(dict_looper [] a)
+|   A.Call(a,b) -> C.Call(a, expr_looper [] b) 
+|   A.CallDefault(a,b,c) -> C.CallDefault(convert_expr a, b, expr_looper [] c)
+
+and expr_looper a = function
+    [] -> []
+  | s::ss -> (convert_expr s):: a
+
+and dict_looper a = function
+    [] -> []
+  | (c,d)::ss -> (convert_expr c, convert_expr d)::a
+
+let convert_stmt = function
+  A.Expr(a) -> C.Expr(convert_expr a)
+
+
+let rec convert curr_list = function
+   [] -> curr_list
+  | s::ss -> (convert_stmt s) :: (convert curr_list ss)
 
 
 
-
-let rec convert list = function
-   [] -> list
-  | s::ss -> [stmt s :: convert list ss]
-
-convert [] stmt_list;;
 
 (*
 (* Variable Type *)
