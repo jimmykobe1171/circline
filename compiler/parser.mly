@@ -17,7 +17,7 @@
 %token LINK RIGHTLINK LEFTLINK SIMILARITY AT AMPERSAND
 
 /* Primary Type */
-%token INT FLOAT STRING BOOL NODE GRAPH LIST DICT NULL
+%token INT FLOAT STRING BOOL NODE GRAPH LIST DICT NULL VOID
 
 /* Quote */
 %token QUOTE
@@ -68,7 +68,7 @@ stmt:
 | expr SEMICOLUMN                       { Expr($1) }
 | func_decl                             { Func($1) }
 | RETURN expr SEMICOLUMN                { Return($2) }
-| FOR LEFTROUNDBRACKET expr SEMICOLUMN for_expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
+| FOR LEFTROUNDBRACKET for_expr SEMICOLUMN expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   {For($3, $5, $7, List.rev $10)}
 | IF LEFTROUNDBRACKET expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET ELSE LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   {If($3,List.rev $6,List.rev $10)}
@@ -83,7 +83,9 @@ var_decl:
 | var_type ID ASSIGN expr  { Local($1, $2, $4) }
 
 var_type:
-  INT 								  {Int_t}
+| VOID                  {Void_t}
+| NULL                  {Null_t}
+| INT 								  {Int_t}
 | FLOAT 								{Float_t}
 | STRING 								{String_t}
 | BOOL {Bool_t}
@@ -131,7 +133,7 @@ expr:
 | LEFTBRACKET list RIGHTBRACKET   			{ ListP(List.rev $2) }
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }
 | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET 	{ $2 }
-| ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call($1, $3) }
+| ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call($1, List.rev $3) }
 
 /* Lists */
 list:
