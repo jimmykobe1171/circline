@@ -1,8 +1,7 @@
 module A = Ast
 module C = Cast
-(* module P = Parserize *)
 
-let Binop_Convert = function
+let binop_convert = function
     A.Add -> C.Add
   | A.Sub -> C.Sub
   | A.Mult -> C.Mult
@@ -20,15 +19,14 @@ let Binop_Convert = function
   | A.ListEdgesAt -> C.ListEdgesAt
   | A.RootAs -> C.RootAs
 
-let Unop_Convert = function
-    A.Neg -> C.Neg
-  | A.Not -> C.Not
+let tnp = function
+    C.Add -> print_string "Fk"
+  | _ -> print_string "Oh no"
 
-let Num_Convert = function
-    A.Num_Int(a) -> C.Num_Int(a)
-  | A.Num_Float(a) -> C.Num_Float(a)
+tnp (binop_convert A.Add) ;;
 
-Binop_Convert A.Add
+
+
 (*
 (* Variable Type *)
 let Convert_var_type = function
