@@ -1,9 +1,9 @@
 module A = Ast
 module C = Cast
-module P = Parserize
+(* module P = Parserize *)
 
 let Binop_Convert = function
-  | A.Add -> C.Add
+    A.Add -> C.Add
   | A.Sub -> C.Sub
   | A.Mult -> C.Mult
   | A.Div -> C.Div
@@ -16,7 +16,7 @@ let Binop_Convert = function
   | A.Geq -> C.Geq
   | A.And -> C.And
   | A.Or -> C.Or
-  | A.ListNodesAt -> C.ListNodeAt 
+  | A.ListNodesAt -> C.ListNodesAt 
   | A.ListEdgesAt -> C.ListEdgesAt
   | A.RootAs -> C.RootAs
 
@@ -27,6 +27,8 @@ let Unop_Convert = function
 let Num_Convert = function
     A.Num_Int(a) -> C.Num_Int(a)
   | A.Num_Float(a) -> C.Num_Float(a)
+
+Binop_Convert A.Add
 (*
 (* Variable Type *)
 let Convert_var_type = function
