@@ -20,10 +20,10 @@ let binop_convert = function
   | A.RootAs -> C.RootAs
 
 let tnp = function
-    C.Add -> print_string "Fk"
-  | _ -> print_string "Oh no"
-
-tnp (binop_convert A.Add) ;;
+    C.Add -> "Fk"
+  | _ -> "Oh no"
+;;
+print_endline "A"
 
 
 
