@@ -1,7 +1,7 @@
 (* Top-level of the MicroC compiler: scan & parse the input,
    check the resulting AST, generate LLVM IR, and dump the module *)
 
-type action = Ast | LLVM_IR | Compile
+type action = LLVM_IR | Compile (* | AST *)
 
 let _ =
   let action = if Array.length Sys.argv > 1 then

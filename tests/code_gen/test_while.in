@@ -1,0 +1,15 @@
+int a = 0;
+while (a < 3) {
+	print(a);
+	a = a + 1;
+}
+float b = 0;
+while (b < 3) {
+	print(b);
+	b = b + 1;
+}
+bool c = true;
+while (c) {
+	print(c);
+	c = not c;
+}

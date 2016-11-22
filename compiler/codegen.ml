@@ -40,10 +40,10 @@ let convertAST stmts =
 let createMain stmts =
   let funcs, vars, scripts = convertAST stmts in
   funcs @ [ A.Func({
-    returnType = A.Int_t;
-    name = "main";
-    args = [];
-    body = vars @ scripts;
+    A.returnType = A.Int_t;
+    A.name = "main";
+    A.args = [];
+    A.body = vars @ scripts;
   }) ]
 
 let context = L.global_context ()
@@ -63,8 +63,6 @@ let ltype_of_typ = function
   | A.Void_t -> void_t
   | _ -> raise (Failure ("Type Not Found!"))
 
-let tmp_res = L.const_int i32_t 0
-
 let codegen_string_lit s llbuilder =
   L.build_global_stringptr s "tmp" llbuilder
 
@@ -80,30 +78,39 @@ let codegen_print llbuilder el =
 
 (*
 ================================================================
+  Casting
+================================================================
+*)
+let int_to_float llbuilder v = L.build_sitofp v f_t "tmp" llbuilder
+
+(*
+================================================================
         Main Codegen Function
 ================================================================
 *)
 let translate raw_stmts =
   let stmts = createMain raw_stmts in
+  let stmts = List.map (
+    fun e -> match e with
+    | A.Func(fdecl) -> fdecl
+    | _ -> raise (Failure("Ooops... AST should be a list of func_decl"))
+  ) stmts in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
-    let function_decl m (A.Func(fdecl)) =
-      (match fdecl.A.name with
-        | "a" -> ignore(print_endline( (L.string_of_lltype (ltype_of_typ fdecl.A.returnType)) ))
-        | _ -> ()
-      );
+    let function_decl m fdecl =
       let name = fdecl.A.name
       and formal_types =
 	       Array.of_list (List.map (fun (A.Formal(t, _)) -> ltype_of_typ t) fdecl.A.args)
       in
-      let ftype = L.function_type (ltype_of_typ fdecl.A.returnType) formal_types in
+      let ftype = L.var_arg_function_type (ltype_of_typ fdecl.A.returnType) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
     List.fold_left function_decl StringMap.empty stmts in
 
   (* Fill in the body of the given function *)
-  let build_function_body (A.Func(fdecl)) =
+  let build_function_body (fdecl) =
     let (the_function, _) = StringMap.find fdecl.A.name function_decls in
+    (* let bb = L.append_block context "entry" the_function in *)
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
     (* Construct the function's "locals": formal arguments and locally
@@ -129,8 +136,8 @@ let translate raw_stmts =
 
     (* Return the type of expr *)
     let rec get_type = function
-        A.Num_Lit(Num_Int _) -> A.Int_t 
-      | A.Num_Lit(Num_Float _) -> A.Float_t 
+        A.Num_Lit(A.Num_Int _) -> A.Int_t 
+      | A.Num_Lit(A.Num_Float _) -> A.Float_t 
       | A.String_Lit _ -> A.String_t 
       | A.Bool_lit _ -> A.Bool_t
       | A.Id s -> let (_, typ) = lookup s in typ
@@ -150,22 +157,24 @@ let translate raw_stmts =
             | A.And | A.Or when t1 = A.Bool_t && t2 = A.Bool_t -> A.Bool_t
             (* mode *)
             | A.Mod when t1 = A.Int_t && t2 = A.Int_t -> A.Int_t
+            | _ -> raise (Failure("Unrecognized Binop Operation..."))
           )
       | A.Unop(op, e) ->
           let t = get_type e in (
             match op with
-              A.Sub when t = A.Int_t -> A.Int_t
-            | A.Sub when t = A.Float_t -> A.Float_t
+              A.Neg when t = A.Int_t -> A.Int_t
+            | A.Neg when t = A.Float_t -> A.Float_t
             | A.Not when t = A.Bool_t -> A.Bool_t
+            | _ -> raise (Failure("Unrecognized Unop Operation..."))
           )
       | A.Assign(var, _) -> let (_, typ) = lookup var in typ
       | A.Call (f, _) ->
          let (_, fdecl) = StringMap.find f function_decls in
-         fdecl.returnType
+         fdecl.A.returnType
       | _ -> A.Void_t
     in
     (* Construct code for an expression; return its value *)
-    let rec handle_binop e1 op e2 dtype llbuilder =
+    let handle_binop e1 op e2 dtype llbuilder =
       (* Generate llvalues from e1 and e2 *)
 
       let float_ops op e1 e2 =
@@ -181,7 +190,7 @@ let translate raw_stmts =
         | A.Leq     -> L.build_fcmp L.Fcmp.Ole e1 e2 "flt_leqtmp" llbuilder
         | A.Greater -> L.build_fcmp L.Fcmp.Ogt e1 e2 "flt_sgttmp" llbuilder
         | A.Geq     -> L.build_fcmp L.Fcmp.Oge e1 e2 "flt_sgetmp" llbuilder
-        | _ -> tmp_res
+        | _ -> raise (Failure("Unrecognized float binop opreation!"))
       in 
 
       (* chars are considered ints, so they will use int_ops as well*)
@@ -200,13 +209,13 @@ let translate raw_stmts =
         | A.Geq     -> L.build_icmp L.Icmp.Sge e1 e2 "sgetmp" llbuilder
         | A.And     -> L.build_and e1 e2 "andtmp" llbuilder
         | A.Or      -> L.build_or  e1 e2 "ortmp" llbuilder
-        | _ -> tmp_res
+        | _ -> raise (Failure("Unrecognized int binop opreation!"))
       in
       let type_handler d = match d with
         | A.Float_t -> float_ops op e1 e2
         | A.Bool_t
         | A.Int_t -> int_ops op e1 e2
-        | _ -> tmp_res
+        | _ -> raise (Failure("Unrecognized binop data type!"))
       in type_handler dtype
     in
     let rec expr builder = function
@@ -223,35 +232,35 @@ let translate raw_stmts =
         and e2' = expr builder e2 in
         let t1 = get_type e1
         and t2 = get_type e2 in
-        let dtype = t1 in
-        handle_binop e1' op e2' dtype builder
-      	  (* (match op with
-      	    A.Add     -> L.build_add
-      	  | A.Sub     -> L.build_sub
-      	  | A.Mult    -> L.build_mul
-          | A.Div     -> L.build_sdiv
-      	  | A.And     -> L.build_and
-      	  | A.Or      -> L.build_or
-      	  | A.Equal   -> L.build_icmp L.Icmp.Eq
-      	  | A.Neq     -> L.build_icmp L.Icmp.Ne
-      	  | A.Less    -> L.build_icmp L.Icmp.Slt
-      	  | A.Leq     -> L.build_icmp L.Icmp.Sle
-      	  | A.Greater -> L.build_icmp L.Icmp.Sgt
-      	  | A.Geq     -> L.build_icmp L.Icmp.Sge
-      	  ) e1' e2' "tmp" builder *)
+        (* Handle Automatic Binop Type Converstion *)
+        (match (t1, t2) with
+          | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
+          | ( A.Int_t, A.Float_t) ->
+              handle_binop (int_to_float builder e1') op e2' A.Float_t builder
+          | ( A.Float_t, A.Int_t ) ->
+              handle_binop e1' op (int_to_float builder e2') A.Float_t builder
+          | _ -> raise (Failure ("Unsuported Binop Type!"))
+        )
       | A.Unop(op, e) ->
       	  let e' = expr builder e in
       	  (match op with
-      	    A.Sub     -> L.build_neg
+      	    A.Neg     -> if (get_type e) = A.Int_t then L.build_neg else L.build_fneg
           | A.Not     -> L.build_not) e' "tmp" builder
       | A.Assign (s, e) ->
           let e' = expr builder e in
-          let (var, _) = lookup s in
-	        ignore (L.build_store e' var builder); e'
+          let (var, typ) = lookup s in
+          ( match (get_type e, typ) with
+            | (t1, t2) when t1 = t2 -> ignore (L.build_store e' var builder); e'
+            | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
+            | _ -> raise (Failure("Assign Type inconsist"))
+          )
       | A.Call ("print", el) ->
           let print_expr e = (
               match (get_type e) with
-              | A.Int_t | A.Bool_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); expr builder e])
+              | A.Int_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); expr builder e])
+              | A.Bool_t -> (match (L.string_of_llvalue (expr builder e)) with
+                    | "i1 true" -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "true"]))
+                    | _ -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "false"])))
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); expr builder e])
               (* | A.Bool_t -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%d\n"; expr builder e]) *)
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); expr builder e])
@@ -280,9 +289,15 @@ let translate raw_stmts =
     let rec stmt builder = function
       | A.Block sl -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
-      | A.Return e -> ignore (match fdecl.A.returnType with
-	          A.Void_t -> L.build_ret_void builder
-	        | _ -> L.build_ret (expr builder e) builder); builder
+      | A.Return e ->
+          ignore (
+            let et = get_type e in
+            match (fdecl.A.returnType, et) with
+  	          (A.Void_t, _) -> L.build_ret_void builder
+  	        | (t1, t2) when t1 = t2 -> L.build_ret (expr builder e) builder
+            | (A.Float_t, A.Int_t) -> L.build_ret (int_to_float builder (expr builder e)) builder
+            | _ -> raise (Failure("Return Type Doesn't match..."))
+          ); builder
       | A.If (predicate, then_stmt, else_stmt) ->
          let bool_val = expr builder predicate in
       	 let merge_bb = L.append_block context "merge" the_function in
@@ -316,6 +331,7 @@ let translate raw_stmts =
       | A.For (e1, e2, e3, body) -> stmt builder
 	       ( A.Block [A.Expr e1 ; A.While (e2, body @ [A.Expr e3]) ] )
       | A.Var_dec(_) -> builder
+      | _ -> builder
     in
 
     (* Build the code for each statement in the function *)
@@ -324,9 +340,14 @@ let translate raw_stmts =
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.A.returnType with
         A.Void_t -> L.build_ret_void
-      | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
+      | A.Int_t as t -> L.build_ret (L.const_int (ltype_of_typ t) 0)
+      | A.Bool_t as t -> L.build_ret (L.const_int (ltype_of_typ t) 0)
+      | A.Float_t as t-> L.build_ret (L.const_float (ltype_of_typ t) 0.)
+      | t-> L.build_ret (L.const_null (ltype_of_typ t))
+    )
   in
 
   (* print_endline (P.string_of_program (stmts)); *)
   List.iter build_function_body stmts;
+
   the_module

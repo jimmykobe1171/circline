@@ -175,7 +175,7 @@ arith_ops:
 | expr MOD          expr 					{ Binop($1, Mod,   $3) }
 | expr OR     expr                { Binop($1, Or,    $3) }
 | NOT  expr 							        { Unop (Not,   $2) }
-| MINUS expr 							        { Unop (Sub, $2) }
+| MINUS expr 							        { Unop (Neg, $2) }
 | expr SIMILARITY expr            { Binop($1, RootAs, $3) }
 | expr AT AT expr                 { Binop($1, ListEdgesAt, $4) }
 | expr AT expr                    { Binop($1, ListNodesAt, $3) }
