@@ -258,9 +258,10 @@ let translate raw_stmts =
           let print_expr e = (
               match (get_type e) with
               | A.Int_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); expr builder e])
-              | A.Bool_t -> (match (L.string_of_llvalue (expr builder e)) with
+              | A.Bool_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); expr builder e])
+                    (* (match (L.string_of_llvalue (expr builder e)) with
                     | "i1 true" -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "true"]))
-                    | _ -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "false"])))
+                    | _ -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "false"]))) *)
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); expr builder e])
               (* | A.Bool_t -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%d\n"; expr builder e]) *)
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); expr builder e])
