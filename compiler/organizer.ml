@@ -99,12 +99,11 @@ let convert_formal_list = function
   | [x] -> [convert_formal x]
   | _ as l -> (List.map convert_formal l)
 
-
 let createMain stmts = A.Func({
-    returnType = Int_t;
-    name = "main";
-    args = [];
-    body = stmts;
+    A.returnType = A.Int_t;
+    A.name = "main";
+    A.args = [];
+    A.body = stmts;
   })
 
 
@@ -133,12 +132,12 @@ let rec get_funcs_from_body_a = function
 
 let rec get_body_from_body_a = function
     [] -> []
-  | A.Func(_)::tl -> get_funcs_from_body_a tl
-  | _ as x::tl -> x :: (get_funcs_from_body_a tl)
+  | A.Func(_)::tl -> get_body_from_body_a tl
+  | _ as x::tl -> x :: (get_body_from_body_a tl)
 
 let rec convert_func_list m parent = function
     [] -> ([], m)
-  | A.Func{returnType = r; name = n; args = a; body = b}::tl -> 
+  | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl -> 
     let m = StringMap.add n parent m in 
 (*    print_int (StringMap.cardinal m); 
     print_string " is the size!\n"; *)
@@ -158,6 +157,7 @@ let rec convert_stmt = function
   | A.If(e, stls1, stls2) -> C.If(convert_expr e, List.map convert_stmt stls1, List.map convert_stmt stls2)
   | A.While(e, stls) -> C.While(convert_expr e, List.map convert_stmt stls)
   | A.Block(stls) ->C.Block(List.map convert_stmt stls)
+  | _ -> C.Expr(C.Noexpr)
 
 (*
 let convert_stmt_list = function
@@ -179,7 +179,7 @@ let rec get_local_from_body_c = function
 
 let rec convert_func_list_c m = function
     [] -> []
-  | A.Func{returnType = r; name = n; args = a; body = b} :: tl -> {
+  | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b} :: tl -> {
     C.returnType = convert_var_type r;
     C.name = n;
     C.args = convert_formal_list a;
@@ -187,7 +187,7 @@ let rec convert_func_list_c m = function
     C.locals = get_local_from_body_c b;
     C.pname = (if n = "main" then "main" else StringMap.find n m)
   } :: (convert_func_list_c m tl)
-
+  | _::tl -> convert_func_list_c m tl
 
 let rec changes = function 
     [] -> []
@@ -197,7 +197,7 @@ let rec changes = function
 let convert stmts = 
   let funcs = createMain stmts in
   let horizen_funcs_m = convert_func_list StringMap.empty "main" [funcs] in
-  print_int (StringMap.cardinal (snd horizen_funcs_m)); convert_func_list_c (snd horizen_funcs_m) (fst horizen_funcs_m)
+  convert_func_list_c (snd horizen_funcs_m) (fst horizen_funcs_m)
 
 
 
