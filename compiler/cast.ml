@@ -90,7 +90,6 @@ type stmt =
 | For of expr * expr * expr * stmt list
 | If of expr * stmt list * stmt list
 | While of expr * stmt list
-| Block of stmt list
 
 (* Function Declaration *)
 and func_decl = {

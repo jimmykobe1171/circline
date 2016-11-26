@@ -1,0 +1,8 @@
+string btos(bool b) {
+	if (b) {
+		return "true";
+	} else {
+		return "false";
+	}
+}
+print(btos(1<=2));

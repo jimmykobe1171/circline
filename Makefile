@@ -8,6 +8,9 @@ all: clean build
 build:
 	cd compiler; make
 	cd tests; make build
+	cd tests; sh test_scanner.sh
+	cd tests; sh test_parser.sh
+	cd tests; sh test_code_gen.sh
 
 test: clean build
 	cd tests; make

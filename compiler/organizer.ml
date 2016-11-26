@@ -6,21 +6,21 @@ let convert_binop = function
   | A.Sub -> C.Sub
   | A.Mult -> C.Mult
   | A.Div -> C.Div
-  | A.Mod -> C.Mod 
+  | A.Mod -> C.Mod
   | A.Equal -> C.Equal
   | A.Neq -> C.Neq
   | A.Less -> C.Less
-  | A.Leq -> C.Leq 
+  | A.Leq -> C.Leq
   | A.Greater -> C.Leq
   | A.Geq -> C.Geq
   | A.And -> C.And
   | A.Or -> C.Or
-  | A.ListNodesAt -> C.ListNodesAt 
+  | A.ListNodesAt -> C.ListNodesAt
   | A.ListEdgesAt -> C.ListEdgesAt
   | A.RootAs -> C.RootAs
 
 let convert_unop = function
-  A.Neg -> C.Neg 
+  A.Neg -> C.Neg
 | A.Not -> C.Not
 
 let convert_num = function
@@ -28,8 +28,8 @@ let convert_num = function
   | A.Num_Float(a) -> C.Num_Float(a)
 
 let convert_var_type = function
-    A.Int_t -> C.Int_t                
-  | A.Float_t -> C.Float_t                
+    A.Int_t -> C.Int_t
+  | A.Float_t -> C.Float_t
   | A.String_t -> C.String_t
   | A.Bool_t -> C.Bool_t
   | A.Node_t -> C.Node_t
@@ -66,7 +66,7 @@ let rec convert_expr = function
 |   A.Noexpr -> C.Noexpr
 |   A.ListP(a) -> C.ListP(convert_expr_list a)
 |   A.DictP(a) -> C.DictP(convert_dict_list a)
-|   A.Call(a,b) -> C.Call(a, convert_expr_list b) 
+|   A.Call(a,b) -> C.Call(a, convert_expr_list b)
 |   A.CallDefault(a,b,c) -> C.CallDefault(convert_expr a, b, convert_expr_list c)
 
 and convert_expr_list = function
@@ -86,7 +86,7 @@ let convert_edge_graph_list = function
   {A.graphs = g; A.edges = e} -> {C.graphs = convert_expr_list g; C.edges = convert_expr_list e}
 
 let convert_formal = function
-  | A.Formal(v, s) -> C.Formal(convert_var_type v, s) 
+  | A.Formal(v, s) -> C.Formal(convert_var_type v, s)
 
 let convert_formal_list = function
     [] -> []
@@ -116,12 +116,12 @@ let rec get_body_from_body_a = function
 (* convert functions in A to a horizental function list in A *)
 let rec convert_func_list m parent = function
     [] -> ([], m)
-  | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl -> 
-    let m = StringMap.add n parent m in 
+  | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl ->
+    let m = StringMap.add n parent m in
 
     let addedFunc = A.Func({
       A.returnType = r; A.name = n; A.args = a; A.body = get_body_from_body_a b
-    }) in 
+    }) in
     let firstRes = convert_func_list m parent tl in
     let secondRes = convert_func_list (snd firstRes) n (get_funcs_from_body_a b) in
     ((addedFunc :: (fst firstRes) @ (fst secondRes)), (snd secondRes))
@@ -134,17 +134,16 @@ let rec convert_stmt = function
   | A.For(e1, e2, e3, stls) -> C.For(convert_expr e1, convert_expr e2, convert_expr e3, List.map convert_stmt stls)
   | A.If(e, stls1, stls2) -> C.If(convert_expr e, List.map convert_stmt stls1, List.map convert_stmt stls2)
   | A.While(e, stls) -> C.While(convert_expr e, List.map convert_stmt stls)
-  | A.Block(stls) ->C.Block(List.map convert_stmt stls)
   | _ -> C.Expr(C.Noexpr)
 
-let rec get_body_from_body_c = function 
+let rec get_body_from_body_c = function
     [] -> []
-  | A.Var_dec(A.Local(typ, name, v))::tl -> C.Expr(C.Assign(name, convert_expr v)) :: (get_body_from_body_c tl)
+  | A.Var_dec(A.Local(_, name, v))::tl -> C.Expr(C.Assign(name, convert_expr v)) :: (get_body_from_body_c tl)
   | _ as x::tl -> (convert_stmt x) :: (get_body_from_body_c tl)
 
-let rec get_local_from_body_c = function 
+let rec get_local_from_body_c = function
     [] -> []
-  | A.Var_dec(A.Local(typ, name, v))::tl -> C.Formal(convert_var_type typ, name) :: (get_local_from_body_c tl)
+  | A.Var_dec(A.Local(typ, name, _))::tl -> C.Formal(convert_var_type typ, name) :: (get_local_from_body_c tl)
   | _::tl -> get_local_from_body_c tl
 
 (* convert the horizental level function list in A to C *)
@@ -161,7 +160,7 @@ let rec convert_func_list_c m = function
   | _::tl -> convert_func_list_c m tl
 
 (* entry point *)
-let convert stmts = 
+let convert stmts =
   let funcs = createMain stmts in
   let horizen_funcs_m = convert_func_list StringMap.empty "main" [funcs] in
   convert_func_list_c (snd horizen_funcs_m) (fst horizen_funcs_m)

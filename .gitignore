@@ -28,3 +28,5 @@ tests/scanner/tokenize
 compiler/circline.native
 
 compiler/pig
+
+tests/pig

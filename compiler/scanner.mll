@@ -1,7 +1,13 @@
-{ open Parser }
+{
+  open Parser
+  let unescape s =
+    	Scanf.sscanf ("\"" ^ s ^ "\"") "%S%!" (fun x -> x)
+}
 let digit = ['0'-'9']
 let letter = ['a'-'z' 'A'-'Z']
 let variable = letter (letter | digit | '_') *
+let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
+let ascii = ([' '-'!' '#'-'[' ']'-'~'])
 rule token =
 parse [' ' '\t' '\r' '\n'] { token lexbuf }
 (* comment *)
@@ -45,6 +51,7 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | '&' { AMPERSAND }
 | '~' { SIMILARITY }
 (* primary type *)
+| "void" { VOID }
 | "int" { INT }
 | "float" { FLOAT }
 | "string" { STRING }
@@ -56,8 +63,8 @@ parse [' ' '\t' '\r' '\n'] { token lexbuf }
 | "null" { NULL }
 (* integer and float *)
 | digit+ as lit { INT_LITERAL(int_of_string lit) }
-| digit+'.'digit+ as lit { FLOAT_LITERAL(float_of_string lit) }
-| '"' (([^ '"'] | "\\\"")* as lit) '"' { STRING_LITERAL(lit) }
+| digit+'.'digit* as lit { FLOAT_LITERAL(float_of_string lit) }
+| '"' ((ascii | escape)* as lit) '"' { STRING_LITERAL(unescape lit) }
 (* quote *)
 | '"'  { QUOTE }
 (* boolean operation *)
