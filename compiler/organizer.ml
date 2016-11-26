@@ -82,7 +82,7 @@ and convert_dict_list = function
   | [x] -> [convert_dict x]
   | _ as l -> (List.map convert_dict l)
 
-(*)
+(*s
 let convert_stmt = function
     [] -> []
   | A.Expr(a) -> C.Expr(convert_expr a)
@@ -140,12 +140,15 @@ let rec convert_func_list m parent = function
     [] -> ([], m)
   | A.Func{returnType = r; name = n; args = a; body = b}::tl -> 
     let m = StringMap.add n parent m in 
-    print_int (StringMap.cardinal m); 
-    print_string " is the size!\n";
-    (A.Func({
+(*    print_int (StringMap.cardinal m); 
+    print_string " is the size!\n"; *)
+    let addedFunc = A.Func({
       A.returnType = r; A.name = n; A.args = a; A.body = get_body_from_body_a b
-    }) :: (fst (convert_func_list m parent tl)) @ (fst (convert_func_list m n (get_funcs_from_body_a b)))),m
-  | _::tl -> (fst (convert_func_list m parent tl),m)
+    }) in 
+    let firstRes = convert_func_list m parent tl in
+    let secondRes = convert_func_list (snd firstRes) n (get_funcs_from_body_a b) in
+    ((addedFunc :: (fst firstRes) @ (fst secondRes)), (snd secondRes))
+  | _::tl -> convert_func_list m parent tl
 
 
 let rec convert_stmt = function
