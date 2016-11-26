@@ -86,13 +86,13 @@ type var_decl =
 (* Statements *)
 type stmt =
   Expr of expr     (* set foo = bar + 3 *)
-| Func of func_decl
 | Return of expr
 | For of expr * expr * expr * stmt list
 | If of expr * stmt list * stmt list
 | While of expr * stmt list
-| Var_dec of var_decl
 | Block of stmt list
+| Var_dec of var_decl
+| Func of func_decl
 
 (* Function Declaration *)
 and func_decl = {

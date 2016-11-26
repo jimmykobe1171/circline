@@ -124,15 +124,17 @@ and txt_of_stmt = function
   | While(e1, s) -> sprintf "While(%s){%s}"
     (txt_of_expr e1) (txt_of_stmts s)
   | Var_dec(var) -> sprintf "Var_dec(%s);" (txt_of_var_decl var)
-and txt_of_stmts stmts =
+
+and txt_of_funcs funcs =
+  
   let rec aux acc = function
       | [] -> sprintf "%s" (String.concat "\n" (List.rev acc))
-      | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
-  in aux [] stmts
+      | f :: tl -> aux (txt_of_func_decl f :: acc) tl
+  in aux [] funcs
 
 (* Program entry point *)
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let program = Parser.program Scanner.token lexbuf in
-  let result = txt_of_stmts program in
+  let result = txt_of_funcs program in
   print_endline result

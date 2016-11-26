@@ -109,7 +109,7 @@ and txt_of_dict = function
 
 (* Functions Declaration *)
 and txt_of_func_decl f =
-  sprintf "%s %s (%s) {%s} {%s} %s"
+  sprintf "returnType(%s) name(%s) args(%s) body{%s} locals{%s} parent(%s)"
     (txt_of_var_type f.returnType) f.name (txt_of_formal_list f.args) (txt_of_stmts f.body) (txt_of_formal_list f.locals) f.pname
 
 (* Statements *)
@@ -122,15 +122,22 @@ and txt_of_stmt = function
     (txt_of_expr e1) (txt_of_stmts s1) (txt_of_stmts s2)
   | While(e1, s) -> sprintf "While(%s){%s}"
     (txt_of_expr e1) (txt_of_stmts s)
-and txt_of_stmts stmts =
+  | Block(stls) -> sprintf "{%s}" (txt_of_stmts stls)
+
+and txt_of_stmts = function
+  | [] -> ""
+  | [x] -> txt_of_stmt x
+  | _ as s -> String.concat ", " (List.map txt_of_stmt s)
+
+and txt_of_funcs funcs =
   let rec aux acc = function
       | [] -> sprintf "%s" (String.concat "\n" (List.rev acc))
-      | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
-  in aux [] stmts
+      | f :: tl -> aux (txt_of_func_decl f :: acc) tl
+  in aux [] funcs
 
 (* Program entry point *)
 let _ =
   let lexbuf = Lexing.from_channel stdin in
-  let program = Organizer.convert [] (Parser.program Scanner.token lexbuf) in
-  let result = txt_of_stmts program in
+  let program = Organizer.convert (Parser.program Scanner.token lexbuf) in
+  let result = txt_of_funcs program in
   print_endline result
