@@ -113,8 +113,9 @@ let rec get_body_from_body_a = function
   | A.Func(_)::tl -> get_body_from_body_a tl
   | _ as x::tl -> x :: (get_body_from_body_a tl)
 
-(* convert functions in A to a horizental function list in A *)
-let rec convert_func_list m parent = function
+(* 
+convert functions in A to a horizental function list in A *)
+(*let rec convert_func_list m parent = function
     [] -> ([], m)
   | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl ->
     let m = StringMap.add n parent m in
@@ -125,7 +126,33 @@ let rec convert_func_list m parent = function
     let firstRes = convert_func_list m parent tl in
     let secondRes = convert_func_list (snd firstRes) n (get_funcs_from_body_a b) in
     ((addedFunc :: (fst firstRes) @ (fst secondRes)), (snd secondRes))
-  | _::tl -> convert_func_list m parent tl
+  | _::tl -> convert_func_list m parent tl 
+*)
+
+let rec mapper parent map = function
+   [] -> map
+ | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl ->
+    mapper parent (StringMap.add n parent map) tl
+
+let convert_bfs_insider my_map = function 
+    A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}->
+    let curr = get_funcs_from_body_a b in
+      let my_map = mapper n my_map curr in
+    (curr,my_map)
+
+let rec bfser m result = function
+    [] ->(result, m) 
+  | A.Func{A.returnType = r; A.name = n; A.args = args; A.body = b} as a ::tl -> let result1 = convert_bfs_insider m a in
+    let latterlist = tl @ (fst result1) in
+    let m = (snd result1) in
+    let addedFunc = A.Func({
+      A.returnType = r; A.name = n; A.args = args; A.body = get_body_from_body_a b
+    }) in
+    let result = result @ [addedFunc] in
+     bfser m result latterlist
+
+
+
 
 (* convert stament in A to C, except those Var_dec and Func, we will convert them separately *)
 let rec convert_stmt = function
@@ -141,9 +168,15 @@ let rec get_body_from_body_c = function
   | A.Var_dec(A.Local(_, name, v))::tl -> C.Expr(C.Assign(name, convert_expr v)) :: (get_body_from_body_c tl)
   | _ as x::tl -> (convert_stmt x) :: (get_body_from_body_c tl)
 
+<<<<<<< Updated upstream
 let rec get_local_from_body_c = function
     [] -> []
   | A.Var_dec(A.Local(typ, name, _))::tl -> C.Formal(convert_var_type typ, name) :: (get_local_from_body_c tl)
+=======
+let rec get_local_from_body_c = function 
+    [] -> [] 
+  | A.Var_dec(A.Local(typ, name, v))::tl -> C.Formal(convert_var_type typ, name) :: (get_local_from_body_c tl)
+>>>>>>> Stashed changes
   | _::tl -> get_local_from_body_c tl
 
 (* convert the horizental level function list in A to C *)
