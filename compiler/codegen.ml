@@ -34,6 +34,12 @@ let ltype_of_typ = function
   | A.Void_t -> void_t
   | _ -> raise (Failure ("Type Not Found!"))
 
+let get_default_value_of_type = function
+  | A.Int_t as t -> L.const_int (ltype_of_typ t) 0
+  | A.Bool_t as t -> L.const_int (ltype_of_typ t) 0
+  | A.Float_t as t-> L.const_float (ltype_of_typ t) 0.
+  | t-> L.const_null (ltype_of_typ t)
+
 let codegen_string_lit s llbuilder =
   L.build_global_stringptr s "tmp" llbuilder
 
@@ -83,6 +89,7 @@ let translate program =
 
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
+    let get_var_name fname n = (fname ^ "." ^ n) in
     let (the_function, _) = StringMap.find fdecl.A.name function_decls in
     (* let bb = L.append_block context "entry" the_function in *)
     let builder = L.builder_at_end context (L.entry_block the_function) in
@@ -97,17 +104,20 @@ let translate program =
         locals
       in
       let add_formal m (A.Formal(t, n)) p =
-        (* let local = L.define_global n p the_module; *)
-        L.set_value_name n p;
+        let n' = get_var_name fdecl.A.name n in
+        let local = L.define_global n' (get_default_value_of_type t) the_module in
+        ignore (L.build_store p local builder);
+        (* L.set_value_name n p;
     	  let local = L.build_alloca (ltype_of_typ t) n builder in
-    	    ignore (L.build_store p local builder);
-    	  StringMap.add n (local, t) m
+    	    ignore (L.build_store p local builder); *)
+    	  StringMap.add n' (local, t) m
       in
 
       let add_local m (A.Formal(t, n)) =
-      	(* let local_var = L.declare_global (ltype_of_typ t) n the_module in *)
-      	let local_var = L.build_alloca (ltype_of_typ t) n builder in
-        StringMap.add n (local_var, t) m
+        let n' = get_var_name fdecl.A.name n in
+      	let local_var = L.define_global n' (get_default_value_of_type t) the_module in
+      	(* let local_var = L.build_alloca (ltype_of_typ t) n builder in *)
+        StringMap.add n' (local_var, t) m
       in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.args
@@ -124,7 +134,7 @@ let translate program =
         fdecl.A.pname
       in
       let rec aux n fname = (
-        try StringMap.find n (Hashtbl.find context_funcs_vars fname)
+        try StringMap.find (get_var_name fname n) (Hashtbl.find context_funcs_vars fname)
         with Not_found -> (
           if fname = "main" then
             (raise (Failure("Local Variable not found...")))
