@@ -56,6 +56,15 @@ let int_to_float llbuilder v = L.build_sitofp v f_t "tmp" llbuilder
 
 (*
 ================================================================
+        context_funcs_vars
+================================================================
+*)
+let context_funcs_vars = Hashtbl.create 50
+let print_hashtbl tb =
+  print_endline (Hashtbl.fold (fun k _ m -> (k^", "^m)) tb "")
+
+(*
+================================================================
         Main Codegen Function
 ================================================================
 *)
@@ -82,21 +91,48 @@ let translate program =
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
     let local_vars =
-      let add_formal m (A.Formal(t, n)) p = L.set_value_name n p;
-    	let local = L.build_alloca (ltype_of_typ t) n builder in
-    	ignore (L.build_store p local builder);
-    	StringMap.add n (local, t) m in
+      let add_to_context locals =
+        ignore(Hashtbl.add context_funcs_vars fdecl.A.name locals);
+        (* ignore(print_hashtbl context_funcs_vars); *)
+        locals
+      in
+      let add_formal m (A.Formal(t, n)) p =
+        (* let local = L.define_global n p the_module; *)
+        L.set_value_name n p;
+    	  let local = L.build_alloca (ltype_of_typ t) n builder in
+    	    ignore (L.build_store p local builder);
+    	  StringMap.add n (local, t) m
+      in
 
       let add_local m (A.Formal(t, n)) =
-      	let local_var = L.build_alloca (ltype_of_typ t) n builder
-      	in StringMap.add n (local_var, t) m in
+      	(* let local_var = L.declare_global (ltype_of_typ t) n the_module in *)
+      	let local_var = L.build_alloca (ltype_of_typ t) n builder in
+        StringMap.add n (local_var, t) m
+      in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.args
           (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals fdecl.A.locals in
+      add_to_context (List.fold_left add_local formals fdecl.A.locals)
+    in
 
     (* Return the value for a variable or formal argument *)
-    let lookup n = StringMap.find n local_vars
+    (* let lookup n = StringMap.find n local_vars
+    in *)
+    let lookup n =
+      let get_parent_func_name fname =
+        let (_, fdecl) = StringMap.find fname function_decls in
+        fdecl.A.pname
+      in
+      let rec aux n fname = (
+        try StringMap.find n (Hashtbl.find context_funcs_vars fname)
+        with Not_found -> (
+          if fname = "main" then
+            (raise (Failure("Local Variable not found...")))
+          else
+            (aux n (get_parent_func_name fname))
+        )
+      ) in
+      aux n fdecl.A.name
     in
 
     (* Return the type of expr *)

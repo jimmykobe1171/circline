@@ -30,3 +30,5 @@ compiler/circline.native
 compiler/pig
 
 tests/pig
+
+compiler/test_in
