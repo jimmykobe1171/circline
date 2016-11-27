@@ -113,22 +113,6 @@ let rec get_body_from_body_a = function
   | A.Func(_)::tl -> get_body_from_body_a tl
   | _ as x::tl -> x :: (get_body_from_body_a tl)
 
-(* 
-convert functions in A to a horizental function list in A *)
-(*let rec convert_func_list m parent = function
-    [] -> ([], m)
-  | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl ->
-    let m = StringMap.add n parent m in
-
-    let addedFunc = A.Func({
-      A.returnType = r; A.name = n; A.args = a; A.body = get_body_from_body_a b
-    }) in
-    let firstRes = convert_func_list m parent tl in
-    let secondRes = convert_func_list (snd firstRes) n (get_funcs_from_body_a b) in
-    ((addedFunc :: (fst firstRes) @ (fst secondRes)), (snd secondRes))
-  | _::tl -> convert_func_list m parent tl 
-*)
-
 let rec mapper parent map = function
    [] -> map
  | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl ->
@@ -141,7 +125,7 @@ let convert_bfs_insider my_map = function
     (curr,my_map)
 
 let rec bfser m result = function
-    [] ->(result, m) 
+    [] ->(List.rev result, m) 
   | A.Func{A.returnType = r; A.name = n; A.args = args; A.body = b} as a ::tl -> let result1 = convert_bfs_insider m a in
     let latterlist = tl @ (fst result1) in
     let m = (snd result1) in
@@ -150,9 +134,6 @@ let rec bfser m result = function
     }) in
     let result = result @ [addedFunc] in
      bfser m result latterlist
-
-
-
 
 (* convert stament in A to C, except those Var_dec and Func, we will convert them separately *)
 let rec convert_stmt = function
@@ -190,5 +171,5 @@ let rec convert_func_list_c m = function
 (* entry point *)
 let convert stmts =
   let funcs = createMain stmts in
-  let horizen_funcs_m = convert_func_list StringMap.empty "main" [funcs] in
+  let horizen_funcs_m = bfser StringMap.empty [] [funcs] in
   convert_func_list_c (snd horizen_funcs_m) (fst horizen_funcs_m)

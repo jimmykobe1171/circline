@@ -122,7 +122,6 @@ and txt_of_stmt = function
     (txt_of_expr e1) (txt_of_stmts s1) (txt_of_stmts s2)
   | While(e1, s) -> sprintf "While(%s){%s}"
     (txt_of_expr e1) (txt_of_stmts s)
-  | Block(stls) -> sprintf "{%s}" (txt_of_stmts stls)
 
 and txt_of_stmts = function
   | [] -> ""
