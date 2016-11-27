@@ -168,15 +168,10 @@ let rec get_body_from_body_c = function
   | A.Var_dec(A.Local(_, name, v))::tl -> C.Expr(C.Assign(name, convert_expr v)) :: (get_body_from_body_c tl)
   | _ as x::tl -> (convert_stmt x) :: (get_body_from_body_c tl)
 
-<<<<<<< Updated upstream
+
 let rec get_local_from_body_c = function
     [] -> []
   | A.Var_dec(A.Local(typ, name, _))::tl -> C.Formal(convert_var_type typ, name) :: (get_local_from_body_c tl)
-=======
-let rec get_local_from_body_c = function 
-    [] -> [] 
-  | A.Var_dec(A.Local(typ, name, v))::tl -> C.Formal(convert_var_type typ, name) :: (get_local_from_body_c tl)
->>>>>>> Stashed changes
   | _::tl -> get_local_from_body_c tl
 
 (* convert the horizental level function list in A to C *)
