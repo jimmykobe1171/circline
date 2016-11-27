@@ -117,12 +117,14 @@ let rec mapper parent map = function
    [] -> map
  | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}::tl ->
     mapper parent (StringMap.add n parent map) tl
+ | _-> map
 
 let convert_bfs_insider my_map = function 
     A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}->
     let curr = get_funcs_from_body_a b in
       let my_map = mapper n my_map curr in
     (curr,my_map)
+  | _->([],my_map)
 
 let rec bfser m result = function
     [] ->(List.rev result, m) 
@@ -134,6 +136,7 @@ let rec bfser m result = function
     }) in
     let result = result @ [addedFunc] in
      bfser m result latterlist
+  | _->([], m)
 
 (* convert stament in A to C, except those Var_dec and Func, we will convert them separately *)
 let rec convert_stmt = function
