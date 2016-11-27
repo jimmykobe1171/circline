@@ -42,12 +42,16 @@ let txt_of_var_type = function
   | Bool_t -> "bool"
   | Node_t -> "node"
   | Graph_t -> "graph"
-  | List_t -> "list"
   | Dict_Int_t -> "dict<int>"
   | Dict_Float_t -> "dict<float>"
   | Dict_String_t -> "dict<string>"
   | Dict_Node_t -> "dict<node>"
   | Dict_Graph_t -> "dict<graph>"
+  | List_Int_t -> "list<int>"
+  | List_Float_t -> "list<float>"
+  | List_String_t -> "list<string>"
+  | List_Node_t -> "list<node>"
+  | List_Graph_t -> "list<graph>"
 
 let txt_of_formal = function
 | Formal(vtype, name) -> sprintf "Formal(%s, %s)" (txt_of_var_type vtype) name
@@ -81,6 +85,7 @@ let rec txt_of_expr = function
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
   | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args)
+  | CallDefault(e, f, args) -> sprintf "CallDefault(%s, %s, [%s])" (txt_of_expr e) f (txt_of_list args)
 
 (*Variable Declaration*)
 and txt_of_var_decl = function

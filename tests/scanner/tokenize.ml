@@ -13,7 +13,7 @@ let stringify = function
   | AND -> "AND"      | OR -> "OR"
   | NOT -> "NOT"      | IF -> "IF"
   | ELSE -> "ELSE"    | FOR -> "FOR"
-  | WHILE -> "WHILE"  | BREAK -> "BREAK"  
+  | WHILE -> "WHILE"  | BREAK -> "BREAK"
   | CONTINUE -> "CONTINUE" | IN -> "IN"
   (* comparator *)
   | EQUAL -> "EQUAL"          | NOTEQUAL -> "NOTEQUAL"
@@ -30,7 +30,7 @@ let stringify = function
   | STRING -> "STRING"    | BOOL -> "BOOL"
   | NODE -> "NODE"        | GRAPH -> "GRAPH"
   | LIST -> "LIST"        | DICT -> "DICT"
-  | NULL -> "NULL"
+  | NULL -> "NULL"        | VOID -> "VOID"
   (* quote *)
   | QUOTE -> "QUOTE"
   (* boolean operation *)

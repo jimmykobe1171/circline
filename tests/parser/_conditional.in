@@ -1,5 +1,6 @@
 aList = ["str1","str2","str3"];
-for(int i = 0; i<= 5; i=i+1){
+int i;
+for(i = 0; i<= 5; i=i+1){
     if (str == "str2"){
         3+2;
     }

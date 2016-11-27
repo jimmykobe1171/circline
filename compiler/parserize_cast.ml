@@ -1,4 +1,4 @@
-open Ast
+open Cast
 open Printf
 
 (* Unary operators *)
@@ -34,18 +34,24 @@ let txt_of_graph_op = function
   | Double_Link -> "DLink"
 
 let txt_of_var_type = function
+  | Void_t -> "void"
+  | Null_t -> "null"
   | Int_t -> "int"
   | Float_t -> "float"
   | String_t -> "string"
   | Bool_t -> "bool"
   | Node_t -> "node"
   | Graph_t -> "graph"
-  | List_t -> "list"
   | Dict_Int_t -> "dict<int>"
   | Dict_Float_t -> "dict<float>"
   | Dict_String_t -> "dict<string>"
   | Dict_Node_t -> "dict<node>"
   | Dict_Graph_t -> "dict<graph>"
+  | List_Int_t -> "list<int>"
+  | List_Float_t -> "list<float>"
+  | List_String_t -> "list<string>"
+  | List_Node_t -> "list<node>"
+  | List_Graph_t -> "list<graph>"
 
 let txt_of_formal = function
 | Formal(vtype, name) -> sprintf "Formal(%s, %s)" (txt_of_var_type vtype) name
@@ -79,6 +85,7 @@ let rec txt_of_expr = function
   | ListP(l) -> sprintf "List(%s)" (txt_of_list l)
   | DictP(d) -> sprintf "Dict(%s)" (txt_of_dict d)
   | Call(f, args) -> sprintf "Call(%s, [%s])" (f) (txt_of_list args)
+  | CallDefault(e, f, args) -> sprintf "CallDefault(%s, %s, [%s])" (txt_of_expr e) f (txt_of_list args)
 
 (*Variable Declaration*)
 and txt_of_var_decl = function
@@ -102,13 +109,12 @@ and txt_of_dict = function
 
 (* Functions Declaration *)
 and txt_of_func_decl f =
-  sprintf "%s %s (%s) {%s}"
-    (txt_of_var_type f.returnType) f.name (txt_of_formal_list f.args) (txt_of_stmts f.body)
+  sprintf "returnType(%s) name(%s) args(%s) body{%s} locals{%s} parent(%s)"
+    (txt_of_var_type f.returnType) f.name (txt_of_formal_list f.args) (txt_of_stmts f.body) (txt_of_formal_list f.locals) f.pname
 
 (* Statements *)
 and txt_of_stmt = function
   | Expr(expr) -> sprintf "Expr(%s);" (txt_of_expr expr)
-  | Func(f) -> sprintf "Func(%s)" (txt_of_func_decl f)
   | Return(expr) -> sprintf "Return(%s);" (txt_of_expr expr)
   | For(e1,e2,e3,s) -> sprintf "For(%s;%s;%s){%s}"
     (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3) (txt_of_stmts s)
@@ -116,12 +122,21 @@ and txt_of_stmt = function
     (txt_of_expr e1) (txt_of_stmts s1) (txt_of_stmts s2)
   | While(e1, s) -> sprintf "While(%s){%s}"
     (txt_of_expr e1) (txt_of_stmts s)
-  | Var_dec(var) -> sprintf "Var_dec(%s);" (txt_of_var_decl var)
-and txt_of_stmts stmts =
+
+and txt_of_stmts = function
+  | [] -> ""
+  | [x] -> txt_of_stmt x
+  | _ as s -> String.concat ", " (List.map txt_of_stmt s)
+
+and txt_of_funcs funcs =
   let rec aux acc = function
       | [] -> sprintf "%s" (String.concat "\n" (List.rev acc))
-      | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
-  in aux [] stmts
+      | f :: tl -> aux (txt_of_func_decl f :: acc) tl
+  in aux [] funcs
 
 (* Program entry point *)
-let string_of_program = txt_of_stmts
+let _ =
+  let lexbuf = Lexing.from_channel stdin in
+  let program = Organizer.convert (Parser.program Scanner.token lexbuf) in
+  let result = txt_of_funcs program in
+  print_endline result

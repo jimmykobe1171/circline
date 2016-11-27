@@ -13,38 +13,9 @@ http://llvm.moe/ocaml/
 *)
 
 module L = Llvm
-module A = Ast
-module P = Parserize
+module A = Cast
 
 module StringMap = Map.Make(String)
-
-let getLocals stmts =
-  let aux l = function
-    | A.Var_dec(A.Local(typ, name, _)) -> (typ, name)::l
-    | _ -> l
-  in List.rev( List.fold_left aux [] stmts )
-
-let convertAST stmts =
-  let (functions, variables, scripts) =
-    let aux (fs, vars, others)= function
-      | A.Func(_) as f -> (f::fs, vars, others)
-      | A.Var_dec(A.Local(typ, name, v)) -> (
-          match v with
-          | A.Noexpr -> (fs, A.Var_dec(A.Local(typ, name, A.Noexpr))::vars, others)
-          | _ -> (fs, A.Var_dec(A.Local(typ, name, A.Noexpr))::vars, A.Expr(A.Assign(name, v))::others)
-        )
-      | _ as other -> (fs, vars, other::others)
-    in List.fold_left aux ([], [], []) stmts
-  in (List.rev functions), (List.rev variables), (List.rev scripts)
-
-let createMain stmts =
-  let funcs, vars, scripts = convertAST stmts in
-  funcs @ [ A.Func({
-    A.returnType = A.Int_t;
-    A.name = "main";
-    A.args = [];
-    A.body = vars @ scripts;
-  }) ]
 
 let context = L.global_context ()
 let the_module = L.create_module context "Circline"
@@ -62,6 +33,12 @@ let ltype_of_typ = function
   | A.String_t -> str_t
   | A.Void_t -> void_t
   | _ -> raise (Failure ("Type Not Found!"))
+
+let get_default_value_of_type = function
+  | A.Int_t as t -> L.const_int (ltype_of_typ t) 0
+  | A.Bool_t as t -> L.const_int (ltype_of_typ t) 0
+  | A.Float_t as t-> L.const_float (ltype_of_typ t) 0.
+  | t-> L.const_null (ltype_of_typ t)
 
 let codegen_string_lit s llbuilder =
   L.build_global_stringptr s "tmp" llbuilder
@@ -85,16 +62,19 @@ let int_to_float llbuilder v = L.build_sitofp v f_t "tmp" llbuilder
 
 (*
 ================================================================
+        context_funcs_vars
+================================================================
+*)
+let context_funcs_vars = Hashtbl.create 50
+let print_hashtbl tb =
+  print_endline (Hashtbl.fold (fun k _ m -> (k^", "^m)) tb "")
+
+(*
+================================================================
         Main Codegen Function
 ================================================================
 *)
-let translate raw_stmts =
-  let stmts = createMain raw_stmts in
-  let stmts = List.map (
-    fun e -> match e with
-    | A.Func(fdecl) -> fdecl
-    | _ -> raise (Failure("Ooops... AST should be a list of func_decl"))
-  ) stmts in
+let translate program =
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -105,10 +85,11 @@ let translate raw_stmts =
       in
       let ftype = L.var_arg_function_type (ltype_of_typ fdecl.A.returnType) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
-    List.fold_left function_decl StringMap.empty stmts in
+    List.fold_left function_decl StringMap.empty program in
 
   (* Fill in the body of the given function *)
-  let build_function_body (fdecl) =
+  let build_function_body fdecl =
+    let get_var_name fname n = (fname ^ "." ^ n) in
     let (the_function, _) = StringMap.find fdecl.A.name function_decls in
     (* let bb = L.append_block context "entry" the_function in *)
     let builder = L.builder_at_end context (L.entry_block the_function) in
@@ -117,28 +98,58 @@ let translate raw_stmts =
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
     let local_vars =
-      let add_formal m (A.Formal(t, n)) p = L.set_value_name n p;
-    	let local = L.build_alloca (ltype_of_typ t) n builder in
-    	ignore (L.build_store p local builder);
-    	StringMap.add n (local, t) m in
+      let add_to_context locals =
+        ignore(Hashtbl.add context_funcs_vars fdecl.A.name locals);
+        (* ignore(print_hashtbl context_funcs_vars); *)
+        locals
+      in
+      let add_formal m (A.Formal(t, n)) p =
+        let n' = get_var_name fdecl.A.name n in
+        let local = L.define_global n' (get_default_value_of_type t) the_module in
+        ignore (L.build_store p local builder);
+        (* L.set_value_name n p;
+    	  let local = L.build_alloca (ltype_of_typ t) n builder in
+    	    ignore (L.build_store p local builder); *)
+    	  StringMap.add n' (local, t) m
+      in
 
-      let add_local m (t,n) =
-      	let local_var = L.build_alloca (ltype_of_typ t) n builder
-      	in StringMap.add n (local_var, t) m in
+      let add_local m (A.Formal(t, n)) =
+        let n' = get_var_name fdecl.A.name n in
+      	let local_var = L.define_global n' (get_default_value_of_type t) the_module in
+      	(* let local_var = L.build_alloca (ltype_of_typ t) n builder in *)
+        StringMap.add n' (local_var, t) m
+      in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.args
           (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals (getLocals fdecl.A.body) in
+      add_to_context (List.fold_left add_local formals fdecl.A.locals)
+    in
 
     (* Return the value for a variable or formal argument *)
-    let lookup n = StringMap.find n local_vars
+    (* let lookup n = StringMap.find n local_vars
+    in *)
+    let lookup n =
+      let get_parent_func_name fname =
+        let (_, fdecl) = StringMap.find fname function_decls in
+        fdecl.A.pname
+      in
+      let rec aux n fname = (
+        try StringMap.find (get_var_name fname n) (Hashtbl.find context_funcs_vars fname)
+        with Not_found -> (
+          if fname = "main" then
+            (raise (Failure("Local Variable not found...")))
+          else
+            (aux n (get_parent_func_name fname))
+        )
+      ) in
+      aux n fdecl.A.name
     in
 
     (* Return the type of expr *)
     let rec get_type = function
-        A.Num_Lit(A.Num_Int _) -> A.Int_t 
-      | A.Num_Lit(A.Num_Float _) -> A.Float_t 
-      | A.String_Lit _ -> A.String_t 
+        A.Num_Lit(A.Num_Int _) -> A.Int_t
+      | A.Num_Lit(A.Num_Float _) -> A.Float_t
+      | A.String_Lit _ -> A.String_t
       | A.Bool_lit _ -> A.Bool_t
       | A.Id s -> let (_, typ) = lookup s in typ
       | A.Binop(e1, op, e2) -> let t1 = get_type e1 and t2 = get_type e2 in
@@ -191,10 +202,10 @@ let translate raw_stmts =
         | A.Greater -> L.build_fcmp L.Fcmp.Ogt e1 e2 "flt_sgttmp" llbuilder
         | A.Geq     -> L.build_fcmp L.Fcmp.Oge e1 e2 "flt_sgetmp" llbuilder
         | _ -> raise (Failure("Unrecognized float binop opreation!"))
-      in 
+      in
 
       (* chars are considered ints, so they will use int_ops as well*)
-      let int_ops op e1 e2 = 
+      let int_ops op e1 e2 =
         match op with
           A.Add     -> L.build_add e1 e2 "addtmp" llbuilder
         | A.Sub     -> L.build_sub e1 e2 "subtmp" llbuilder
@@ -288,7 +299,6 @@ let translate raw_stmts =
     (* Build the code for the given statement; return the builder for
        the statement's successor *)
     let rec stmt builder = function
-      | A.Block sl -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
       | A.Return e ->
           ignore (
@@ -304,12 +314,14 @@ let translate raw_stmts =
       	 let merge_bb = L.append_block context "merge" the_function in
 
       	 let then_bb = L.append_block context "then" the_function in
-      	 add_terminal (stmt (L.builder_at_end context then_bb) (A.Block then_stmt))
-      	   (L.build_br merge_bb);
+      	 add_terminal (
+             List.fold_left stmt (L.builder_at_end context then_bb) then_stmt
+           ) (L.build_br merge_bb);
 
       	 let else_bb = L.append_block context "else" the_function in
-      	 add_terminal (stmt (L.builder_at_end context else_bb) (A.Block else_stmt))
-      	   (L.build_br merge_bb);
+         add_terminal (
+             List.fold_left stmt (L.builder_at_end context else_bb) else_stmt
+           ) (L.build_br merge_bb);
 
       	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
       	 L.builder_at_end context merge_bb
@@ -319,8 +331,9 @@ let translate raw_stmts =
       	  ignore (L.build_br pred_bb builder);
 
       	  let body_bb = L.append_block context "while_body" the_function in
-      	  add_terminal (stmt (L.builder_at_end context body_bb) (A.Block body))
-      	    (L.build_br pred_bb);
+      	  add_terminal (
+              List.fold_left stmt (L.builder_at_end context body_bb) body
+            ) (L.build_br pred_bb);
 
       	  let pred_builder = L.builder_at_end context pred_bb in
       	  let bool_val = expr pred_builder predicate in
@@ -329,14 +342,12 @@ let translate raw_stmts =
       	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
       	  L.builder_at_end context merge_bb
 
-      | A.For (e1, e2, e3, body) -> stmt builder
-	       ( A.Block [A.Expr e1 ; A.While (e2, body @ [A.Expr e3]) ] )
-      | A.Var_dec(_) -> builder
-      | _ -> builder
+      | A.For (e1, e2, e3, body) -> List.fold_left stmt builder
+	       ( [A.Expr e1 ; A.While (e2, body @ [A.Expr e3]) ] )
     in
 
     (* Build the code for each statement in the function *)
-    let builder = stmt builder (A.Block fdecl.A.body) in
+    let builder = List.fold_left stmt builder fdecl.A.body in
 
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.A.returnType with
@@ -348,7 +359,6 @@ let translate raw_stmts =
     )
   in
 
-  (* print_endline (P.string_of_program (stmts)); *)
-  List.iter build_function_body stmts;
+  List.iter build_function_body (List.rev program);
 
   the_module

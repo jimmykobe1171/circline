@@ -36,12 +36,16 @@ type var_type =
 | Bool_t
 | Node_t
 | Graph_t
-| List_t
 | Dict_Int_t
 | Dict_Float_t
 | Dict_String_t
 | Dict_Node_t
 | Dict_Graph_t
+| List_Int_t
+| List_Float_t
+| List_String_t
+| List_Node_t
+| List_Graph_t
 | Void_t
 | Null_t
 
@@ -69,6 +73,7 @@ type expr =
 |   ListP of expr list
 |   DictP of (expr * expr) list
 |   Call of string * expr list    (* function call *)
+|   CallDefault of expr * string * expr list
 
 and edge_graph_list = {
   graphs: expr list;
@@ -81,13 +86,12 @@ type var_decl =
 (* Statements *)
 type stmt =
   Expr of expr     (* set foo = bar + 3 *)
-| Func of func_decl
 | Return of expr
 | For of expr * expr * expr * stmt list
 | If of expr * stmt list * stmt list
 | While of expr * stmt list
 | Var_dec of var_decl
-| Block of stmt list
+| Func of func_decl
 
 (* Function Declaration *)
 and func_decl = {
