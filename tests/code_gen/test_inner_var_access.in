@@ -1,0 +1,10 @@
+int d = 1;
+int b(int c) {
+  int d = 2;
+  int a() {
+    return d + c;
+  }
+  return a();
+}
+print(b(3));
+print(d);

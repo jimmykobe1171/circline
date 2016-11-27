@@ -119,7 +119,7 @@ let rec mapper parent map = function
     mapper parent (StringMap.add n parent map) tl
  | _-> map
 
-let convert_bfs_insider my_map = function 
+let convert_bfs_insider my_map = function
     A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b}->
     let curr = get_funcs_from_body_a b in
       let my_map = mapper n my_map curr in
@@ -127,7 +127,7 @@ let convert_bfs_insider my_map = function
   | _->([],my_map)
 
 let rec bfser m result = function
-    [] ->(List.rev result, m) 
+    [] ->(List.rev result, m)
   | A.Func{A.returnType = r; A.name = n; A.args = args; A.body = b} as a ::tl -> let result1 = convert_bfs_insider m a in
     let latterlist = tl @ (fst result1) in
     let m = (snd result1) in
@@ -149,7 +149,8 @@ let rec convert_stmt = function
 
 let rec get_body_from_body_c = function
     [] -> []
-  | A.Var_dec(A.Local(_, name, v))::tl -> C.Expr(C.Assign(name, convert_expr v)) :: (get_body_from_body_c tl)
+  | A.Var_dec(A.Local(_, name, v))::tl when v <> A.Noexpr -> C.Expr(C.Assign(name, convert_expr v)) :: (get_body_from_body_c tl)
+  | A.Var_dec(A.Local(_, name, v))::tl when v = A.Noexpr -> (get_body_from_body_c tl)
   | _ as x::tl -> (convert_stmt x) :: (get_body_from_body_c tl)
 
 

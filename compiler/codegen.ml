@@ -359,6 +359,6 @@ let translate program =
     )
   in
 
-  List.iter build_function_body program;
+  List.iter build_function_body (List.rev program);
 
   the_module
