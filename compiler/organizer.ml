@@ -1,6 +1,8 @@
 module A = Ast
 module C = Cast
 
+module StringMap = Map.Make(String)
+
 let convert_binop = function
     A.Add -> C.Add
   | A.Sub -> C.Sub
@@ -52,38 +54,44 @@ let convert_graph_op = function
 | A.Left_Link -> C.Right_Link
 | A.Double_Link -> C.Double_Link
 
-let rec convert_expr = function
+let rec get_entire_name m aux cur_name = 
+  if (StringMap.mem cur_name m) then 
+    let aux = (StringMap.find cur_name m) ^ "." ^ aux in  
+    (get_entire_name m aux (StringMap.find cur_name m))
+  else aux
+
+let rec convert_expr m = function
     A.Num_Lit(a) -> C.Num_Lit(convert_num a)
 |   A.Null -> C.Null
 |   A.String_Lit(a) -> C.String_Lit(a)
 |   A.Bool_lit(a) -> C.Bool_lit(a)
-|   A.Node(a) -> C.Node(convert_expr a)
-|   A.Graph_Link(a,b,c,d) -> C.Graph_Link(convert_expr a, convert_graph_op b, convert_expr c, convert_expr d)
-|   A.Binop(a,b,c) -> C.Binop(convert_expr a, convert_binop b, convert_expr c)
-|   A.Unop(a,b) -> C.Unop(convert_unop a, convert_expr b)
+|   A.Node(a) -> C.Node(convert_expr m a)
+|   A.Graph_Link(a,b,c,d) -> C.Graph_Link(convert_expr m a, convert_graph_op b, convert_expr m c, convert_expr m d)
+|   A.Binop(a,b,c) -> C.Binop(convert_expr m a, convert_binop b, convert_expr m c)
+|   A.Unop(a,b) -> C.Unop(convert_unop a, convert_expr m b)
 |   A.Id(a) -> C.Id(a)
-|   A.Assign(a,b) -> C.Assign(a, convert_expr b)
+|   A.Assign(a,b) -> C.Assign(a, convert_expr m b)
 |   A.Noexpr -> C.Noexpr
-|   A.ListP(a) -> C.ListP(convert_expr_list a)
-|   A.DictP(a) -> C.DictP(convert_dict_list a)
-|   A.Call(a,b) -> C.Call(a, convert_expr_list b)
-|   A.CallDefault(a,b,c) -> C.CallDefault(convert_expr a, b, convert_expr_list c)
+|   A.ListP(a) -> C.ListP(convert_expr_list m a)
+|   A.DictP(a) -> C.DictP(convert_dict_list m a)
+|   A.Call(a,b) -> C.Call(get_entire_name m a a, convert_expr_list m b)
+|   A.CallDefault(a,b,c) -> C.CallDefault(convert_expr m a, b, convert_expr_list m c)
 
-and convert_expr_list = function
+and convert_expr_list m = function
     [] -> []
-  | [x] -> [convert_expr x]
-  | _ as l -> (List.map convert_expr l)
+  | [x] -> [convert_expr m x]
+  | _ as l -> (List.map (convert_expr m) l)
 
-and convert_dict = function
-  (c,d) -> (convert_expr c, convert_expr d)
+and convert_dict m = function
+  (c,d) -> (convert_expr m c, convert_expr m d)
 
-and convert_dict_list = function
+and convert_dict_list m = function
     [] -> []
-  | [x] -> [convert_dict x]
-  | _ as l -> (List.map convert_dict l)
+  | [x] -> [convert_dict m x]
+  | _ as l -> (List.map (convert_dict m) l)
 
-let convert_edge_graph_list = function
-  {A.graphs = g; A.edges = e} -> {C.graphs = convert_expr_list g; C.edges = convert_expr_list e}
+let convert_edge_graph_list m = function
+  {A.graphs = g; A.edges = e} -> {C.graphs = convert_expr_list m g; C.edges = convert_expr_list m e}
 
 let convert_formal = function
   | A.Formal(v, s) -> C.Formal(convert_var_type v, s)
@@ -100,8 +108,6 @@ let createMain stmts = A.Func({
     A.args = [];
     A.body = stmts;
   })
-
-module StringMap = Map.Make(String)
 
 let rec get_funcs_from_body_a = function
     [] -> []
@@ -139,20 +145,20 @@ let rec bfser m result = function
   | _->([], m)
 
 (* convert stament in A to C, except those Var_dec and Func, we will convert them separately *)
-let rec convert_stmt = function
-    A.Expr(a) -> C.Expr(convert_expr a)
-  | A.Return(a) -> C.Return(convert_expr a)
-  | A.For(e1, e2, e3, stls) -> C.For(convert_expr e1, convert_expr e2, convert_expr e3, List.map convert_stmt stls)
-  | A.If(e, stls1, stls2) -> C.If(convert_expr e, List.map convert_stmt stls1, List.map convert_stmt stls2)
-  | A.While(e, stls) -> C.While(convert_expr e, List.map convert_stmt stls)
+let rec convert_stmt m = function
+    A.Expr(a) -> C.Expr(convert_expr m a)
+  | A.Return(a) -> C.Return(convert_expr m a)
+  | A.For(e1, e2, e3, stls) -> C.For(convert_expr m e1, convert_expr m e2, convert_expr m e3, List.map (convert_stmt m) stls)
+  | A.If(e, stls1, stls2) -> C.If(convert_expr m e, List.map (convert_stmt m) stls1, List.map (convert_stmt m) stls2)
+  | A.While(e, stls) -> C.While(convert_expr m e, List.map (convert_stmt m) stls)
   | _ -> C.Expr(C.Noexpr)
 
-let rec get_body_from_body_c = function
-    [] -> []
-  | A.Var_dec(A.Local(_, name, v))::tl when v <> A.Noexpr -> C.Expr(C.Assign(name, convert_expr v)) :: (get_body_from_body_c tl)
-  | A.Var_dec(A.Local(_, name, v))::tl when v = A.Noexpr -> (get_body_from_body_c tl)
-  | _ as x::tl -> (convert_stmt x) :: (get_body_from_body_c tl)
 
+let rec get_body_from_body_c m = function
+    [] -> []
+  | A.Var_dec(A.Local(_, name, v))::tl when v <> A.Noexpr -> C.Expr(C.Assign(name, convert_expr m v)) :: (get_body_from_body_c m tl)
+  | A.Var_dec(A.Local(_, name, v))::tl when v = A.Noexpr -> (get_body_from_body_c m tl)
+  | _ as x::tl -> (convert_stmt m x) :: (get_body_from_body_c m tl)
 
 let rec get_local_from_body_c = function
     [] -> []
@@ -164,11 +170,11 @@ let rec convert_func_list_c m = function
     [] -> []
   | A.Func{A.returnType = r; A.name = n; A.args = a; A.body = b} :: tl -> {
     C.returnType = convert_var_type r;
-    C.name = n;
+    C.name = get_entire_name m n n;
     C.args = convert_formal_list a;
-    C.body = get_body_from_body_c b;
-    C.locals = get_local_from_body_c b;
-    C.pname = (if n = "main" then "main" else StringMap.find n m)
+    C.body = get_body_from_body_c m b;
+    C.locals = get_local_from_body_c b; 
+    C.pname = if n = "main" then "main" else get_entire_name m (StringMap.find n m) (StringMap.find n m)
   } :: (convert_func_list_c m tl)
   | _::tl -> convert_func_list_c m tl
 
