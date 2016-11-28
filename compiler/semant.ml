@@ -1,4 +1,5 @@
 open Cast
+open Printf
 
 
 module StringMap = Map.Make(String)
@@ -74,6 +75,29 @@ let rec string_of_expr = function
   | CallDefault(e, n, es) -> "function call " ^ string_of_expr e ^ "." ^ n
   
 
+exception SemanticError of string
+
+(* error message functions *)
+let undeclared_function_error name =
+    let msg = sprintf "undeclared function %s" name in
+    raise (SemanticError msg)
+
+let duplicate_formal_decl_error func name =
+    let msg = sprintf "duplicate formal %s in %s" name func.name in
+    raise (SemanticError msg)
+
+let duplicate_local_decl_error func name =
+    let msg = sprintf "duplicate local %s in %s" name func.name in
+    raise (SemanticError msg)
+
+let undeclared_identifier_error name =
+    let msg = sprintf "undeclared identifier %s" name in
+    raise (SemanticError msg)
+
+let illegal_assignment_error lvaluet rvaluet ex =
+    let msg = sprintf "illegal assignment %s = %s in %s." lvaluet rvaluet ex in
+    raise (SemanticError msg)
+
 let  match_list_type = function
   Int_t -> List_Int_t
 | Float_t -> List_Float_t
@@ -101,13 +125,13 @@ let check_valid_dict_type typ =
 (* get function obj from func_map, if not found, raise error *)
 let get_func_obj name func_map = 
     try StringMap.find name func_map
-    with Not_found -> raise (Failure ("undeclared function " ^ name))
+    with Not_found -> undeclared_function_error name
 
 
 (* Raise an exception if the given list has a duplicate *)
 let report_duplicate exceptf list =
     let rec helper = function
-        n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
+        n1 :: n2 :: _ when n1 = n2 -> exceptf n1
         | _ :: t -> helper t
         | [] -> ()
     in helper (List.sort compare list)
@@ -116,11 +140,11 @@ let report_duplicate exceptf list =
 let check_function func_map func =
     (* check duplicate formals *)
     let args = List.map (fun (Formal(t, n)) -> n) func.args in
-    report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.name) args;
+    report_duplicate (duplicate_formal_decl_error func) args;
 
     (* check duplicate locals *)
     let locals = List.map (fun (Formal(t, n)) -> n) func.locals in
-    report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.name) locals;
+    report_duplicate (duplicate_local_decl_error func) locals;
 
     
     (* search locally, if not found, then recursively search parent environment *)
@@ -130,15 +154,16 @@ let check_function func_map func =
         in
         try StringMap.find s symbols
         with Not_found ->
-            if func.name = "main" then raise (Failure ("undeclared identifier " ^ s)) else
+            if func.name = "main" then undeclared_identifier_error s else
             (* recursively search parent environment *)
             type_of_identifier (StringMap.find func.pname func_map) s
     in
     (* Raise an exception of the given rvalue type cannot be assigned to
     he given lvalue type, noted that int could be assinged to float type variable *)
-    let check_assign lvaluet rvaluet err = match lvaluet with
+    let check_assign lvaluet rvaluet ex = match lvaluet with
         Float_t when rvaluet = Int_t -> lvaluet
-        | _ -> if lvaluet == rvaluet then lvaluet else raise err
+        | _ -> if lvaluet == rvaluet then lvaluet else 
+            illegal_assignment_error (string_of_typ lvaluet) (string_of_typ rvaluet) (string_of_expr ex)
     in
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
@@ -181,8 +206,7 @@ let check_function func_map func =
         | Assign(var, ListP([])) -> let lt = type_of_identifier func var in check_valid_list_type lt
         | Assign(var, DictP([])) -> let lt = type_of_identifier func var in check_valid_dict_type lt
         | Assign(var, e) as ex -> let lt = type_of_identifier func var and rt = expr e in
-            check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-            " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
+            check_assign lt rt ex
         | Noexpr -> Void_t
         (* check list element type, if empty, assign List_Int_t here, and check again when encounter
         assignment operation *)
