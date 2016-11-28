@@ -34,11 +34,11 @@ let convert_var_type = function
   | A.Bool_t -> C.Bool_t
   | A.Node_t -> C.Node_t
   | A.Graph_t -> C.Graph_t
-  | A.List_Int_t
-  | A.List_Float_t
-  | A.List_String_t
-  | A.List_Node_t
-  | A.List_Graph_t
+  | A.List_Int_t -> C.List_Int_t
+  | A.List_Float_t -> C.List_Float_t
+  | A.List_String_t -> C.List_String_t
+  | A.List_Node_t -> C.List_Node_t
+  | A.List_Graph_t -> C.List_Graph_t
   | A.Dict_Int_t -> C.Dict_Int_t
   | A.Dict_Float_t -> C.Dict_Float_t
   | A.Dict_String_t -> C.Dict_String_t

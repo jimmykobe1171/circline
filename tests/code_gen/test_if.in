@@ -1,0 +1,19 @@
+int a = 2;
+if (a < 3) {
+	print(a);
+}
+if(a>3) {
+	print(10);
+}
+else
+{
+	print("True");
+}
+float b = 0;
+if (b < 3) {
+	print(b);
+}
+bool c = true;
+if (c) {
+	print("True");
+}
