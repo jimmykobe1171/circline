@@ -1,0 +1,9 @@
+int foo() {
+    int a = 0; 
+    int bar() {
+        return a + 1;
+    }
+    bar();
+}
+
+foo();
