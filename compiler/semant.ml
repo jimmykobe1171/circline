@@ -1,5 +1,6 @@
 open Cast
 
+
 module StringMap = Map.Make(String)
 
 (* Pretty-printing functions *)
@@ -121,12 +122,17 @@ let check_function func_map func =
     let locals = List.map (fun (Formal(t, n)) -> n) func.locals in
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.name) locals;
 
-    let symbols = List.fold_left (fun m (Formal(t, n)) -> StringMap.add n t m)
-        StringMap.empty (func.args @ func.locals )
-    in
-    let type_of_identifier s =
-      try StringMap.find s symbols
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    
+    (* search locally, if not found, then recursively search parent environment *)
+    let rec type_of_identifier func s =
+        let symbols = List.fold_left (fun m (Formal(t, n)) -> StringMap.add n t m)
+            StringMap.empty (func.args @ func.locals )
+        in
+        try StringMap.find s symbols
+        with Not_found ->
+            if func.name = "main" then raise (Failure ("undeclared identifier " ^ s)) else
+            (* recursively search parent environment *)
+            type_of_identifier (StringMap.find func.pname func_map) s
     in
     (* Raise an exception of the given rvalue type cannot be assigned to
     he given lvalue type *)
@@ -169,11 +175,11 @@ let check_function func_map func =
             | Not when t = Bool_t -> Bool_t
             | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
                     string_of_typ t ^ " in " ^ string_of_expr ex)))
-        | Id s -> type_of_identifier s
+        | Id s -> type_of_identifier func s
         (* check assignment operation, check cases of empty list and empty dict *)
-        | Assign(var, ListP([])) -> let lt = type_of_identifier var in check_valid_list_type lt
-        | Assign(var, DictP([])) -> let lt = type_of_identifier var in check_valid_dict_type lt
-        | Assign(var, e) as ex -> let lt = type_of_identifier var and rt = expr e in
+        | Assign(var, ListP([])) -> let lt = type_of_identifier func var in check_valid_list_type lt
+        | Assign(var, DictP([])) -> let lt = type_of_identifier func var in check_valid_dict_type lt
+        | Assign(var, e) as ex -> let lt = type_of_identifier func var and rt = expr e in
             check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
             " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
         | Noexpr -> Void_t
@@ -224,25 +230,21 @@ let check_function func_map func =
                   check_args_type func.args args
               in
               ignore(check_funciton_call func_obj args); func_obj.returnType
+              (* TODO: implement call default *)
         (* |   CallDefault(e, n, es) -> *)
     in
     (* check statement *)
     let rec stmt = function
             Expr(e) -> ignore (expr e)
             | Return e -> ignore (expr e)
-            (* TODO: possible bug here, should use mutually recursive with stmt_list *)
             | For(e1, e2, e3, stls) -> 
                 ignore (expr e1); ignore (expr e2); ignore (expr e3); ignore(stmt_list stls)
             | If(e, stls1, stls2) -> ignore(e); ignore(stmt_list stls1); ignore(stmt_list stls2)
             | While(e, stls) -> ignore(e); ignore(stmt_list stls)
-            (* | Var_dec(Local(typ, name, e)) when e <> Noexpr -> let lt = typ and rt = expr e in
-                ignore(check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-                " = " ^ string_of_typ rt ^ " in " ^ string_of_typ lt ^ " " ^ name ^ " = " ^ string_of_expr e)))
-            | Var_dec(Local(typ, name, e)) when e = Noexpr -> () *)
     and
     (* check statement list *)
     stmt_list = function
-            Return _ :: _ -> raise (Failure "nothing may follow a return")
+            Return _ :: ss when ss <> [] -> raise (Failure "nothing may follow a return")
             | s::ss -> stmt s ; stmt_list ss
             | [] -> ()
 
@@ -251,40 +253,10 @@ let check_function func_map func =
 
 (* program here is a list of functions *)
 let check program =
-    let rec collect_functions m = function
-        [] -> m
-        | f :: t -> ignore(StringMap.add f.name f m); collect_functions m t
-        | _ :: t -> collect_functions m t
-    in
-    (* collect global variable declarations *)
-    let func_map = collect_functions StringMap.empty program in
-(*     (* loop through the stmt_list of program to collect global variable declarations *)
-    let rec collect_globals list = function
-        [] -> list
-        | Var_dec(Local(typ, name, v)) :: t -> (name, (typ, v)) :: collect_globals list t
-        | _ :: t -> collect_globals list t
-    in
-    (* collect global variable declarations *)
-    let globals = collect_globals [] program in
-
-    (* Type and value of global variable *)
-    let globals_symbols = List.fold_left (fun m (name, (typ, v)) -> StringMap.add name (typ, v) m)
-        StringMap.empty globals
-    in
-    let type_of_identifier s =
-      try fst (StringMap.find s globals_symbols)
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-    in
-    
-    (**** Checking duplicated global variables ****)
-    report_duplicate (fun n -> "duplicate global " ^ n) (List.map fst globals); *)
-
-    (**** Checking statements ****)
-    (* stmt_list program; *)
-
-    
-    (**** Checking functions ****)
+    (* collect all functions and store in map with key=name, value=function *)
+    let func_map = List.fold_left (fun m f -> StringMap.add f.name f m) StringMap.empty program in
     let check_function_wrapper func m =
         func m
     in
+    (**** Checking functions ****)
     List.iter (check_function_wrapper check_function func_map) program
