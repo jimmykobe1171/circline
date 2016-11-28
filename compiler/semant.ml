@@ -227,16 +227,21 @@ let check_function func_map func =
         (* |   CallDefault(e, n, es) -> *)
     in
     (* check statement *)
-    let stmt = function
+    let rec stmt = function
             Expr(e) -> ignore (expr e)
             | Return e -> ignore (expr e)
+            (* TODO: possible bug here, should use mutually recursive with stmt_list *)
+            | For(e1, e2, e3, stls) -> 
+                ignore (expr e1); ignore (expr e2); ignore (expr e3); ignore(stmt_list stls)
+            | If(e, stls1, stls2) -> ignore(e); ignore(stmt_list stls1); ignore(stmt_list stls2)
+            | While(e, stls) -> ignore(e); ignore(stmt_list stls)
             (* | Var_dec(Local(typ, name, e)) when e <> Noexpr -> let lt = typ and rt = expr e in
                 ignore(check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
                 " = " ^ string_of_typ rt ^ " in " ^ string_of_typ lt ^ " " ^ name ^ " = " ^ string_of_expr e)))
             | Var_dec(Local(typ, name, e)) when e = Noexpr -> () *)
-    in
+    and
     (* check statement list *)
-    let rec stmt_list = function
+    stmt_list = function
             Return _ :: _ -> raise (Failure "nothing may follow a return")
             | s::ss -> stmt s ; stmt_list ss
             | [] -> ()
