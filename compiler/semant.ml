@@ -135,9 +135,10 @@ let check_function func_map func =
             type_of_identifier (StringMap.find func.pname func_map) s
     in
     (* Raise an exception of the given rvalue type cannot be assigned to
-    he given lvalue type *)
-    let check_assign lvaluet rvaluet err =
-        if lvaluet == rvaluet then lvaluet else raise err
+    he given lvalue type, noted that int could be assinged to float type variable *)
+    let check_assign lvaluet rvaluet err = match lvaluet with
+        Float_t when rvaluet = Int_t -> lvaluet
+        | _ -> if lvaluet == rvaluet then lvaluet else raise err
     in
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
@@ -222,12 +223,13 @@ let check_function func_map func =
                   check_args_length func.args args;
                   (* l_arg is a list of Formal(typ, name), r_arg is a list of expr *)
                   let check_args_type l_arg r_arg =
-                      List.map2 
+                      List.iter2 
                           (fun (Formal(t, n)) r -> let r_typ = expr r in if t = r_typ then () else
-                          raise (Failure("incompatible argument type " ^ string_of_typ t ^ " but " ^ string_of_typ r_typ ^ " is expected"))) 
+                          raise (Failure("incompatible argument type " ^ string_of_typ r_typ ^ ", but " ^ string_of_typ t ^ " is expected"))) 
                           l_arg r_arg
                   in
-                  check_args_type func.args args
+                  (* do not check args type of function print, do conversion in codegen *)
+                  if func.name = "print" then () else check_args_type func.args args
               in
               ignore(check_funciton_call func_obj args); func_obj.returnType
               (* TODO: implement call default *)
@@ -253,8 +255,19 @@ let check_function func_map func =
 
 (* program here is a list of functions *)
 let check program =
+    if List.mem "print" (List.map (fun f -> f.name) program)
+        then raise (Failure ("function print may not be defined")) else ();
+    (* TODO: check duplicate function *)
+
+    (* Function declaration for a named function *)
+    let built_in_funcs =  StringMap.add "print"
+       { returnType = Void_t; name = "print"; args = [Formal(String_t, "x")];
+         locals = []; body = []; pname = "main"} (StringMap.singleton "printb"
+       { returnType = Void_t; name = "printb"; args = [Formal(Bool_t, "x")];
+         locals = []; body = []; pname = "main"})
+    in
     (* collect all functions and store in map with key=name, value=function *)
-    let func_map = List.fold_left (fun m f -> StringMap.add f.name f m) StringMap.empty program in
+    let func_map = List.fold_left (fun m f -> StringMap.add f.name f m) built_in_funcs program in
     let check_function_wrapper func m =
         func m
     in
