@@ -8,7 +8,7 @@ circline.native :
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		circline.native
 
-OBJS = cast.cmx ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx circline.cmx parserize.cmx
+OBJS = organizer.cmx cast.cmx ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx circline.cmx parserize.cmx
 
 circline: $(OBJS)
 	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o circline
