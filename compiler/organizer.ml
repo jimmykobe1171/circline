@@ -13,7 +13,7 @@ let convert_binop = function
   | A.Neq -> C.Neq
   | A.Less -> C.Less
   | A.Leq -> C.Leq
-  | A.Greater -> C.Leq
+  | A.Greater -> C.Greater
   | A.Geq -> C.Geq
   | A.And -> C.And
   | A.Or -> C.Or
