@@ -4,11 +4,11 @@
 default: test
 
 
-test: build
+test: clean build
 	bash ./test_scanner.sh
 	bash ./test_parser.sh
-	bash ./test_code_gen.sh
 	bash ./test_semantic.sh
+	bash ./test_code_gen.sh
 
 build:
 	cd scanner; make

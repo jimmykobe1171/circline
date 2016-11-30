@@ -1,0 +1,5 @@
+list<int> a = [];
+list<float> b = [];
+list<string> c = [];
+list<node> d = [];
+list<graph> e = [];

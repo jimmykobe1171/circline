@@ -45,7 +45,7 @@ let string_of_op = function
 
 let string_of_uop = function
     Neg -> "-"
-  | Not -> "!"
+  | Not -> "not"
 
 let string_of_graph_op = function
     Right_Link -> "->"
@@ -64,7 +64,7 @@ let rec string_of_expr = function
       "graph_link(" ^ string_of_expr e1 ^ " " ^ string_of_graph_op op ^ " " ^ string_of_expr e2 ^ " " ^ string_of_expr e3 ^ ")"
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
-  | Unop(o, e) -> string_of_uop o ^ string_of_expr e
+  | Unop(o, e) -> string_of_uop o ^ " " ^ string_of_expr e
   | Id(s) -> s
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Noexpr -> ""
@@ -95,8 +95,25 @@ let undeclared_identifier_error name =
     raise (SemanticError msg)
 
 let illegal_assignment_error lvaluet rvaluet ex =
-    let msg = sprintf "illegal assignment %s = %s in %s." lvaluet rvaluet ex in
+    let msg = sprintf "illegal assignment %s = %s in %s" lvaluet rvaluet ex in
     raise (SemanticError msg)
+
+let illegal_binary_operation_error typ1 typ2 op ex =
+    let msg = sprintf "illegal binary operator %s %s %s in %s" typ1 op typ2 ex in
+    raise (SemanticError msg)
+
+let illegal_unary_operation_error typ op ex =
+    let msg = sprintf "illegal unary operator %s %s in %s" op typ ex in
+    raise (SemanticError msg)
+
+let invaid_list_type_error typ = 
+    let msg = sprintf "invalid list type: %s" typ in
+    raise (SemanticError msg)
+
+let invaid_dict_type_error typ = 
+    let msg = sprintf "invalid dict type: %s" typ in
+    raise (SemanticError msg)
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -104,7 +121,7 @@ let  match_list_type = function
 | String_t -> List_String_t
 | Node_t -> List_Node_t
 | Graph_t -> List_Graph_t
-| _ as t-> raise (Failure("invalid list type: " ^ string_of_typ t))
+| _ as t-> invaid_list_type_error (string_of_typ t)
 
 let  match_dict_type = function
   Int_t -> Dict_Int_t
@@ -112,15 +129,15 @@ let  match_dict_type = function
 | String_t -> Dict_String_t
 | Node_t -> Dict_Node_t
 | Graph_t -> Dict_Graph_t
-| _ as t-> raise (Failure("invalid dict type: " ^ string_of_typ t))
+| _ as t-> invaid_dict_type_error (string_of_typ t)
 
 let check_valid_list_type typ =
     if typ = List_Int_t || typ = List_Float_t || typ = List_String_t || typ = List_Node_t || typ = List_Graph_t then typ
-    else raise (Failure("invalid list type: " ^ string_of_typ typ))
+    else invaid_list_type_error (string_of_typ typ)
 
 let check_valid_dict_type typ =
     if typ = Dict_Int_t || typ = Dict_Float_t || typ = Dict_String_t || typ = Dict_Node_t || typ = Dict_Graph_t then typ
-    else raise (Failure("invalid dict type: " ^ string_of_typ typ))
+    else invaid_dict_type_error (string_of_typ typ)
 
 (* get function obj from func_map, if not found, raise error *)
 let get_func_obj name func_map = 
@@ -182,7 +199,7 @@ let check_function func_map func =
             |Add | Sub | Mult | Div when t1 = Float_t && t2 = Float_t -> Float_t
             |Add | Sub | Mult | Div when t1 = Int_t && t2 = Float_t -> Float_t
             |Add | Sub | Mult | Div when t1 = Float_t && t2 = Int_t -> Float_t
-            (* =, != *)
+            (* ==, != *)
             | Equal | Neq when t1 = t2 -> Bool_t
             (* <, <=, >, >= *)
             | Less | Leq | Greater | Geq when (t1 = Int_t || t1 = Float_t) && (t2 = Int_t || t2 = Float_t) -> Bool_t
@@ -190,17 +207,15 @@ let check_function func_map func =
             | And | Or when t1 = Bool_t && t2 = Bool_t -> Bool_t
             (* mode *)
             | Mod when t1 = Int_t && t2 = Int_t -> Int_t
-            | _ -> raise (Failure ("illegal binary operator " ^
-                      string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-                      string_of_typ t2 ^ " in " ^ string_of_expr e))
+            | _ -> illegal_binary_operation_error (string_of_typ t1) (string_of_typ t2) (string_of_op op) (string_of_expr e)
             )
         | Unop(op, e) as ex -> let t = expr e in
             (match op with
             Neg when t = Int_t -> Int_t
             |Neg when t = Float_t -> Float_t
             | Not when t = Bool_t -> Bool_t
-            | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
-                    string_of_typ t ^ " in " ^ string_of_expr ex)))
+            | _ -> illegal_unary_operation_error (string_of_typ t) (string_of_uop op) (string_of_expr ex)
+            )
         | Id s -> type_of_identifier func s
         (* check assignment operation, check cases of empty list and empty dict *)
         | Assign(var, ListP([])) -> let lt = type_of_identifier func var in check_valid_list_type lt
