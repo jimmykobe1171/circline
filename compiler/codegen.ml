@@ -63,8 +63,6 @@ let get_default_value_of_type = function
 ================================================================
 *)
 
-(* let node_vals_types = Hashtbl.create 100 *)
-
 let get_node_val_index_by_type typ =
   match typ with
   | A.Int_t -> 1
@@ -85,12 +83,20 @@ let get_node_value node_ptr typ llbuilder =
 
 let set_node_value node_ptr nval typ llbuilder =
   let idx = get_node_val_index_by_type typ in
-  let a_ptr = L.build_struct_gep node_ptr idx "node_ptr_tmp" llbuilder in
+  let a_ptr = L.build_struct_gep node_ptr idx "node_val_ptr_tmp" llbuilder in
   (ignore(L.build_store nval a_ptr llbuilder); node_ptr)
 
-let create_node nval typ llbuilder =
+let create_node (id, nval, typ) llbuilder =
   let node_ptr = L.build_malloc node_t "node_ptr_tmp" llbuilder in
-  set_node_value node_ptr nval typ llbuilder
+  let id_ptr = L.build_struct_gep node_ptr 0 "node_id_ptr_tmp" llbuilder in
+  (
+    ignore(L.build_store (L.const_int i32_t id) id_ptr llbuilder);
+    List.fold_left (fun _ t -> (
+      if t = typ
+      then (set_node_value node_ptr nval t llbuilder)
+      else (set_node_value node_ptr (get_default_value_of_type t) t llbuilder)
+    )) node_ptr [A.Int_t; A.Float_t; A.Bool_t; A.String_t]
+  )
 
 (*
 ================================================================
@@ -196,46 +202,6 @@ let translate program =
       aux n fdecl.A.name
     in
 
-    (* Return the type of expr *)
-    let rec get_type = function
-        A.Num_Lit(A.Num_Int _) -> A.Int_t
-      | A.Num_Lit(A.Num_Float _) -> A.Float_t
-      | A.String_Lit _ -> A.String_t
-      | A.Bool_lit _ -> A.Bool_t
-      | A.Node _ -> A.Node_t 
-      | A.Id s -> let (_, typ) = lookup s in typ
-      | A.Binop(e1, op, e2) -> let t1 = get_type e1 and t2 = get_type e2 in
-          (
-            match op with
-            (* +,-,*,/ *)
-              A.Add | A.Sub | A.Mult | A.Div when t1 = A.Int_t && t2 = A.Int_t -> A.Int_t
-            | A.Add | A.Sub | A.Mult | A.Div when t1 = A.Float_t && t2 = A.Float_t -> A.Float_t
-            | A.Add | A.Sub | A.Mult | A.Div when t1 = A.Int_t && t2 = A.Float_t -> A.Float_t
-            | A.Add | A.Sub | A.Mult | A.Div when t1 = A.Float_t && t2 = A.Int_t -> A.Float_t
-            (* =, != *)
-            | A.Equal | A.Neq when t1 = t2 -> A.Bool_t
-            (* <, <=, >, >= *)
-            | A.Less | A.Leq | A.Greater | A.Geq when (t1 = A.Int_t || t1 = A.Float_t) && (t2 = A.Int_t || t2 = A.Float_t) -> A.Bool_t
-            (* and, or *)
-            | A.And | A.Or when t1 = A.Bool_t && t2 = A.Bool_t -> A.Bool_t
-            (* mode *)
-            | A.Mod when t1 = A.Int_t && t2 = A.Int_t -> A.Int_t
-            | _ -> raise (Failure("Unrecognized Binop Operation..."))
-          )
-      | A.Unop(op, e) ->
-          let t = get_type e in (
-            match op with
-              A.Neg when t = A.Int_t -> A.Int_t
-            | A.Neg when t = A.Float_t -> A.Float_t
-            | A.Not when t = A.Bool_t -> A.Bool_t
-            | _ -> raise (Failure("Unrecognized Unop Operation..."))
-          )
-      | A.Assign(var, _) -> let (_, typ) = lookup var in typ
-      | A.Call (f, _) ->
-         let (_, fdecl) = StringMap.find f function_decls in
-         fdecl.A.returnType
-      | _ -> A.Void_t
-    in
     (* Construct code for an expression; return its value *)
     let handle_binop e1 op e2 dtype llbuilder =
       (* Generate llvalues from e1 and e2 *)
@@ -287,9 +253,11 @@ let translate program =
       | A.Bool_lit b -> (L.const_int i1_t (if b then 1 else 0), A.Bool_t)
       | A.String_Lit s -> (codegen_string_lit s builder, A.String_t)
       | A.Noexpr -> (L.const_int i32_t 0, A.Void_t)
-      | A.Node e ->
+      | A.Node(id, e) ->
           let (nval, typ) = expr builder e in
-          (create_node nval typ builder, A.Node_t)
+          let node_ptr = create_node (id, nval, typ) builder in (
+            (node_ptr, A.Node_t)
+          )
       | A.Id s ->
           let (var, typ) = lookup s in
           (L.build_load var s builder, typ)
@@ -336,7 +304,14 @@ let translate program =
                     | A.String_t -> (codegen_string_lit "node: %s\n" builder)
                     | _ -> raise (Failure("Unsupported Node Value Type..."))
                   ) in *)
-                  ignore(codegen_print builder [(codegen_string_lit "node: %d\n" builder); (get_node_value eval A.Int_t builder)])
+                  ignore(codegen_print builder [
+                    (codegen_string_lit "node-%d: %d; %d; %f; %s\n" builder);
+                    (get_node_id eval builder);
+                    (get_node_value eval A.Int_t builder);
+                    (get_node_value eval A.Bool_t builder);
+                    (get_node_value eval A.Float_t builder);
+                    (get_node_value eval A.String_t builder)
+                  ])
               | _ -> raise (Failure("Unsupported type for print..."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->
