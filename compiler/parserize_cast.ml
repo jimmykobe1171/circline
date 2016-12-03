@@ -73,7 +73,7 @@ let rec txt_of_expr = function
   | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
   | String_Lit(x) -> sprintf "String_Lit(%s)" x
   | Null -> sprintf "Null"
-  | Node(x) -> sprintf "Node(%s)" (txt_of_expr x)
+  | Node(node_num, x) -> sprintf "Node(%s, %s)" (string_of_int node_num) (txt_of_expr x)
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)

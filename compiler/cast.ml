@@ -63,7 +63,7 @@ type expr =
 |   Null
 |   String_Lit of string
 |   Bool_lit of bool
-|   Node of expr
+|   Node of int * expr
 |   Graph_Link of expr * graph_op * expr * expr
 |   Binop of expr * binop * expr
 |   Unop of unop * expr

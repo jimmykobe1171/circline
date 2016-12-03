@@ -2,6 +2,7 @@ module A = Ast
 module C = Cast
 
 module StringMap = Map.Make(String)
+let node_num = ref 0
 
 let convert_binop = function
     A.Add -> C.Add
@@ -60,12 +61,16 @@ let rec get_entire_name m aux cur_name =
     (get_entire_name m aux (StringMap.find cur_name m))
   else aux
 
+let increase_node_num = 
+  let node_num = ref(!node_num) in
+  !(node_num) - 1
+
 let rec convert_expr m = function
     A.Num_Lit(a) -> C.Num_Lit(convert_num a)
 |   A.Null -> C.Null
 |   A.String_Lit(a) -> C.String_Lit(a)
 |   A.Bool_lit(a) -> C.Bool_lit(a)
-|   A.Node(a) -> C.Node(convert_expr m a)
+|   A.Node(a) -> node_num := (!node_num + 1); C.Node(!node_num - 1, convert_expr m a)
 |   A.Graph_Link(a,b,c,d) -> C.Graph_Link(convert_expr m a, convert_graph_op b, convert_expr m c, convert_expr m d)
 |   A.Binop(a,b,c) -> C.Binop(convert_expr m a, convert_binop b, convert_expr m c)
 |   A.Unop(a,b) -> C.Unop(convert_unop a, convert_expr m b)

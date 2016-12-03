@@ -59,7 +59,7 @@ let rec string_of_expr = function
   | String_Lit(l) -> l
   | Bool_lit(true) -> "true"
   | Bool_lit(false) -> "false"
-  | Node(e) -> "node(" ^ string_of_expr e ^ ")"
+  | Node(_, e) -> "node(" ^ string_of_expr e ^ ")"
   | Graph_Link(e1, op, e2, e3) -> 
       "graph_link(" ^ string_of_expr e1 ^ " " ^ string_of_graph_op op ^ " " ^ string_of_expr e2 ^ " " ^ string_of_expr e3 ^ ")"
   | Binop(e1, o, e2) ->
@@ -190,7 +190,7 @@ let check_function func_map func =
         | String_Lit _ -> String_t 
         | Bool_lit _ -> Bool_t
         (* TODO: check node and graph *)
-        | Node(e) -> Node_t
+        | Node(_, e) -> Node_t
         | Graph_Link(e1, op, e2, e3) -> Graph_t
         | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
             (match op with
