@@ -26,12 +26,29 @@ and i1_t   = L.i1_type   context
 and str_t  = L.pointer_type (L.i8_type context)
 and void_t = L.void_type context
 
+(*
+  Node Definition Structure 
+  {
+    int    id,         // 0
+    int    val_int,    // 1
+    double val_double, // 2
+    bool   val_bool,   // 3
+    i8*    val_str     // 4
+  }
+*)
+let node_t = (
+  let typ = L.named_struct_type context "struct_node" in
+  ignore(L.struct_set_body typ [| i32_t; i32_t; f_t; i1_t; str_t |] false);
+  typ
+)
+
 let ltype_of_typ = function
     A.Int_t -> i32_t
   | A.Float_t -> f_t
   | A.Bool_t -> i1_t
   | A.String_t -> str_t
   | A.Void_t -> void_t
+  | A.Node_t -> L.pointer_type (node_t)
   | _ -> raise (Failure ("Type Not Found!"))
 
 let get_default_value_of_type = function
@@ -40,8 +57,40 @@ let get_default_value_of_type = function
   | A.Float_t as t-> L.const_float (ltype_of_typ t) 0.
   | t-> L.const_null (ltype_of_typ t)
 
-let codegen_string_lit s llbuilder =
-  L.build_global_stringptr s "tmp" llbuilder
+(*
+================================================================
+  Node Related Methods
+================================================================
+*)
+
+(* let node_vals_types = Hashtbl.create 100 *)
+
+let get_node_val_index_by_type typ =
+  match typ with
+  | A.Int_t -> 1
+  | A.Float_t -> 2
+  | A.Bool_t -> 3
+  | A.String_t -> 4
+  | _ -> raise (Failure("Unsupported Node Values ..."))
+  
+
+let get_node_id node_ptr llbuilder =
+  let val_ptr = L.build_struct_gep node_ptr 0 "node_id_ptr_tmp" llbuilder in
+  L.build_load val_ptr "node_id_tmp" llbuilder
+
+let get_node_value node_ptr typ llbuilder =
+  let idx = get_node_val_index_by_type typ in
+  let val_ptr = L.build_struct_gep node_ptr idx "node_val_ptr_tmp" llbuilder in
+  L.build_load val_ptr "node_val_tmp" llbuilder
+
+let set_node_value node_ptr nval typ llbuilder =
+  let idx = get_node_val_index_by_type typ in
+  let a_ptr = L.build_struct_gep node_ptr idx "node_ptr_tmp" llbuilder in
+  (ignore(L.build_store nval a_ptr llbuilder); node_ptr)
+
+let create_node nval typ llbuilder =
+  let node_ptr = L.build_malloc node_t "node_ptr_tmp" llbuilder in
+  set_node_value node_ptr nval typ llbuilder
 
 (*
 ================================================================
@@ -52,6 +101,9 @@ let printf_t = L.var_arg_function_type i32_t [| str_t |]
 let printf_func = L.declare_function "printf" printf_t the_module
 let codegen_print llbuilder el =
   L.build_call printf_func (Array.of_list el) "printf" llbuilder
+
+let codegen_string_lit s llbuilder =
+  L.build_global_stringptr s "str_tmp" llbuilder
 
 (*
 ================================================================
@@ -75,7 +127,6 @@ let print_hashtbl tb =
 ================================================================
 *)
 let translate program =
-
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -97,7 +148,7 @@ let translate program =
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
-    let local_vars =
+    let _ =
       let add_to_context locals =
         ignore(Hashtbl.add context_funcs_vars fdecl.A.name locals);
         (* ignore(print_hashtbl context_funcs_vars); *)
@@ -151,6 +202,7 @@ let translate program =
       | A.Num_Lit(A.Num_Float _) -> A.Float_t
       | A.String_Lit _ -> A.String_t
       | A.Bool_lit _ -> A.Bool_t
+      | A.Node _ -> A.Node_t 
       | A.Id s -> let (_, typ) = lookup s in typ
       | A.Binop(e1, op, e2) -> let t1 = get_type e1 and t2 = get_type e2 in
           (
@@ -227,22 +279,23 @@ let translate program =
         | A.Bool_t
         | A.Int_t -> int_ops op e1 e2
         | _ -> raise (Failure("Unrecognized binop data type!"))
-      in type_handler dtype
+      in (type_handler dtype, dtype)
     in
     let rec expr builder = function
-	      A.Num_Lit(A.Num_Int i) -> L.const_int i32_t i
-      | A.Num_Lit(A.Num_Float f) -> L.const_float f_t f
-      | A.Bool_lit b -> L.const_int i1_t (if b then 1 else 0)
-      | A.String_Lit s -> codegen_string_lit s builder
-      | A.Noexpr -> L.const_int i32_t 0
+	      A.Num_Lit(A.Num_Int i) -> (L.const_int i32_t i, A.Int_t)
+      | A.Num_Lit(A.Num_Float f) -> (L.const_float f_t f, A.Float_t)
+      | A.Bool_lit b -> (L.const_int i1_t (if b then 1 else 0), A.Bool_t)
+      | A.String_Lit s -> (codegen_string_lit s builder, A.String_t)
+      | A.Noexpr -> (L.const_int i32_t 0, A.Void_t)
+      | A.Node e ->
+          let (nval, typ) = expr builder e in
+          (create_node nval typ builder, A.Node_t)
       | A.Id s ->
-          let (var, _) = lookup s in
-          L.build_load var s builder
+          let (var, typ) = lookup s in
+          (L.build_load var s builder, typ)
       | A.Binop (e1, op, e2) ->
-        let e1' = expr builder e1
-        and e2' = expr builder e2 in
-        let t1 = get_type e1
-        and t2 = get_type e2 in
+        let (e1', t1) = expr builder e1
+        and (e2', t2) = expr builder e2 in
         (* Handle Automatic Binop Type Converstion *)
         (match (t1, t2) with
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
@@ -253,40 +306,51 @@ let translate program =
           | _ -> raise (Failure ("Unsuported Binop Type!"))
         )
       | A.Unop(op, e) ->
-      	  let e' = expr builder e in
-      	  (match op with
-      	    A.Neg     -> if (get_type e) = A.Int_t then L.build_neg else L.build_fneg
-          | A.Not     -> L.build_not) e' "tmp" builder
+      	  let (e', typ) = expr builder e in
+      	  ((match op with
+      	    A.Neg     -> if typ = A.Int_t then L.build_neg else L.build_fneg
+          | A.Not     -> L.build_not) e' "tmp" builder, typ)
       | A.Assign (s, e) ->
-          let e' = expr builder e in
+          let (e', etyp) = expr builder e in
           let (var, typ) = lookup s in
-          ( match (get_type e, typ) with
+          (( match (etyp, typ) with
             | (t1, t2) when t1 = t2 -> ignore (L.build_store e' var builder); e'
             | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
             | _ -> raise (Failure("Assign Type inconsist"))
-          )
+          ), typ)
       | A.Call ("print", el) ->
-          let print_expr e = (
-              match (get_type e) with
-              | A.Int_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); expr builder e])
-              | A.Bool_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); expr builder e])
-                    (* (match (L.string_of_llvalue (expr builder e)) with
-                    | "i1 true" -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "true"]))
-                    | _ -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "false"]))) *)
-              | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); expr builder e])
-              (* | A.Bool_t -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%d\n"; expr builder e]) *)
-              | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); expr builder e])
-              | _ -> ignore(codegen_print builder (List.map (fun s -> codegen_string_lit s builder) ["%s\n"; "Unsuported Type for print..."]))
-          ) in List.iter print_expr el; L.const_int i32_t 0
+          let print_expr e = 
+            let (eval, etyp) = expr builder e in (
+              match etyp with
+              | A.Int_t
+              | A.Bool_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); eval])
+              | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); eval])
+              | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
+              | A.Node_t -> 
+                  (* let (nval, ntyp) = expr builder e in
+                  let fmt_str = (
+                    match ntyp with
+                    | A.Int_t
+                    | A.Bool_t -> (codegen_string_lit "node: %d\n" builder)
+                    | A.Float_t -> (codegen_string_lit "node: %f\n" builder)
+                    | A.String_t -> (codegen_string_lit "node: %s\n" builder)
+                    | _ -> raise (Failure("Unsupported Node Value Type..."))
+                  ) in *)
+                  ignore(codegen_print builder [(codegen_string_lit "node: %d\n" builder); (get_node_value eval A.Int_t builder)])
+              | _ -> raise (Failure("Unsupported type for print..."))
+          ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->
-          codegen_print builder (List.map (expr builder) el)
+          (codegen_print builder (List.map 
+            (fun e -> (let (eval, _) = expr builder e in eval))
+            el), A.Void_t)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-      	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+      	 let actuals = List.rev (List.map
+          (fun e -> (let (eval, _) = expr builder e in eval)) (List.rev act)) in
       	 let result = (match fdecl.A.returnType with A.Void_t -> ""
                                                    | _ -> f ^ "_result") in
-         L.build_call fdef (Array.of_list actuals) result builder
-      | _ -> L.const_int i32_t 0
+         (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.returnType)
+      | _ -> (L.const_int i32_t 0, A.Void_t)
     in
 
     (* Invoke "f builder" if the current block doesn't already
@@ -302,15 +366,15 @@ let translate program =
       | A.Expr e -> ignore (expr builder e); builder
       | A.Return e ->
           ignore (
-            let et = get_type e in
+            let (ev, et) = expr builder e in
             match (fdecl.A.returnType, et) with
   	          (A.Void_t, _) -> L.build_ret_void builder
-  	        | (t1, t2) when t1 = t2 -> L.build_ret (expr builder e) builder
-            | (A.Float_t, A.Int_t) -> L.build_ret (int_to_float builder (expr builder e)) builder
+  	        | (t1, t2) when t1 = t2 -> L.build_ret ev builder
+            | (A.Float_t, A.Int_t) -> L.build_ret (int_to_float builder ev) builder
             | _ -> raise (Failure("Return Type Doesn't match..."))
           ); builder
       | A.If (predicate, then_stmt, else_stmt) ->
-         let bool_val = expr builder predicate in
+         let (bool_val, _) = expr builder predicate in
       	 let merge_bb = L.append_block context "merge" the_function in
 
       	 let then_bb = L.append_block context "then" the_function in
@@ -336,7 +400,7 @@ let translate program =
             ) (L.build_br pred_bb);
 
       	  let pred_builder = L.builder_at_end context pred_bb in
-      	  let bool_val = expr pred_builder predicate in
+      	  let (bool_val, _) = expr pred_builder predicate in
 
       	  let merge_bb = L.append_block context "merge" the_function in
       	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);

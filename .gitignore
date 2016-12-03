@@ -34,3 +34,5 @@ tests/pig
 compiler/test_in
 
 tests/semantic_check/semantic_check
+
+compiler/test.in
