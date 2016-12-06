@@ -18,9 +18,9 @@ module A = Cast
 module StringMap = Map.Make(String)
 
 let context = L.global_context ()
-let llctx = L.global_context ()
+(* let llctx = L.global_context ()
 let customM = L.MemoryBuffer.of_file "utils.bc"
-let llm = Llvm_bitreader.parse_bitcode llctx customM
+let llm = Llvm_bitreader.parse_bitcode llctx customM *)
 let the_module = L.create_module context "Circline"
 
 let i32_t  = L.i32_type  context
@@ -120,10 +120,10 @@ let codegen_string_lit s llbuilder =
   Custom C functions
 ================================================================
 *)
-let print_node_t  = L.function_type i32_t [| i32_t |]
+(* let print_node_t  = L.function_type i32_t [| i32_t |]
 let print_node_f  = L.declare_function "hello" print_node_t the_module
 let hello llbuilder el =
-L.build_call print_node_f (Array.of_list el) "hello" llbuilder
+L.build_call print_node_f (Array.of_list el) "hello" llbuilder *)
 
 (*
 ================================================================
@@ -330,10 +330,6 @@ let translate program =
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->
           (codegen_print builder (List.map 
-            (fun e -> (let (eval, _) = expr builder e in eval))
-            el), A.Void_t)
-      | A.Call ("hello", el) ->
-          (hello builder (List.map 
             (fun e -> (let (eval, _) = expr builder e in eval))
             el), A.Void_t)
       | A.Call (f, act) ->

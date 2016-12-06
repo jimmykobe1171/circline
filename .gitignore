@@ -40,3 +40,5 @@ compiler/test.in
 *.out
 
 *.o
+
+*.ll
