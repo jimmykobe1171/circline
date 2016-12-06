@@ -18,9 +18,9 @@ module A = Cast
 module StringMap = Map.Make(String)
 
 let context = L.global_context ()
-(* let llctx = L.global_context ()
+let llctx = L.global_context ()
 let customM = L.MemoryBuffer.of_file "utils.bc"
-let llm = Llvm_bitreader.parse_bitcode llctx customM *)
+let llm = Llvm_bitreader.parse_bitcode llctx customM
 let the_module = L.create_module context "Circline"
 
 let i32_t  = L.i32_type  context
@@ -34,17 +34,22 @@ and void_t = L.void_type context
   Node Definition Structure 
   {
     int    id,         // 0
-    int    val_int,    // 1
-    double val_double, // 2
-    bool   val_bool,   // 3
-    i8*    val_str     // 4
+    int    type,       // 1
+    int    val_int,    // 0
+    double val_double, // 1
+    bool   val_bool,   // 2
+    i8*    val_str     // 3
   }
 *)
-let node_t = (
+(* let node_t = (
   let typ = L.named_struct_type context "struct_node" in
   ignore(L.struct_set_body typ [| i32_t; i32_t; f_t; i1_t; str_t |] false);
   typ
-)
+) *)
+
+let node_t = L.pointer_type (match L.type_by_name llm "struct.Node" with
+    None -> raise (Failure "Option.get")
+  | Some x -> x)
 
 let ltype_of_typ = function
     A.Int_t -> i32_t
@@ -52,8 +57,13 @@ let ltype_of_typ = function
   | A.Bool_t -> i1_t
   | A.String_t -> str_t
   | A.Void_t -> void_t
-  | A.Node_t -> L.pointer_type (node_t)
+  | A.Node_t -> node_t
   | _ -> raise (Failure ("Type Not Found!"))
+
+let int_zero = L.const_int i32_t 0
+and float_zero = L.const_float f_t 0.
+and bool_false = L.const_int i1_t 0
+and str_null = L.const_null str_t
 
 let get_default_value_of_type = function
   | A.Int_t as t -> L.const_int (ltype_of_typ t) 0
@@ -90,7 +100,7 @@ let set_node_value node_ptr nval typ llbuilder =
   let a_ptr = L.build_struct_gep node_ptr idx "node_val_ptr_tmp" llbuilder in
   (ignore(L.build_store nval a_ptr llbuilder); node_ptr)
 
-let create_node (id, nval, typ) llbuilder =
+(* let create_node (id, nval, typ) llbuilder =
   let node_ptr = L.build_malloc node_t "node_ptr_tmp" llbuilder in
   let id_ptr = L.build_struct_gep node_ptr 0 "node_id_ptr_tmp" llbuilder in
   (
@@ -100,7 +110,7 @@ let create_node (id, nval, typ) llbuilder =
       then (set_node_value node_ptr nval t llbuilder)
       else (set_node_value node_ptr (get_default_value_of_type t) t llbuilder)
     )) node_ptr [A.Int_t; A.Float_t; A.Bool_t; A.String_t]
-  )
+  ) *)
 
 (*
 ================================================================
@@ -120,10 +130,26 @@ let codegen_string_lit s llbuilder =
   Custom C functions
 ================================================================
 *)
-(* let print_node_t  = L.function_type i32_t [| i32_t |]
-let print_node_f  = L.declare_function "hello" print_node_t the_module
-let hello llbuilder el =
-L.build_call print_node_f (Array.of_list el) "hello" llbuilder *)
+let create_node_t  = L.function_type node_t [| i32_t; i32_t; i32_t; f_t; i1_t; str_t |]
+let create_node_f  = L.declare_function "createNode" create_node_t the_module
+let create_node (id, typ, nval) llbuilder =
+  let actuals = [| id; int_zero; int_zero; float_zero; (L.const_int i1_t 0); str_null |] in
+  let (typ_val, loc) = (match typ with
+    | A.Int_t -> (0, 2)
+    | A.Float_t -> (1, 3)
+    | A.Bool_t -> (2, 4)
+    | A.String_t -> (3, 5)
+    | _ -> raise (Failure "Unsupported node value type")
+  ) in (
+    ignore( Array.set actuals 1 (L.const_int i32_t typ_val) );
+    ignore( Array.set actuals loc nval );
+    L.build_call create_node_f actuals "createNode" llbuilder
+  )
+
+let print_node_t  = L.function_type i32_t [| node_t |]
+let print_node_f  = L.declare_function "printNode" print_node_t the_module
+let print_node node llbuilder =
+  L.build_call print_node_f [| node |] "printNode" llbuilder
 
 (*
 ================================================================
@@ -259,7 +285,11 @@ let translate program =
         | A.Bool_t
         | A.Int_t -> int_ops op e1 e2
         | _ -> raise (Failure("Unrecognized binop data type!"))
-      in (type_handler dtype, dtype)
+      in (type_handler dtype,
+        match op with
+        | A.Add | A.Sub | A.Mult | A.Div | A.Mod -> dtype
+        | _ -> A.Bool_t
+      )
     in
     let rec expr builder = function
 	      A.Num_Lit(A.Num_Int i) -> (L.const_int i32_t i, A.Int_t)
@@ -269,9 +299,10 @@ let translate program =
       | A.Noexpr -> (L.const_int i32_t 0, A.Void_t)
       | A.Node(id, e) ->
           let (nval, typ) = expr builder e in
-          let node_ptr = create_node (id, nval, typ) builder in (
+          (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
+          (* let node_ptr = create_node (id, nval, typ) builder in (
             (node_ptr, A.Node_t)
-          )
+          ) *)
       | A.Id s ->
           let (var, typ) = lookup s in
           (L.build_load var s builder, typ)
@@ -308,24 +339,7 @@ let translate program =
               | A.Bool_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); eval])
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); eval])
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
-              | A.Node_t -> 
-                  (* let (nval, ntyp) = expr builder e in
-                  let fmt_str = (
-                    match ntyp with
-                    | A.Int_t
-                    | A.Bool_t -> (codegen_string_lit "node: %d\n" builder)
-                    | A.Float_t -> (codegen_string_lit "node: %f\n" builder)
-                    | A.String_t -> (codegen_string_lit "node: %s\n" builder)
-                    | _ -> raise (Failure("Unsupported Node Value Type..."))
-                  ) in *)
-                  ignore(codegen_print builder [
-                    (codegen_string_lit "node-%d: %d; %d; %f; %s\n" builder);
-                    (get_node_id eval builder);
-                    (get_node_value eval A.Int_t builder);
-                    (get_node_value eval A.Bool_t builder);
-                    (get_node_value eval A.Float_t builder);
-                    (get_node_value eval A.String_t builder)
-                  ])
+              | A.Node_t -> ignore(print_node eval builder)
               | _ -> raise (Failure("Unsupported type for print..."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->

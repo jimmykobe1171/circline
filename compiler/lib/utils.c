@@ -22,7 +22,7 @@ struct Node* createNode(
 	return new;
 }
 
-int print_node(struct Node * node) {
+int printNode(struct Node * node) {
 	if (node == NULL) return 0;
 	switch (node->type) {
 		case 0:

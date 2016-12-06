@@ -42,3 +42,5 @@ compiler/test.in
 *.o
 
 *.ll
+
+*.exe

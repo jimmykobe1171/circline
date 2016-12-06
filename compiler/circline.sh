@@ -5,9 +5,9 @@ then
 else
     ./circline.native $1 <$2 >a.ll
 fi
-clang utils.bc a.ll -o run
-./run
-rm a.ll
-rm run
+clang utils.bc a.ll -o $1.exe
+echo please run with $1.exe
+# rm a.ll
+# rm run
 
 # /usr/local/opt/llvm38/bin/clang-3.8

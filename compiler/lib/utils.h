@@ -21,6 +21,6 @@ struct Node* createNode(
 	char* d
 );
 
-int print_node(struct Node * node);
+int printNode(struct Node * node);
 
 #endif /* #ifndef _UTILS_H_ */
