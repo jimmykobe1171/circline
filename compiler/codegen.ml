@@ -51,6 +51,10 @@ let node_t = L.pointer_type (match L.type_by_name llm "struct.Node" with
     None -> raise (Failure "Option.get")
   | Some x -> x)
 
+let list_t = L.pointer_type (match L.type_by_name llm "struct.List" with
+    None -> raise (Failure "Option.get")
+  | Some x -> x)
+
 let ltype_of_typ = function
     A.Int_t -> i32_t
   | A.Float_t -> f_t
@@ -58,6 +62,7 @@ let ltype_of_typ = function
   | A.String_t -> str_t
   | A.Void_t -> void_t
   | A.Node_t -> node_t
+  | A.List_Int_t -> list_t
   | _ -> raise (Failure ("Type Not Found!"))
 
 let int_zero = L.const_int i32_t 0
@@ -146,10 +151,32 @@ let create_node (id, typ, nval) llbuilder =
     L.build_call create_node_f actuals "createNode" llbuilder
   )
 
+
+let create_list_t  = L.function_type list_t [| i32_t |]
+let create_list_f  = L.declare_function "createList" create_list_t the_module
+let create_list typ llbuilder =
+  let actuals = [|int_zero|] in
+  let typ_val = (match typ with
+    | A.Int_t -> 0
+    (* | A.Float_t -> (1, 3) *)
+    (* | A.Bool_t -> (2, 4) *)
+    (* | A.String_t -> (3, 5) *)
+    | _ -> raise (Failure "Unsupported list value type")
+  ) in (
+    (* ignore( Array.set actuals 0 typ_val); *)
+    L.build_call create_list_f actuals "createList" llbuilder
+  )
+
+
 let print_node_t  = L.function_type i32_t [| node_t |]
 let print_node_f  = L.declare_function "printNode" print_node_t the_module
 let print_node node llbuilder =
   L.build_call print_node_f [| node |] "printNode" llbuilder
+
+let print_list_t  = L.function_type i32_t [| list_t |]
+let print_list_f  = L.declare_function "printList" print_list_t the_module
+let print_list l llbuilder =
+  L.build_call print_list_f [| l |] "printList" llbuilder
 
 (*
 ================================================================
@@ -303,6 +330,8 @@ let translate program =
           (* let node_ptr = create_node (id, nval, typ) builder in (
             (node_ptr, A.Node_t)
           ) *)
+      | A.ListP(e) -> 
+          (create_list A.Int_t builder, A.List_Int_t)
       | A.Id s ->
           let (var, typ) = lookup s in
           (L.build_load var s builder, typ)
@@ -340,6 +369,7 @@ let translate program =
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); eval])
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
               | A.Node_t -> ignore(print_node eval builder)
+              | A.List_Int_t -> ignore(print_list eval builder)
               | _ -> raise (Failure("Unsupported type for print..."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->

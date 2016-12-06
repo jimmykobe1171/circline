@@ -22,6 +22,36 @@ struct Node* createNode(
 	return new;
 }
 
+struct List* createList(
+	int32_t type
+) {
+	struct List* new = (struct List*) malloc(sizeof(struct List));
+	// default initialize size is 1
+	new->size = 3;
+	new->type = type;
+	// means that the next element would be added at curPos
+	new->curPos = 3;
+	new->arr = (int *)malloc(new->size * sizeof(int));
+	*(new->arr + 0) = 1;
+	*(new->arr + 1) = 2;
+	*(new->arr + 2) = 3;
+	return new;
+}
+
+struct List* addList(
+	struct List * list,
+	int32_t addData
+){
+	if (list->curPos >= list->size){
+		list->size = list->size * 2;
+		// double size
+		list->arr = (int *) realloc(list->arr, list->size * sizeof (int));
+	}
+	*(list->arr + list->curPos) = addData;
+	list->curPos++;
+	return list;
+}
+
 int printNode(struct Node * node) {
 	if (node == NULL) return 0;
 	switch (node->type) {
@@ -43,13 +73,33 @@ int printNode(struct Node * node) {
 	return 1;
 }
 
+int printList(struct List * list){
+	int curPos = list->curPos - 1;
+	int p = 0;
+	while(p <= curPos){
+		printf("element of list:%d\n", *(list->arr + p));
+		p++;
+	}
+	return 1;
+}
+
+
+
 // int main() {
-// 	struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
-// 	struct Node* b = createNode(1, 1, 0, 1.2, 0, NULL);
-// 	struct Node* c = createNode(1, 2, 0, 0, 0, NULL);
-// 	struct Node* d = createNode(1, 3, 0, 0, 1, "Hello World!");
-// 	print_node(a);
-// 	print_node(b);
-// 	print_node(c);
-// 	print_node(d);
+// 	//test node
+// 	// struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
+// 	// struct Node* b = createNode(1, 1, 0, 1.2, 0, NULL);
+// 	// struct Node* c = createNode(1, 2, 0, 0, 0, NULL);
+// 	// struct Node* d = createNode(1, 3, 0, 0, 1, "Hello World!");
+// 	// print_node(a);
+// 	// print_node(b);
+// 	// print_node(c);
+// 	// print_node(d);
+
+// 	//test list
+// 	struct List* list = createList(1);
+// 	printf("list type:%d\n", list->type);
+// 	// struct List* newList = addList(addList(addList(addList(list, 52), 53), 54), 55);
+// 	printList(list);
+
 // }
