@@ -1,0 +1,17 @@
+node a = node(1);
+print(a);
+
+a = node(1.2);
+print(a);
+
+a = node("Hello World!");
+print(a);
+
+a = node(1<2);
+print(a);
+
+node f(int a) {
+	return node(a);
+}
+
+print(f(22));
