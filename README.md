@@ -6,6 +6,16 @@ System Architecture: Haikuo Liu
 Language Guru: Zehao Song
 
 Tester: Qing Lan
+
+## Install LLVM
+
+### Create soft link
+
+```
+sudo ln -s /usr/local/opt/llvm38/bin/lli-3.8 /usr/local/bin/lli
+sudo ln -s /usr/local/opt/llvm38/bin/llvm-link-3.8 /usr/local/bin/llvm-link
+```
+
 ## Current Target
 - Build the Travis CI (done in 24-Oct)
 - Build the Ocaml Compiler
