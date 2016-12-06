@@ -44,3 +44,5 @@ compiler/test.in
 *.ll
 
 *.exe
+
+tests/code_gen/test_node_basic.in

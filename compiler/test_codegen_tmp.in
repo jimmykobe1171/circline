@@ -1,0 +1,14 @@
+node a = node(1);
+node b = node(3.3);
+node c = node(1<2);
+node d = node("hehah");
+
+print(a->b);
+
+print("**************************\n");
+
+print(b<-c);
+
+print("**************************\n");
+
+print(c--d);

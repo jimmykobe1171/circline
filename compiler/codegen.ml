@@ -48,7 +48,11 @@ and void_t = L.void_type context
 ) *)
 
 let node_t = L.pointer_type (match L.type_by_name llm "struct.Node" with
-    None -> raise (Failure "Option.get")
+    None -> raise (Failure "struct.Node doesn't defined!")
+  | Some x -> x)
+
+let graph_t = L.pointer_type (match L.type_by_name llm "struct.Graph" with
+    None -> raise (Failure "struct.Graph doesn't defined!")
   | Some x -> x)
 
 let list_t = L.pointer_type (match L.type_by_name llm "struct.List" with
@@ -63,11 +67,13 @@ let ltype_of_typ = function
   | A.Void_t -> void_t
   | A.Node_t -> node_t
   | A.List_Int_t -> list_t
+  | A.Graph_t -> graph_t
   | _ -> raise (Failure ("Type Not Found!"))
 
 let int_zero = L.const_int i32_t 0
 and float_zero = L.const_float f_t 0.
 and bool_false = L.const_int i1_t 0
+and bool_true = L.const_int i1_t 1
 and str_null = L.const_null str_t
 
 let get_default_value_of_type = function
@@ -82,7 +88,7 @@ let get_default_value_of_type = function
 ================================================================
 *)
 
-let get_node_val_index_by_type typ =
+(* let get_node_val_index_by_type typ =
   match typ with
   | A.Int_t -> 1
   | A.Float_t -> 2
@@ -103,7 +109,7 @@ let get_node_value node_ptr typ llbuilder =
 let set_node_value node_ptr nval typ llbuilder =
   let idx = get_node_val_index_by_type typ in
   let a_ptr = L.build_struct_gep node_ptr idx "node_val_ptr_tmp" llbuilder in
-  (ignore(L.build_store nval a_ptr llbuilder); node_ptr)
+  (ignore(L.build_store nval a_ptr llbuilder); node_ptr) *)
 
 (* let create_node (id, nval, typ) llbuilder =
   let node_ptr = L.build_malloc node_t "node_ptr_tmp" llbuilder in
@@ -132,23 +138,24 @@ let codegen_string_lit s llbuilder =
 
 (*
 ================================================================
-  Custom C functions
+  Node
 ================================================================
 *)
 let create_node_t  = L.function_type node_t [| i32_t; i32_t; i32_t; f_t; i1_t; str_t |]
 let create_node_f  = L.declare_function "createNode" create_node_t the_module
 let create_node (id, typ, nval) llbuilder =
-  let actuals = [| id; int_zero; int_zero; float_zero; (L.const_int i1_t 0); str_null |] in
+  let actuals = [| id; int_zero; int_zero; float_zero; bool_false; str_null |] in
   let (typ_val, loc) = (match typ with
     | A.Int_t -> (0, 2)
     | A.Float_t -> (1, 3)
     | A.Bool_t -> (2, 4)
     | A.String_t -> (3, 5)
+    | A.Void_t | A.Null_t -> (-1, 2)
     | _ -> raise (Failure "Unsupported node value type")
   ) in (
     ignore( Array.set actuals 1 (L.const_int i32_t typ_val) );
     ignore( Array.set actuals loc nval );
-    L.build_call create_node_f actuals "createNode" llbuilder
+    L.build_call create_node_f actuals "node" llbuilder
   )
 
 
@@ -177,6 +184,55 @@ let print_list_t  = L.function_type i32_t [| list_t |]
 let print_list_f  = L.declare_function "printList" print_list_t the_module
 let print_list l llbuilder =
   L.build_call print_list_f [| l |] "printList" llbuilder
+
+(*
+================================================================
+  Graph
+================================================================
+*)
+(* Create a new empty grpah *)
+let create_graph_t  = L.function_type graph_t [| |]
+let create_graph_f  = L.declare_function "createGraph" create_graph_t the_module
+let create_graph llbuilder =
+  L.build_call create_graph_f [| |] "graph" llbuilder
+
+(* Add a new node to graph *)
+let graph_add_node_t = L.function_type i32_t [| graph_t; node_t |]
+let graph_add_node_f = L.declare_function "graphAddNode" graph_add_node_t the_module
+let graph_add_node graph node llbuilder =
+  L.build_call graph_add_node_f [| graph; node |] "addNodeRes" llbuilder
+
+(* Add a new edge to graph *)
+let graph_add_edge_t = L.function_type i32_t
+  [| graph_t; node_t; node_t; i32_t; i32_t; f_t; i1_t; str_t |]
+let graph_add_edge_f = L.declare_function "graphAddEdge" graph_add_edge_t the_module
+let graph_add_edge graph (sour, dest) op (typ, vals) llbuilder =
+  let actuals = [| graph; sour; dest; int_zero; int_zero; float_zero; bool_false; str_null |] in
+  let actuals_r = [| graph; dest; sour; int_zero; int_zero; float_zero; bool_false; str_null |] in
+  let (typ_val, loc) = (match typ with
+    | A.Int_t -> (0, 4)
+    | A.Float_t -> (1, 5)
+    | A.Bool_t -> (2, 6)
+    | A.String_t -> (3, 7)
+    | A.Void_t | A.Null_t -> (-1, 4)
+    | _ -> raise (Failure "Unsupported edge value type")
+  ) in (
+    ignore( Array.set actuals 3 (L.const_int i32_t typ_val) );
+    ignore( Array.set actuals loc vals );
+    match op with
+    | A.Right_Link -> L.build_call graph_add_edge_f actuals "addRightEdgeRes" llbuilder
+    | A.Left_Link -> L.build_call graph_add_edge_f actuals_r "addLeftEdgeRes" llbuilder
+    | A.Double_Link -> (
+        ignore(L.build_call graph_add_edge_f actuals "addRightEdgeRes" llbuilder);
+        L.build_call graph_add_edge_f actuals_r "addLeftEdgeRes" llbuilder
+      )
+  )  
+
+(* Print out the graph *)
+let print_graph_t  = L.function_type i32_t [| graph_t |]
+let print_graph_f  = L.declare_function "printGraph" print_graph_t the_module
+let print_graph graph llbuilder =
+  L.build_call print_graph_f [| graph |] "printGraph" llbuilder
 
 (*
 ================================================================
@@ -324,14 +380,28 @@ let translate program =
       | A.Bool_lit b -> (L.const_int i1_t (if b then 1 else 0), A.Bool_t)
       | A.String_Lit s -> (codegen_string_lit s builder, A.String_t)
       | A.Noexpr -> (L.const_int i32_t 0, A.Void_t)
+      | A.Null -> (L.const_int i32_t 0, A.Null_t)
       | A.Node(id, e) ->
           let (nval, typ) = expr builder e in
           (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
-          (* let node_ptr = create_node (id, nval, typ) builder in (
-            (node_ptr, A.Node_t)
-          ) *)
       | A.ListP(e) -> 
           (create_list A.Int_t builder, A.List_Int_t)
+      | A.Graph_Link(left, op, right, edges) ->
+          let gh = create_graph builder in
+          let (ln, _) = expr builder left in
+          let (rn, rn_type) = expr builder right in
+          let (el, el_type) = expr builder edges in (
+            ignore(graph_add_node gh ln builder);
+            ignore(match (rn_type, el_type) with
+              | (A.Null_t, _) -> ()
+              | (A.Node_t, _) -> (
+                  ignore(graph_add_node gh rn builder);
+                  ignore(graph_add_edge gh (ln, rn) op (el_type, el) builder);
+                )
+              | _ -> raise (Failure "Graph Link Under build...")
+            );
+            (gh, A.Graph_t)
+          )
       | A.Id s ->
           let (var, typ) = lookup s in
           (L.build_load var s builder, typ)
@@ -370,6 +440,7 @@ let translate program =
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
               | A.Node_t -> ignore(print_node eval builder)
               | A.List_Int_t -> ignore(print_list eval builder)
+              | A.Graph_t -> ignore(print_graph eval builder)
               | _ -> raise (Failure("Unsupported type for print..."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->
