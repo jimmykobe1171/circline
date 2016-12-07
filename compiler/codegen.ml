@@ -235,8 +235,10 @@ let graph_add_edge graph (sour, dest) op (typ, vals) llbuilder =
     | A.Void_t | A.Null_t -> (-1, 4)
     | _ -> raise (Failure "Unsupported edge value type")
   ) in (
-    ignore( Array.set actuals 3 (L.const_int i32_t typ_val) );
-    ignore( Array.set actuals loc vals );
+    ignore( actuals.(3) <- (L.const_int i32_t typ_val) );
+    ignore( actuals_r.(3) <- (L.const_int i32_t typ_val) );
+    ignore( actuals.(loc) <- vals );
+    ignore( actuals_r.(loc) <- vals );
     match op with
     | A.Right_Link -> L.build_call graph_add_edge_f actuals "addRightEdgeRes" llbuilder
     | A.Left_Link -> L.build_call graph_add_edge_f actuals_r "addLeftEdgeRes" llbuilder
