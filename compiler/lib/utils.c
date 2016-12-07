@@ -32,14 +32,14 @@ struct List* createList(
 ) {
 	struct List* new = (struct List*) malloc(sizeof(struct List));
 	// default initialize size is 1
-	new->size = 3;
+	new->size = 1;
 	new->type = type;
 	// means that the next element would be added at curPos
-	new->curPos = 3;
+	new->curPos = 0;
 	new->arr = (int *)malloc(new->size * sizeof(int));
-	*(new->arr + 0) = 1;
-	*(new->arr + 1) = 2;
-	*(new->arr + 2) = 3;
+	// *(new->arr + 0) = 1;
+	// *(new->arr + 1) = 2;
+	// *(new->arr + 2) = 3;
 	return new;
 }
 
@@ -231,10 +231,12 @@ int32_t printGraph(struct Graph* g) {
 int printList(struct List * list){
 	int curPos = list->curPos - 1;
 	int p = 0;
-	while(p <= curPos){
-		printf("element of list:%d\n", *(list->arr + p));
+	printf("list:[");
+	while(p < curPos){
+		printf("%d, ", *(list->arr + p));
 		p++;
 	}
+	printf("%d]\n", *(list->arr + curPos));
 	return 1;
 }
 
@@ -242,10 +244,10 @@ int printList(struct List * list){
 
 // int main() {
 // 	//test list
-// 	struct List* list = createList(1);
-// 	printf("list type:%d\n", list->type);
-// 	// struct List* newList = addList(addList(addList(addList(list, 52), 53), 54), 55);
-// 	printList(list);
+	// struct List* list = createList(1);
+	// printf("list type:%d\n", list->type);
+	// struct List* newList = addList(addList(addList(addList(list, 52), 53), 54), 55);
+	// printList(list);
 
 // 	struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
 // 	struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);

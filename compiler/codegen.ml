@@ -170,9 +170,27 @@ let create_list typ llbuilder =
     (* | A.String_t -> (3, 5) *)
     | _ -> raise (Failure "Unsupported list value type")
   ) in (
-    (* ignore( Array.set actuals 0 typ_val); *)
     L.build_call create_list_f actuals "createList" llbuilder
   )
+
+let add_list_t  = L.function_type list_t [| list_t; i32_t |]
+let add_list_f  = L.declare_function "addList" add_list_t the_module
+let add_list data l_ptr llbuilder =
+  let actuals = [|str_null; int_zero|] in
+(*   let typ_val = (match typ with
+    | A.Int_t -> 0
+    (* | A.Float_t -> (1, 3) *)
+    | A.Bool_t -> (2, 4)
+    (* | A.String_t -> (3, 5) *)
+    | _ -> raise (Failure "Unsupported list value type")
+  ) in ( *)
+    ignore(Array.set actuals 0 l_ptr);
+    ignore(Array.set actuals 1 data);
+    (L.build_call add_list_f actuals "addList" llbuilder)
+
+let rec add_multi_elements_list l_ptr llbuilder = function 
+  | [] -> l_ptr
+  | h :: tl -> add_multi_elements_list (add_list h l_ptr llbuilder) llbuilder tl
 
 
 let print_node_t  = L.function_type i32_t [| node_t |]
@@ -384,8 +402,9 @@ let translate program =
       | A.Node(id, e) ->
           let (nval, typ) = expr builder e in
           (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
-      | A.ListP(e) -> 
-          (create_list A.Int_t builder, A.List_Int_t)
+      | A.ListP(ls) -> 
+          let l_ptr_type = create_list A.Int_t builder, A.List_Int_t in 
+            add_multi_elements_list (fst l_ptr_type) builder (List.map fst (List.map (expr builder) ls)), (snd l_ptr_type) 
       | A.Graph_Link(left, op, right, edges) ->
           let gh = create_graph builder in
           let (ln, _) = expr builder left in
