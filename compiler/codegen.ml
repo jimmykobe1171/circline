@@ -55,6 +55,10 @@ let graph_t = L.pointer_type (match L.type_by_name llm "struct.Graph" with
     None -> raise (Failure "struct.Graph doesn't defined!")
   | Some x -> x)
 
+let dict_t = L.pointer_type (match L.type_by_name llm "struct._hashmap_map" with
+    None -> raise (Failure "struct.hashmap_map doesn't defined!")
+  | Some x -> x)
+
 let list_t = L.pointer_type (match L.type_by_name llm "struct.List" with
     None -> raise (Failure "Option.get")
   | Some x -> x)
@@ -67,6 +71,7 @@ let ltype_of_typ = function
   | A.Void_t -> void_t
   | A.Node_t -> node_t
   | A.List_Int_t -> list_t
+  | A.Dict_String_t -> dict_t
   | A.Graph_t -> graph_t
   | _ -> raise (Failure ("Type Not Found!"))
 
@@ -158,6 +163,26 @@ let create_node (id, typ, nval) llbuilder =
     L.build_call create_node_f actuals "node" llbuilder
   )
 
+let create_dict_t  = L.function_type dict_t [| |]
+let create_dict_f  = L.declare_function "hashmap_new" create_dict_t the_module
+let create_dict llbuilder = 
+    L.build_call create_dict_f [| |] "hashmap" llbuilder
+
+let put_dict_t  = L.function_type dict_t [| dict_t; str_t; str_t|]
+let put_dict_f  = L.declare_function "hashmap_put" put_dict_t the_module
+let put_dict d key val_ptr llbuilder = 
+    let actuals = [| d; key; val_ptr|] in
+    L.build_call put_dict_f actuals "put" llbuilder
+
+let get_dict_t  = L.function_type str_t [| dict_t; str_t |]
+let get_dict_f  = L.declare_function "hashmap_get" get_dict_t the_module
+let get_dict d key llbuilder = 
+    let actuals = [| d; key |] in
+    L.build_call get_dict_f actuals "get" llbuilder
+
+let rec put_multi_kvs_dict dict_ptr llbuilder = function 
+  | [] -> dict_ptr
+  | h :: tl -> put_dict dict_ptr (fst h) (snd h) llbuilder; put_multi_kvs_dict dict_ptr llbuilder tl
 
 let create_list_t  = L.function_type list_t [| i32_t |]
 let create_list_f  = L.declare_function "createList" create_list_t the_module
@@ -213,6 +238,12 @@ let create_graph_t  = L.function_type graph_t [| |]
 let create_graph_f  = L.declare_function "createGraph" create_graph_t the_module
 let create_graph llbuilder =
   L.build_call create_graph_f [| |] "graph" llbuilder
+
+let ptr_from_void_to_str_t  = L.function_type str_t [| i32_t |]
+let ptr_from_void_to_str_f  = L.declare_function "get_str_from_void_ptr" ptr_from_void_to_str_t the_module
+let ptr_from_void_to_str ptr llbuilder =
+  L.build_call ptr_from_void_to_str_f [| ptr |] "ptr_from_void_to_str" llbuilder
+
 
 (* Add a new node to graph *)
 let graph_add_node_t = L.function_type i32_t [| graph_t; node_t |]
@@ -392,6 +423,7 @@ let translate program =
         | _ -> A.Bool_t
       )
     in
+
     let rec expr builder = function
 	      A.Num_Lit(A.Num_Int i) -> (L.const_int i32_t i, A.Int_t)
       | A.Num_Lit(A.Num_Float f) -> (L.const_float f_t f, A.Float_t)
@@ -405,6 +437,22 @@ let translate program =
       | A.ListP(ls) -> 
           let l_ptr_type = create_list A.Int_t builder, A.List_Int_t in 
             add_multi_elements_list (fst l_ptr_type) builder (List.map fst (List.map (expr builder) ls)), (snd l_ptr_type) 
+      | A.DictP(expr_list) -> 
+          let get_ptr v builder = 
+            let d_ltyp = ltype_of_typ (snd (expr builder v)) in
+              let d_ptr = L.build_malloc d_ltyp "tmp" builder in
+              (
+                ignore(print_endline (L.string_of_llvalue d_ptr));
+                L.build_store (fst (expr builder v)) d_ptr builder
+              )
+              (* L.build_bitcast d_ptr (L.pointer_type i8_t) "ptr" builder (* return a void pointer *) *)
+          in
+          let dict_ptr = create_dict builder in
+          (put_multi_kvs_dict dict_ptr builder 
+                (* (List.map (fun (key, v) -> key, get_ptr v builder) (List.map (fun (key, v) -> (fst(expr builder key), v)) expr_list)) *)
+                (List.map (fun (key, v) -> key, fst(expr builder v)) (List.map (fun (key, v) -> (fst(expr builder key), v)) expr_list))
+              , A.Dict_String_t)
+
       | A.Graph_Link(left, op, right, edges) ->
           let gh = create_graph builder in
           let (ln, _) = expr builder left in
@@ -473,6 +521,8 @@ let translate program =
       	 let result = (match fdecl.A.returnType with A.Void_t -> ""
                                                    | _ -> f ^ "_result") in
          (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.returnType)
+      | A.CallDefault(e, "get", el) ->
+           (get_dict (fst (expr builder e))  (fst (expr builder (List.hd el))) builder, A.String_t)
       | _ -> (L.const_int i32_t 0, A.Void_t)
     in
 

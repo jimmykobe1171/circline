@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "utils.h"
+#include "hashmap.c"
 
 /************************************
 	Node Methods
@@ -37,9 +38,6 @@ struct List* createList(
 	// means that the next element would be added at curPos
 	new->curPos = 0;
 	new->arr = (int *)malloc(new->size * sizeof(int));
-	// *(new->arr + 0) = 1;
-	// *(new->arr + 1) = 2;
-	// *(new->arr + 2) = 3;
 	return new;
 }
 
@@ -228,7 +226,7 @@ int32_t printGraph(struct Graph* g) {
 	return 0;
 }
 
-int printList(struct List * list){
+int32_t printList(struct List * list){
 	int curPos = list->curPos - 1;
 	int p = 0;
 	printf("list:[");
@@ -240,34 +238,89 @@ int printList(struct List * list){
 	return 1;
 }
 
+char* get_str_from_void_ptr(void * ptr){
+	return (char *) ptr;
+}
+
 
 
 // int main() {
-// 	//test list
+	// test list
 	// struct List* list = createList(1);
 	// printf("list type:%d\n", list->type);
 	// struct List* newList = addList(addList(addList(addList(list, 52), 53), 54), 55);
 	// printList(list);
 
-// 	struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
-// 	struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);
-// 	struct Node* c = createNode(3, 2, 0, 0, 0, NULL);
-// 	struct Node* d = createNode(4, 3, 0, 0, 1, "Hello World!");
-// 	struct Graph* g = createGraph();
-// 	graphAddNode(g, a);
-// 	graphAddNode(g, b);
-// 	graphAddNode(g, c);
-// 	graphAddNode(g, d);
-// 	graphAddEdge(g, a, b, 3,0,0,0,"Edge1");
-// 	graphAddEdge(g, b, c, 2,0,0,1,NULL);
+	// struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
+	// struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);
+	// struct Node* c = createNode(3, 2, 0, 0, 0, NULL);
+	// struct Node* d = createNode(4, 3, 0, 0, 1, "Hello World!");
+	// struct Graph* g = createGraph();
+	// graphAddNode(g, a);
+	// graphAddNode(g, b);
+	// graphAddNode(g, c);
+	// graphAddNode(g, d);
+	// graphAddEdge(g, a, b, 3,0,0,0,"Edge1");
+	// graphAddEdge(g, b, c, 2,0,0,1,NULL);
 
-// 	struct Graph* g2 = copyGraph(g);
-// 	g->edges[0].d = "ffff";
-// 	d->d = "????";
-// 	graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
+	// struct Graph* g2 = copyGraph(g);
+	// g->edges[0].d = "ffff";
+	// d->d = "????";
+	// graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
 
-// 	printGraph(g);
-// 	printf("****************************\n");
-// 	printGraph(g2);
+	// printGraph(g);
+	// printf("****************************\n");
+	// printGraph(g2);
+	
+	// void * ptr = "xxx";
+	// printf("%s\n", get_str_from_void_ptr(ptr));
+	// return 1;
+// }
 
+
+
+// below is the test for dict
+
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <assert.h>
+
+// #include "hashmap.h"
+
+// #define KEY_MAX_LENGTH (256)
+// #define KEY_PREFIX ("somekey")
+// #define KEY_COUNT (1024*1024)
+
+// typedef struct data_struct_s
+// {
+//     char key_string[KEY_MAX_LENGTH];
+//     int number;
+// } data_struct_t;
+
+
+// int main()
+// {
+//     int index;
+//     int error;
+//     map_t mymap;
+//     char key_string[KEY_MAX_LENGTH];
+//     data_struct_t* value;
+    
+//     mymap = hashmap_new();
+
+//     /* First, populate the hash map with ascending values */
+//     /* Store the key string along side the numerical value so we can free it later */
+//     value = malloc(sizeof(data_struct_t));
+//     value->number = 1;
+//     strcpy(value->key_string, "Warrior");
+//     printf("%s\n", value->key_string);
+//     hashmap_put(mymap, value->key_string, value);
+//     data_struct_t* tmp = malloc(sizeof(data_struct_t));
+//     int a = hashmap_get(mymap, value->key_string, (void**)(&tmp));
+//     printf("%s:%d", tmp->key_string, tmp->number);
+//     // error = hashmap_remove(mymap, key_string);
+//     /* Now, destroy the map */
+//     hashmap_free(mymap);
+
+//     return 1;
 // }

@@ -65,7 +65,7 @@ struct List* addList(
 	int32_t addData
 );
 
-int pirntList(struct List * list);
+int32_t pirntList(struct List * list);
 
 int32_t printNode(struct Node * node);
 
@@ -82,6 +82,8 @@ struct Edge createEdge(
 	bool c,
 	char* d
 );
+
+char* get_str_from_void_ptr(void * ptr);
 
 /************************************
 	Graph Methods
