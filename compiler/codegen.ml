@@ -165,6 +165,12 @@ let copy_graph_f  = L.declare_function "copyGraph" copy_graph_t the_module
 let copy_graph g llbuilder =
   L.build_call copy_graph_f [| g |] "graph" llbuilder
 
+(* Merge two graphs into a single graph *)
+let merge_graph_t = L.function_type graph_t [| graph_t; graph_t |]
+let merge_graph_f = L.declare_function "mergeGraph" merge_graph_t the_module
+let merge_graph g1 g2 llbuilder =
+  L.build_call merge_graph_f [| g1; g2 |] "graph" llbuilder
+
 (* Get the root node of the graph *)
 let graph_get_root_t  = L.function_type node_t [| graph_t |]
 let graph_get_root_f  = L.declare_function "graphGetRoot" graph_get_root_t the_module
@@ -408,6 +414,11 @@ let translate program =
         and (e2', t2) = expr builder e2 in
         (* Handle Automatic Binop Type Converstion *)
         (match (t1, t2) with
+          | ( A.Graph_t, A.Graph_t) -> (
+                match op with
+                | A.Add -> (merge_graph e1' e2' builder, A.Graph_t)
+                | _ -> raise (Failure ("Unsuported Binop Type On Graph!"))
+              )
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
           | ( A.Int_t, A.Float_t) ->
               handle_binop (int_to_float builder e1') op e2' A.Float_t builder

@@ -94,6 +94,7 @@ struct Edge createEdge(
 
 struct Graph* createGraph();
 struct Graph* copyGraph(struct Graph* a);
+struct Graph* mergeGraph(struct Graph* a, struct Graph* b);
 struct Node* graphGetRoot(struct Graph* g);
 int32_t graphSetRoot(struct Graph* g, struct Node * root);
 int32_t graphAddNode(struct Graph* g, struct Node * node);

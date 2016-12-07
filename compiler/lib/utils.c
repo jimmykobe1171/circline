@@ -161,6 +161,33 @@ struct Graph* copyGraph(struct Graph* a) {
 	return g;
 }
 
+int32_t graphAddEdgeHelper(struct Graph* g, struct Edge e) {
+	if (g == NULL) return 1;
+	int i;
+	for (i=0; i < g->en; i++) {
+		if (g->edges[i].sour == e.sour && g->edges[i].dest == e.dest) {
+			g->edges[i] = e;
+			return 0;
+		}
+	}
+	g->edges[i] = e;
+	g->en ++;
+	return 0;
+}
+
+struct Graph* mergeGraph(struct Graph* a, struct Graph* b) {
+	if (b == NULL) return copyGraph(a);
+	if (a == NULL) return copyGraph(b);
+	struct Graph* gh = copyGraph(a);
+	int i;
+	for (i=0; i< b->vn; i++) {
+		graphAddNode(gh, b->nodes[i]);
+	}
+	for (i=0; i< b->en; i++) {
+		graphAddEdgeHelper(gh, b->edges[i]);
+	}
+	return gh;
+}
 struct Node* graphGetRoot(struct Graph* g) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
@@ -301,17 +328,19 @@ int printList(struct List * list){
 // 	graphAddNode(g, a);
 // 	graphAddNode(g, b);
 // 	graphAddNode(g, c);
-// 	graphAddNode(g, d);
+// 	// graphAddNode(g, d);
 // 	graphAddEdge(g, a, b, 3,0,0,0,"Edge1");
 // 	graphAddEdge(g, b, c, 2,0,0,1,NULL);
 //
-// 	// struct Graph* g2 = copyGraph(g);
-// 	// g->edges[0].d = "ffff";
-// 	// d->d = "????";
-// 	// graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
-// 	printNode( graphGetRoot(g) );
+// 	struct Graph* g2 = createGraph();
+// 	// graphAddEdge(g2, a, b, 0,11,0,0,NULL);
+// 	graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
+//
+// 	struct Graph* g3 = mergeGraph(g, g2);
+//
 // 	printGraph(g);
 // 	printf("****************************\n");
-// 	graphSetRoot(g, b);
-// 	printGraph(g);
+// 	printGraph(g2);
+// 	printf("****************************\n");
+// 	printGraph(g3);
 // }
