@@ -15,6 +15,13 @@ Tester: Qing Lan
 sudo ln -s /usr/local/opt/llvm38/bin/lli-3.8 /usr/local/bin/lli
 sudo ln -s /usr/local/opt/llvm38/bin/llvm-link-3.8 /usr/local/bin/llvm-link
 ```
+### How to run
+
+```
+make all
+sh compiler/circline.sh program.file
+./complier/test.in.exe
+```
 
 ## Current Target
 - Build the Travis CI (done in 24-Oct)
@@ -24,7 +31,7 @@ sudo ln -s /usr/local/opt/llvm38/bin/llvm-link-3.8 /usr/local/bin/llvm-link
 ## Recent Update 2016-10-22
 Figure out the major obstacle on the Scanner Part. User can run the test module by doing the follows:
 ```
-sh test_scanner.sh 
+sh test_scanner.sh
 ```
 This work is the same as to do:
 ```

@@ -30,23 +30,6 @@ and i1_t   = L.i1_type   context
 and str_t  = L.pointer_type (L.i8_type context)
 and void_t = L.void_type context
 
-(*
-  Node Definition Structure 
-  {
-    int    id,         // 0
-    int    type,       // 1
-    int    val_int,    // 0
-    double val_double, // 1
-    bool   val_bool,   // 2
-    i8*    val_str     // 3
-  }
-*)
-(* let node_t = (
-  let typ = L.named_struct_type context "struct_node" in
-  ignore(L.struct_set_body typ [| i32_t; i32_t; f_t; i1_t; str_t |] false);
-  typ
-) *)
-
 let node_t = L.pointer_type (match L.type_by_name llm "struct.Node" with
     None -> raise (Failure "struct.Node doesn't defined!")
   | Some x -> x)
@@ -89,47 +72,6 @@ let get_default_value_of_type = function
 
 (*
 ================================================================
-  Node Related Methods
-================================================================
-*)
-
-(* let get_node_val_index_by_type typ =
-  match typ with
-  | A.Int_t -> 1
-  | A.Float_t -> 2
-  | A.Bool_t -> 3
-  | A.String_t -> 4
-  | _ -> raise (Failure("Unsupported Node Values ..."))
-  
-
-let get_node_id node_ptr llbuilder =
-  let val_ptr = L.build_struct_gep node_ptr 0 "node_id_ptr_tmp" llbuilder in
-  L.build_load val_ptr "node_id_tmp" llbuilder
-
-let get_node_value node_ptr typ llbuilder =
-  let idx = get_node_val_index_by_type typ in
-  let val_ptr = L.build_struct_gep node_ptr idx "node_val_ptr_tmp" llbuilder in
-  L.build_load val_ptr "node_val_tmp" llbuilder
-
-let set_node_value node_ptr nval typ llbuilder =
-  let idx = get_node_val_index_by_type typ in
-  let a_ptr = L.build_struct_gep node_ptr idx "node_val_ptr_tmp" llbuilder in
-  (ignore(L.build_store nval a_ptr llbuilder); node_ptr) *)
-
-(* let create_node (id, nval, typ) llbuilder =
-  let node_ptr = L.build_malloc node_t "node_ptr_tmp" llbuilder in
-  let id_ptr = L.build_struct_gep node_ptr 0 "node_id_ptr_tmp" llbuilder in
-  (
-    ignore(L.build_store (L.const_int i32_t id) id_ptr llbuilder);
-    List.fold_left (fun _ t -> (
-      if t = typ
-      then (set_node_value node_ptr nval t llbuilder)
-      else (set_node_value node_ptr (get_default_value_of_type t) t llbuilder)
-    )) node_ptr [A.Int_t; A.Float_t; A.Bool_t; A.String_t]
-  ) *)
-
-(*
-================================================================
   Declare printf(), which the print built-in function will call
 ================================================================
 *)
@@ -163,6 +105,17 @@ let create_node (id, typ, nval) llbuilder =
     L.build_call create_node_f actuals "node" llbuilder
   )
 
+let print_node_t  = L.function_type i32_t [| node_t |]
+  let print_node_f  = L.declare_function "printNode" print_node_t the_module
+  let print_node node llbuilder =
+   L.build_call print_node_f [| node |] "printNode" llbuilder
+
+
+(*
+================================================================
+  Dict
+================================================================
+*)
 let create_dict_t  = L.function_type dict_t [| |]
 let create_dict_f  = L.declare_function "hashmap_new" create_dict_t the_module
 let create_dict llbuilder = 
@@ -184,6 +137,12 @@ let rec put_multi_kvs_dict dict_ptr llbuilder = function
   | [] -> dict_ptr
   | h :: tl -> put_dict dict_ptr (fst h) (snd h) llbuilder; put_multi_kvs_dict dict_ptr llbuilder tl
 
+
+(*
+================================================================
+  List
+================================================================
+*)
 let create_list_t  = L.function_type list_t [| i32_t |]
 let create_list_f  = L.declare_function "createList" create_list_t the_module
 let create_list typ llbuilder =
@@ -213,15 +172,9 @@ let add_list data l_ptr llbuilder =
     ignore(Array.set actuals 1 data);
     (L.build_call add_list_f actuals "addList" llbuilder)
 
-let rec add_multi_elements_list l_ptr llbuilder = function 
+let rec add_multi_elements_list l_ptr llbuilder = function
   | [] -> l_ptr
   | h :: tl -> add_multi_elements_list (add_list h l_ptr llbuilder) llbuilder tl
-
-
-let print_node_t  = L.function_type i32_t [| node_t |]
-let print_node_f  = L.declare_function "printNode" print_node_t the_module
-let print_node node llbuilder =
-  L.build_call print_node_f [| node |] "printNode" llbuilder
 
 let print_list_t  = L.function_type i32_t [| list_t |]
 let print_list_f  = L.declare_function "printList" print_list_t the_module
@@ -239,11 +192,36 @@ let create_graph_f  = L.declare_function "createGraph" create_graph_t the_module
 let create_graph llbuilder =
   L.build_call create_graph_f [| |] "graph" llbuilder
 
-let ptr_from_void_to_str_t  = L.function_type str_t [| i32_t |]
+
+(* let ptr_from_void_to_str_t  = L.function_type str_t [| i32_t |]
 let ptr_from_void_to_str_f  = L.declare_function "get_str_from_void_ptr" ptr_from_void_to_str_t the_module
 let ptr_from_void_to_str ptr llbuilder =
   L.build_call ptr_from_void_to_str_f [| ptr |] "ptr_from_void_to_str" llbuilder
+ *)
 
+(* Create a copy of origianl grpah *)
+let copy_graph_t  = L.function_type graph_t [| graph_t |]
+let copy_graph_f  = L.declare_function "copyGraph" copy_graph_t the_module
+let copy_graph g llbuilder =
+  L.build_call copy_graph_f [| g |] "graph" llbuilder
+
+(* Merge two graphs into a single graph *)
+let merge_graph_t = L.function_type graph_t [| graph_t; graph_t |]
+let merge_graph_f = L.declare_function "mergeGraph" merge_graph_t the_module
+let merge_graph g1 g2 llbuilder =
+  L.build_call merge_graph_f [| g1; g2 |] "graph" llbuilder
+
+(* Get the root node of the graph *)
+let graph_get_root_t  = L.function_type node_t [| graph_t |]
+let graph_get_root_f  = L.declare_function "graphGetRoot" graph_get_root_t the_module
+let graph_get_root g llbuilder =
+  L.build_call graph_get_root_f [| g |] "rootNode" llbuilder
+
+(* Set the root node of the graph *)
+let graph_set_root_t  = L.function_type i32_t [| graph_t; node_t |]
+let graph_set_root_f  = L.declare_function "graphSetRoot" graph_set_root_t the_module
+let graph_set_root graph node llbuilder =
+  L.build_call graph_set_root_f [| graph; node |] "setRootRes" llbuilder
 
 (* Add a new node to graph *)
 let graph_add_node_t = L.function_type i32_t [| graph_t; node_t |]
@@ -266,8 +244,10 @@ let graph_add_edge graph (sour, dest) op (typ, vals) llbuilder =
     | A.Void_t | A.Null_t -> (-1, 4)
     | _ -> raise (Failure "Unsupported edge value type")
   ) in (
-    ignore( Array.set actuals 3 (L.const_int i32_t typ_val) );
-    ignore( Array.set actuals loc vals );
+    ignore( actuals.(3) <- (L.const_int i32_t typ_val) );
+    ignore( actuals_r.(3) <- (L.const_int i32_t typ_val) );
+    ignore( actuals.(loc) <- vals );
+    ignore( actuals_r.(loc) <- vals );
     match op with
     | A.Right_Link -> L.build_call graph_add_edge_f actuals "addRightEdgeRes" llbuilder
     | A.Left_Link -> L.build_call graph_add_edge_f actuals_r "addLeftEdgeRes" llbuilder
@@ -275,7 +255,7 @@ let graph_add_edge graph (sour, dest) op (typ, vals) llbuilder =
         ignore(L.build_call graph_add_edge_f actuals "addRightEdgeRes" llbuilder);
         L.build_call graph_add_edge_f actuals_r "addLeftEdgeRes" llbuilder
       )
-  )  
+  )
 
 (* Print out the graph *)
 let print_graph_t  = L.function_type i32_t [| graph_t |]
@@ -431,6 +411,9 @@ let translate program =
       | A.String_Lit s -> (codegen_string_lit s builder, A.String_t)
       | A.Noexpr -> (L.const_int i32_t 0, A.Void_t)
       | A.Null -> (L.const_int i32_t 0, A.Null_t)
+      | A.Id s ->
+          let (var, typ) = lookup s in
+          (L.build_load var s builder, typ)
       | A.Node(id, e) ->
           let (nval, typ) = expr builder e in
           (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
@@ -454,29 +437,45 @@ let translate program =
               , A.Dict_String_t)
 
       | A.Graph_Link(left, op, right, edges) ->
-          let gh = create_graph builder in
-          let (ln, _) = expr builder left in
+          let (ln, ln_type) = expr builder left in
           let (rn, rn_type) = expr builder right in
           let (el, el_type) = expr builder edges in (
-            ignore(graph_add_node gh ln builder);
-            ignore(match (rn_type, el_type) with
-              | (A.Null_t, _) -> ()
-              | (A.Node_t, _) -> (
-                  ignore(graph_add_node gh rn builder);
-                  ignore(graph_add_edge gh (ln, rn) op (el_type, el) builder);
+            match (ln_type, rn_type, el_type) with
+            | (A.Node_t, A.Null_t, _) -> (
+                let gh = create_graph builder in (
+                    ignore(graph_add_node gh ln builder);
+                    (gh, A.Graph_t)
                 )
-              | _ -> raise (Failure "Graph Link Under build...")
-            );
-            (gh, A.Graph_t)
+              )
+            | (A.Node_t, A.Node_t, _) -> (
+                let gh = create_graph builder in (
+                    ignore(graph_add_node gh ln builder); (* Also set the root *)
+                    ignore(graph_add_node gh rn builder);
+                    ignore(graph_add_edge gh (ln, rn) op (el_type, el) builder);
+                    (gh, A.Graph_t)
+                )
+              )
+            | (A.Node_t, A.Graph_t, _) -> (
+                let gh = copy_graph rn builder in
+                let rt = graph_get_root rn builder in (
+                    ignore(graph_add_node gh ln builder);
+                    ignore(graph_set_root gh ln builder);
+                    ignore(graph_add_edge gh (ln, rt) op (el_type, el) builder);
+                    (gh, A.Graph_t)
+                )
+              )
+            | _ -> raise (Failure "Graph Link Under build...")
           )
-      | A.Id s ->
-          let (var, typ) = lookup s in
-          (L.build_load var s builder, typ)
       | A.Binop (e1, op, e2) ->
         let (e1', t1) = expr builder e1
         and (e2', t2) = expr builder e2 in
         (* Handle Automatic Binop Type Converstion *)
         (match (t1, t2) with
+          | ( A.Graph_t, A.Graph_t) -> (
+                match op with
+                | A.Add -> (merge_graph e1' e2' builder, A.Graph_t)
+                | _ -> raise (Failure ("Unsuported Binop Type On Graph!"))
+              )
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
           | ( A.Int_t, A.Float_t) ->
               handle_binop (int_to_float builder e1') op e2' A.Float_t builder
@@ -498,7 +497,7 @@ let translate program =
             | _ -> raise (Failure("Assign Type inconsist"))
           ), typ)
       | A.Call ("print", el) ->
-          let print_expr e = 
+          let print_expr e =
             let (eval, etyp) = expr builder e in (
               match etyp with
               | A.Int_t
@@ -511,7 +510,7 @@ let translate program =
               | _ -> raise (Failure("Unsupported type for print..."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->
-          (codegen_print builder (List.map 
+          (codegen_print builder (List.map
             (fun e -> (let (eval, _) = expr builder e in eval))
             el), A.Void_t)
       | A.Call (f, act) ->
