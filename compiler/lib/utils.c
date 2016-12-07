@@ -137,11 +137,13 @@ struct Graph* createGraph() {
 	g->en = 0;
 	g->vn_len = 16;
 	g->en_len = 64;
+	g->root = NULL;
 	g->nodes = (struct Node**) malloc( sizeof(struct Node*) * 16 );
 	g->edges = (struct Edge*) malloc( sizeof(struct Edge) * 64 );
 	return g;
 }
 struct Graph* copyGraph(struct Graph* a) {
+	if (a == NULL) return NULL;
 	struct Graph* g = (struct Graph*) malloc( sizeof(struct Graph) );
 	memcpy(g, a, sizeof(struct Graph));
 	g->nodes = (struct Node**) malloc( sizeof(struct Node*) * a->vn_len );
@@ -159,19 +161,50 @@ struct Graph* copyGraph(struct Graph* a) {
 	return g;
 }
 
+struct Node* graphGetRoot(struct Graph* g) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		return NULL;
+	}
+	return g->root;
+}
+int32_t graphSetRoot(struct Graph* g, struct Node * root) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		return 1;
+	}
+	if (root == NULL) {
+		printf("[Error] Root node doesn't exist!\n");
+		return 1;
+	}
+	int i;
+	for (i=0; i<g->vn; i++) {
+		if (g->nodes[i] == root) {
+			g->root = root;
+			return 0;
+		}
+	}
+	printf("[Error] Root doesn't exist in the graph!\n");
+	return 1;
+}
+
 int32_t graphAddNode(struct Graph* g, struct Node * node) {
 	if (g == NULL) {
-		printf("Graph doesn't exist!\n");
+		printf("[Error] Graph doesn't exist!\n");
 		return 1;
 	}
 	if (g->vn + 1 >= g->vn_len) {
-		printf("# Graph Nodes reach the limit!\n");
+		printf("[Warning] # Graph Nodes reach the limit!\n");
 		return 1;
 	}
 	int i;
 	// Nodes already exist in the graph
 	for (i=0; i<g->vn; i++) {
 		if (g->nodes[i] == node) return 0;
+	}
+	// Update the root if the graph is empty
+	if (g->root == NULL) {
+		g->root = node;
 	}
 	g->nodes[i] = node;
 	g->vn++;
@@ -189,15 +222,17 @@ int32_t graphAddEdge(
 	char* d
 ) {
 	if (g == NULL) {
-		printf("Graph doesn't exist!\n");
+		printf("[Error] Graph doesn't exist!\n");
 		return 1;
 	}
 	if (g->vn + 1 >= g->vn_len) {
-		printf("# Graph Nodes reach the limit!\n");
+		printf("[Error] # Graph Nodes reach the limit!\n");
 		return 1;
 	}
+	if (graphAddNode(g, sour) > 0) return 1;
+	if (graphAddNode(g, dest) > 0) return 1;
 	int i;
-	// Nodes already exist in the graph
+	// Edges already exist in the graph
 	for (i=0; i<g->en; i++) {
 		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
 			g->edges[i].type = type;
@@ -215,13 +250,19 @@ int32_t graphAddEdge(
 }
 
 int32_t printGraph(struct Graph* g) {
-	printf("# Nodes: %d\n", g->vn);
+	if (g == NULL) return 1;
+	printf("#Nodes: %d  ", g->vn);
+	if (g->root != NULL) {
+		printf("Root Node: %d\n", g->root->id);
+	} else {
+		printf("\n");
+	}
 	int i;
 	for (i=0; i<g->vn; i++) {
 		printNode(g->nodes[i]);
 	}
 	printf("--------------------------------------\n");
-	printf("# Edges: %d\n", g->en);
+	printf("#Edges: %d\n", g->en);
 	for (i=0; i<g->en; i++) {
 		printEdge(&g->edges[i]);
 	}
@@ -242,13 +283,16 @@ int printList(struct List * list){
 
 
 
+//test list
 // int main() {
-// 	//test list
-	// struct List* list = createList(1);
-	// printf("list type:%d\n", list->type);
-	// struct List* newList = addList(addList(addList(addList(list, 52), 53), 54), 55);
-	// printList(list);
+// 	struct List* list = createList(1);
+// 	printf("list type:%d\n", list->type);
+// 	struct List* newList = addList(addList(addList(addList(list, 52), 53), 54), 55);
+// 	printList(list);
+// }
 
+// test graph
+// int main() {
 // 	struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
 // 	struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);
 // 	struct Node* c = createNode(3, 2, 0, 0, 0, NULL);
@@ -260,14 +304,14 @@ int printList(struct List * list){
 // 	graphAddNode(g, d);
 // 	graphAddEdge(g, a, b, 3,0,0,0,"Edge1");
 // 	graphAddEdge(g, b, c, 2,0,0,1,NULL);
-
-// 	struct Graph* g2 = copyGraph(g);
-// 	g->edges[0].d = "ffff";
-// 	d->d = "????";
-// 	graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
-
+//
+// 	// struct Graph* g2 = copyGraph(g);
+// 	// g->edges[0].d = "ffff";
+// 	// d->d = "????";
+// 	// graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
+// 	printNode( graphGetRoot(g) );
 // 	printGraph(g);
 // 	printf("****************************\n");
-// 	printGraph(g2);
-
+// 	graphSetRoot(g, b);
+// 	printGraph(g);
 // }

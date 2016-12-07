@@ -52,16 +52,16 @@ let convert_var_type = function
 
 let convert_graph_op = function
 | A.Right_Link -> C.Right_Link
-| A.Left_Link -> C.Right_Link
+| A.Left_Link -> C.Left_Link
 | A.Double_Link -> C.Double_Link
 
-let rec get_entire_name m aux cur_name = 
-  if (StringMap.mem cur_name m) then 
-    let aux = (StringMap.find cur_name m) ^ "." ^ aux in  
+let rec get_entire_name m aux cur_name =
+  if (StringMap.mem cur_name m) then
+    let aux = (StringMap.find cur_name m) ^ "." ^ aux in
     (get_entire_name m aux (StringMap.find cur_name m))
   else aux
 
-let increase_node_num = 
+let increase_node_num =
   let node_num = ref(!node_num) in
   !(node_num) - 1
 
@@ -178,7 +178,7 @@ let rec convert_func_list_c m = function
     C.name = get_entire_name m n n;
     C.args = convert_formal_list a;
     C.body = get_body_from_body_c m b;
-    C.locals = get_local_from_body_c b; 
+    C.locals = get_local_from_body_c b;
     C.pname = if n = "main" then "main" else get_entire_name m (StringMap.find n m) (StringMap.find n m)
   } :: (convert_func_list_c m tl)
   | _::tl -> convert_func_list_c m tl

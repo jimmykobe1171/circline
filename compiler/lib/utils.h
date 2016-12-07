@@ -31,8 +31,17 @@ struct Graph {
 	int32_t en;
 	int32_t vn_len;
  	int32_t en_len;
+	struct Node* root;
 	struct Node** nodes;
 	struct Edge* edges;
+};
+
+// one element of a list.
+struct List {
+	int32_t type;
+	int32_t size;
+	int32_t *arr;
+	int32_t curPos;
 };
 
 /************************************
@@ -48,13 +57,11 @@ struct Node* createNode(
 	char* d
 );
 
-// one element of a list.
-struct List {
-	int32_t type;
-	int32_t size;
-	int32_t *arr;
-	int32_t curPos;
-};
+int32_t printNode(struct Node * node);
+
+/************************************
+	List Methods
+************************************/
 
 struct List* createList(
 	int32_t type
@@ -66,8 +73,6 @@ struct List* addList(
 );
 
 int pirntList(struct List * list);
-
-int32_t printNode(struct Node * node);
 
 /************************************
 	Edge Methods
@@ -89,6 +94,8 @@ struct Edge createEdge(
 
 struct Graph* createGraph();
 struct Graph* copyGraph(struct Graph* a);
+struct Node* graphGetRoot(struct Graph* g);
+int32_t graphSetRoot(struct Graph* g, struct Node * root);
 int32_t graphAddNode(struct Graph* g, struct Node * node);
 int32_t graphAddEdge(
 	struct Graph* g,
