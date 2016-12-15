@@ -16,14 +16,9 @@ struct List* createList(
 	int32_t type
 );
 
-struct List* addList(
+struct List* addListHelper(
 	struct List * list,
 	void* addData
-);
-
-struct List* addList_Int(
-	struct List * list,
- 	int32_t addData
 );
 
 int32_t pirntList(struct List * list);

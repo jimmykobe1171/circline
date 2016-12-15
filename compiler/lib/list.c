@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include "utils.h"
 #include "list.h"
 
@@ -19,7 +20,7 @@ struct List* createList(
 	return new;
 }
 
-struct List* addList(
+struct List* addListHelper(
 	struct List * list,
 	void* addData
 ){
@@ -33,14 +34,28 @@ struct List* addList(
 	return list;
 }
 
-struct List* addList_Int(
-	struct List * list,
-	int32_t addData
-){
-		// void* a = (void*)&addData;
-		// printf("Address: %d %d\n", &addData, *(&addData));
-		// printf("%d\n", *((int*)a));
-		return addList(list, (void*)&addData);
+struct List* addList(int n, ...) {
+	va_list ap;
+
+	va_start(ap, n);
+	int32_t type = va_arg(ap, int);
+	struct List * list = va_arg(ap, struct List *);
+	void * data;
+	int* tmp0;
+	float* tmp1;
+	bool* tmp2;
+	char* tmp3;
+	switch (type) {
+		case INT:
+			tmp0 = (int*)malloc(sizeof(int));
+			*tmp0 = va_arg(ap, int);
+			data = (void*) tmp0;
+			break;
+		default:
+			break;
+	}
+  va_end(ap);
+  return addListHelper(list, data);
 }
 
 int32_t printList(struct List * list){
@@ -80,10 +95,10 @@ char* get_str_from_void_ptr(void * ptr){
 	return (char *) ptr;
 }
 
-int main() {
-	struct List* a = createList(INT);
-	addList_Int(a, 1);
-	addList_Int(a, 2);
-	addList_Int(a, 3);
-	printList(a);
-}
+// int main() {
+// 	struct List* a = createList(INT);
+// 	addListP(3, INT, a, 1);
+// 	addListP(3, INT, a, 2);
+// 	addListP(3, INT, a, 3);
+// 	printList(a);
+// }

@@ -58,6 +58,17 @@ let ltype_of_typ = function
   | A.Graph_t -> graph_t
   | _ -> raise (Failure ("Type Not Found!"))
 
+let lconst_of_typ = function
+    A.Int_t -> L.const_int i32_t 0
+  | A.Float_t -> L.const_int i32_t 1
+  | A.Bool_t -> L.const_int i32_t 2
+  | A.String_t -> L.const_int i32_t 3
+  | A.Node_t -> L.const_int i32_t 4
+  | A.Graph_t -> L.const_int i32_t 5
+  (* | A.List_Int_t -> list_t
+  | A.Dict_String_t -> dict_t *)
+  | _ -> raise (Failure ("Type Not Found!"))
+
 let int_zero = L.const_int i32_t 0
 and float_zero = L.const_float f_t 0.
 and bool_false = L.const_int i1_t 0
@@ -118,22 +129,22 @@ let print_node_t  = L.function_type i32_t [| node_t |]
 *)
 let create_dict_t  = L.function_type dict_t [| |]
 let create_dict_f  = L.declare_function "hashmap_new" create_dict_t the_module
-let create_dict llbuilder = 
+let create_dict llbuilder =
     L.build_call create_dict_f [| |] "hashmap" llbuilder
 
 let put_dict_t  = L.function_type dict_t [| dict_t; str_t; str_t|]
 let put_dict_f  = L.declare_function "hashmap_put" put_dict_t the_module
-let put_dict d key val_ptr llbuilder = 
+let put_dict d key val_ptr llbuilder =
     let actuals = [| d; key; val_ptr|] in
     L.build_call put_dict_f actuals "put" llbuilder
 
 let get_dict_t  = L.function_type str_t [| dict_t; str_t |]
 let get_dict_f  = L.declare_function "hashmap_get" get_dict_t the_module
-let get_dict d key llbuilder = 
+let get_dict d key llbuilder =
     let actuals = [| d; key |] in
     L.build_call get_dict_f actuals "get" llbuilder
 
-let rec put_multi_kvs_dict dict_ptr llbuilder = function 
+let rec put_multi_kvs_dict dict_ptr llbuilder = function
   | [] -> dict_ptr
   | h :: tl -> put_dict dict_ptr (fst h) (snd h) llbuilder; put_multi_kvs_dict dict_ptr llbuilder tl
 
@@ -146,35 +157,19 @@ let rec put_multi_kvs_dict dict_ptr llbuilder = function
 let create_list_t  = L.function_type list_t [| i32_t |]
 let create_list_f  = L.declare_function "createList" create_list_t the_module
 let create_list typ llbuilder =
-  let actuals = [|int_zero|] in
-  let typ_val = (match typ with
-    | A.Int_t -> 0
-    (* | A.Float_t -> (1, 3) *)
-    (* | A.Bool_t -> (2, 4) *)
-    (* | A.String_t -> (3, 5) *)
-    | _ -> raise (Failure "Unsupported list value type")
-  ) in (
+  let actuals = [|lconst_of_typ typ|]in (
     L.build_call create_list_f actuals "createList" llbuilder
   )
 
-let add_list_t  = L.function_type list_t [| list_t; i32_t |]
+let add_list_t  = L.var_arg_function_type list_t [| i32_t; i32_t; list_t |]
 let add_list_f  = L.declare_function "addList" add_list_t the_module
-let add_list data l_ptr llbuilder =
-  let actuals = [|str_null; int_zero|] in
-(*   let typ_val = (match typ with
-    | A.Int_t -> 0
-    (* | A.Float_t -> (1, 3) *)
-    | A.Bool_t -> (2, 4)
-    (* | A.String_t -> (3, 5) *)
-    | _ -> raise (Failure "Unsupported list value type")
-  ) in ( *)
-    ignore(Array.set actuals 0 l_ptr);
-    ignore(Array.set actuals 1 data);
+let add_list (data, typ) l_ptr llbuilder =
+  let actuals = [| L.const_int i32_t 3; lconst_of_typ typ; l_ptr; data|] in
     (L.build_call add_list_f actuals "addList" llbuilder)
 
-let rec add_multi_elements_list l_ptr llbuilder = function
+let rec add_multi_elements_list l_ptr typ llbuilder = function
   | [] -> l_ptr
-  | h :: tl -> add_multi_elements_list (add_list h l_ptr llbuilder) llbuilder tl
+  | h :: tl -> add_multi_elements_list (add_list (h, typ) l_ptr llbuilder) typ llbuilder tl
 
 let print_list_t  = L.function_type i32_t [| list_t |]
 let print_list_f  = L.declare_function "printList" print_list_t the_module
@@ -417,11 +412,11 @@ let translate program =
       | A.Node(id, e) ->
           let (nval, typ) = expr builder e in
           (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
-      | A.ListP(ls) -> 
-          let l_ptr_type = create_list A.Int_t builder, A.List_Int_t in 
-            add_multi_elements_list (fst l_ptr_type) builder (List.map fst (List.map (expr builder) ls)), (snd l_ptr_type) 
-      | A.DictP(expr_list) -> 
-          let get_ptr v builder = 
+      | A.ListP(ls) ->
+          let l_ptr_type = create_list A.Int_t builder, A.List_Int_t in
+            add_multi_elements_list (fst l_ptr_type) A.Int_t builder (List.map fst (List.map (expr builder) ls)), (snd l_ptr_type)
+      | A.DictP(expr_list) ->
+          let get_ptr v builder =
             let d_ltyp = ltype_of_typ (snd (expr builder v)) in
               let d_ptr = L.build_malloc d_ltyp "tmp" builder in
               (
@@ -431,7 +426,7 @@ let translate program =
               (* L.build_bitcast d_ptr (L.pointer_type i8_t) "ptr" builder (* return a void pointer *) *)
           in
           let dict_ptr = create_dict builder in
-          (put_multi_kvs_dict dict_ptr builder 
+          (put_multi_kvs_dict dict_ptr builder
                 (* (List.map (fun (key, v) -> key, get_ptr v builder) (List.map (fun (key, v) -> (fst(expr builder key), v)) expr_list)) *)
                 (List.map (fun (key, v) -> key, fst(expr builder v)) (List.map (fun (key, v) -> (fst(expr builder key), v)) expr_list))
               , A.Dict_String_t)
