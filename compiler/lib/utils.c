@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include "utils.h"
 #include "hashmap.c"
 #include "list.c"
@@ -27,6 +28,29 @@ struct Node* createNode(
 	new->c = c;
 	new->d = d;
 	return new;
+}
+
+struct Node* createNodeP(int32_t id, int32_t type, ...) {
+	struct Node* new = (struct Node*) malloc(sizeof(struct Node));
+	new->id = id;
+	new->type = type;
+
+	va_list ap;
+	va_start(ap, 1);
+	switch (type) {
+		case INT:
+			new->a = va_arg(ap, int);	break;
+		case FLOAT:
+			new->b = va_arg(ap, double);	break;
+		case BOOL:
+			new->c = va_arg(ap, bool);	break;
+		case STRING:
+			new->d = va_arg(ap, char*);	break;
+		default:
+			break;
+	}
+  va_end(ap);
+  return new;
 }
 
 int32_t printNode(struct Node * node) {
@@ -298,7 +322,7 @@ int32_t printGraph(struct Graph* g) {
 	// printGraph(g);
 	// printf("****************************\n");
 	// printGraph(g2);
-	
+
 	// void * ptr = "xxx";
 	// printf("%s\n", get_str_from_void_ptr(ptr));
 	// return 1;
@@ -332,7 +356,7 @@ int32_t printGraph(struct Graph* g) {
 //     map_t mymap;
 //     char key_string[KEY_MAX_LENGTH];
 //     data_struct_t* value;
-    
+
 //     mymap = hashmap_new();
 
 //     /* First, populate the hash map with ascending values */
@@ -361,28 +385,36 @@ int32_t printGraph(struct Graph* g) {
 
 // test graph
 // int main() {
-// 	struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
-// 	struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);
-// 	struct Node* c = createNode(3, 2, 0, 0, 0, NULL);
-// 	struct Node* d = createNode(4, 3, 0, 0, 1, "Hello World!");
-// 	struct Graph* g = createGraph();
-// 	graphAddNode(g, a);
-// 	graphAddNode(g, b);
-// 	graphAddNode(g, c);
-// 	// graphAddNode(g, d);
-// 	graphAddEdge(g, a, b, 3,0,0,0,"Edge1");
-// 	graphAddEdge(g, b, c, 2,0,0,1,NULL);
+// 	// struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
+// 	// struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);
+// 	// struct Node* c = createNode(3, 2, 0, 0, 0, NULL);
+// 	// struct Node* d = createNode(4, 3, 0, 0, 1, "Hello World!");
+// 	struct Node* a = createNodeP(1, 0, 12);
+// 	struct Node* b = createNodeP(2, 1, 1.2);
+// 	struct Node* c = createNodeP(3, 2, 0);
+// 	struct Node* d = createNodeP(4, 3, "Hello World!");
 //
-// 	struct Graph* g2 = createGraph();
-// 	// graphAddEdge(g2, a, b, 0,11,0,0,NULL);
-// 	graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
-//
-// 	struct Graph* g3 = mergeGraph(g, g2);
-//
-// 	printGraph(g);
-// 	printf("****************************\n");
-// 	printGraph(g2);
-// 	printf("****************************\n");
-// 	printGraph(g3);
+// 	printNode(a);
+// 	printNode(b);
+// 	printNode(c);
+// 	printNode(d);
+// 	// struct Graph* g = createGraph();
+// 	// graphAddNode(g, a);
+// 	// graphAddNode(g, b);
+// 	// graphAddNode(g, c);
+// 	// // graphAddNode(g, d);
+// 	// graphAddEdge(g, a, b, 3,0,0,0,"Edge1");
+// 	// graphAddEdge(g, b, c, 2,0,0,1,NULL);
+// 	//
+// 	// struct Graph* g2 = createGraph();
+// 	// // graphAddEdge(g2, a, b, 0,11,0,0,NULL);
+// 	// graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
+// 	//
+// 	// struct Graph* g3 = mergeGraph(g, g2);
+// 	//
+// 	// printGraph(g);
+// 	// printf("****************************\n");
+// 	// printGraph(g2);
+// 	// printf("****************************\n");
+// 	// printGraph(g3);
 // }
-

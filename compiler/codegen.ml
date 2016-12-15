@@ -103,11 +103,12 @@ let codegen_string_lit s llbuilder =
   Node
 ================================================================
 *)
-let create_node_t  = L.function_type node_t [| i32_t; i32_t; i32_t; f_t; i1_t; str_t |]
-let create_node_f  = L.declare_function "createNode" create_node_t the_module
+let create_node_t  = L.var_arg_function_type node_t [| i32_t; i32_t |]
+let create_node_f  = L.declare_function "createNodeP" create_node_t the_module
 let create_node (id, typ, nval) llbuilder =
-  let actuals = [| id; int_zero; int_zero; float_zero; bool_false; str_null |] in
-  let (typ_val, loc) = (match typ with
+  let actuals = [| id; lconst_of_typ typ; nval |] in
+    L.build_call create_node_f actuals "node" llbuilder
+  (* let (typ_val, loc) = (match typ with
     | A.Int_t -> (0, 2)
     | A.Float_t -> (1, 3)
     | A.Bool_t -> (2, 4)
@@ -118,7 +119,7 @@ let create_node (id, typ, nval) llbuilder =
     ignore( Array.set actuals 1 (L.const_int i32_t typ_val) );
     ignore( Array.set actuals loc nval );
     L.build_call create_node_f actuals "node" llbuilder
-  )
+  ) *)
 
 let print_node_t  = L.function_type i32_t [| node_t |]
   let print_node_f  = L.declare_function "printNode" print_node_t the_module
