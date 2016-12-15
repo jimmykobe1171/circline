@@ -60,7 +60,15 @@ let ltype_of_typ = function
   | A.List_Graph_t -> list_t
   | A.Dict_String_t -> dict_t
   | A.Graph_t -> graph_t
-  | _ -> raise (Failure ("Type Not Found!"))
+  | _ -> raise (Failure ("Type Not Found for ltype_of_typ!"))
+
+let type_of_list_type = function
+    A.List_Int_t -> A.Int_t
+  | A.List_Float_t -> A.Float_t
+  | A.List_String_t -> A.String_t
+  | A.List_Node_t -> A.Node_t
+  | A.List_Graph_t -> A.Graph_t
+  | _ -> raise (Failure ("Type Not Found for type_of_list_type!"))
 
 let lconst_of_typ = function
     A.Int_t -> L.const_int i32_t 0
@@ -71,7 +79,7 @@ let lconst_of_typ = function
   | A.Graph_t -> L.const_int i32_t 5
   (* | A.List_Int_t -> list_t
   | A.Dict_String_t -> dict_t *)
-  | _ -> raise (Failure ("Type Not Found!"))
+  | _ -> raise (Failure ("Type Not Found for lconst_of_typ!"))
 
 let int_zero = L.const_int i32_t 0
 and float_zero = L.const_float f_t 0.
@@ -180,6 +188,12 @@ let print_list_t  = L.function_type i32_t [| list_t |]
 let print_list_f  = L.declare_function "printList" print_list_t the_module
 let print_list l llbuilder =
   L.build_call print_list_f [| l |] "printList" llbuilder
+
+(* let list_get builder params =  *)
+(* list_call_default_main builder (fst (expr val_name)) params_list (snd (expr val_name)) default_func_name   *)
+let list_call_default_main builder list_ptr params_list typ = function
+  | "add" -> add_list (List.hd params_list, typ) list_ptr builder 
+  (* | "set" ->  *)
 
 (*
 ================================================================
@@ -518,6 +532,10 @@ let translate program =
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
               | A.Node_t -> ignore(print_node eval builder)
               | A.List_Int_t -> ignore(print_list eval builder)
+              | A.List_Float_t -> ignore(print_list eval builder)
+              | A.List_String_t -> ignore(print_list eval builder)
+              | A.List_Node_t -> ignore(print_list eval builder)
+              | A.List_Graph_t -> ignore(print_list eval builder)
               | A.Graph_t -> ignore(print_graph eval builder)
               | _ -> raise (Failure("Unsupported type for print..."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
@@ -538,8 +556,21 @@ let translate program =
       (* default set operator of list *)
 
       (* default get operator of dict *)
-      | A.CallDefault(e, "get", el) ->
-           (get_dict (fst (expr builder e))  (fst (expr builder (List.hd el))) builder, A.String_t)
+      | A.CallDefault(val_name, default_func_name, params_list) -> 
+        (* get caller tpye *)
+        let expr_tpy = snd (expr builder val_name) in 
+        let assign_func_by_typ builder = function 
+          (* deal with list *)       
+          | A.List_Int_t | A.List_Float_t | A.List_String_t 
+          | A.List_Node_t | A.List_Graph_t -> 
+              list_call_default_main builder (fst (expr builder val_name)) (List.map (fun e -> fst (expr builder e)) params_list) (type_of_list_type expr_tpy) default_func_name  
+          
+          | _ -> raise (Failure ("Default Function Not Support!"))
+          in 
+            (assign_func_by_typ builder expr_tpy), expr_tpy
+          
+        (* below is used to deal with dict *)
+           (* (get_dict (fst (expr builder e))  (fst (expr builder (List.hd el))) builder, A.String_t) *)
 
       | _ -> (L.const_int i32_t 0, A.Void_t)
     in
