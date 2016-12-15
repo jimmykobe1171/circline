@@ -133,10 +133,10 @@ char* get_str_from_void_ptr(void * ptr){
 	return (char *) ptr;
 }
 
-int main() {
-	struct List* a = createList(STRING);
-	addList(3, STRING, a, "123");
-	addList(3, STRING, a, "456");
-	addList(3, STRING, a, "789");
-	printList(a);
-}
+// int main() {
+// 	struct List* a = createList(STRING);
+// 	addList(3, STRING, a, "123");
+// 	addList(3, STRING, a, "456");
+// 	addList(3, STRING, a, "789");
+// 	printList(a);
+// }
