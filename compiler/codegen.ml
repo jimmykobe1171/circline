@@ -54,6 +54,10 @@ let ltype_of_typ = function
   | A.Void_t -> void_t
   | A.Node_t -> node_t
   | A.List_Int_t -> list_t
+  | A.List_Float_t -> list_t
+  | A.List_String_t -> list_t
+  | A.List_Node_t -> list_t
+  | A.List_Graph_t -> list_t
   | A.Dict_String_t -> dict_t
   | A.Graph_t -> graph_t
   | _ -> raise (Failure ("Type Not Found!"))
@@ -146,7 +150,7 @@ let get_dict d key llbuilder =
 
 let rec put_multi_kvs_dict dict_ptr llbuilder = function
   | [] -> dict_ptr
-  | h :: tl -> put_dict dict_ptr (fst h) (snd h) llbuilder; put_multi_kvs_dict dict_ptr llbuilder tl
+  | h :: tl -> ignore(put_dict dict_ptr (fst h) (snd h) llbuilder); put_multi_kvs_dict dict_ptr llbuilder tl
 
 
 (*
@@ -413,8 +417,20 @@ let translate program =
           let (nval, typ) = expr builder e in
           (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
       | A.ListP(ls) ->
-          let l_ptr_type = create_list A.Int_t builder, A.List_Int_t in
-            add_multi_elements_list (fst l_ptr_type) A.Int_t builder (List.map fst (List.map (expr builder) ls)), (snd l_ptr_type)
+          let from_expr_typ_to_list_typ = function 
+              A.Int_t -> A.List_Int_t
+            | A.Float_t -> A.List_Float_t
+            | A.String_t -> A.List_String_t
+            | A.Node_t -> A.List_Node_t
+            | A.Graph_t -> A.Graph_t
+            | _ -> A.List_Int_t
+          in
+          (* get the list typ by its first element *)
+          let list_typ = snd (expr builder (List.hd ls)) in
+          (* create a new list first *)
+          let l_ptr_type = (create_list list_typ builder, from_expr_typ_to_list_typ list_typ) in
+          (* then add all initial values to the list *)
+            add_multi_elements_list (fst l_ptr_type) list_typ builder (List.map fst (List.map (expr builder) ls)), (snd l_ptr_type)
       | A.DictP(expr_list) ->
           let get_ptr v builder =
             let d_ltyp = ltype_of_typ (snd (expr builder v)) in
@@ -515,8 +531,15 @@ let translate program =
       	 let result = (match fdecl.A.returnType with A.Void_t -> ""
                                                    | _ -> f ^ "_result") in
          (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.returnType)
+      (* default get operator of list *)
+      (* default size operator of list *)
+      (* default remove operator of list *)
+      (* default set operator of list *)
+
+      (* default get operator of dict *)
       | A.CallDefault(e, "get", el) ->
            (get_dict (fst (expr builder e))  (fst (expr builder (List.hd el))) builder, A.String_t)
+
       | _ -> (L.const_int i32_t 0, A.Void_t)
     in
 
