@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include "utils.h"
-#include "hashmap.c"
-#include "list.c"
+#include "hashmap.h"
+#include "list.h"
 
 /************************************
 	Node Methods

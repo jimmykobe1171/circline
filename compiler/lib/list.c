@@ -67,12 +67,20 @@ struct List* addList(int n, ...) {
 			data = (void*) va_arg(ap, char*);
 			break;
 
+		case NODE:
+			data = (void*) va_arg(ap, struct Node*);
+
 		default:
 			break;
 	}
   va_end(ap);
   return addListHelper(list, data);
 }
+
+// void* getList(struct List* list, int index){
+// 	int curPos = list->curPos -1;
+// 	return *(list->arr + index);
+// }
 
 int32_t printList(struct List * list){
 	int curPos = list->curPos - 1;
@@ -111,6 +119,14 @@ int32_t printList(struct List * list){
 			printf("%s", ((char*)(*(list->arr + p))));
 			break;
 
+		case NODE:
+			while(p < curPos){
+				printNode((struct Node*)(*(list->arr + p)));
+				p++;
+			}
+			printNode((struct Node*)(*(list->arr + p)));
+			break;
+
 		default:
 			printf("Unsupported List Type!\n");
 			return 1;
@@ -134,9 +150,9 @@ char* get_str_from_void_ptr(void * ptr){
 }
 
 // int main() {
-// 	struct List* a = createList(STRING);
-// 	addList(3, STRING, a, "123");
-// 	addList(3, STRING, a, "456");
-// 	addList(3, STRING, a, "789");
+// 	struct List* a = createList(NODE);
+// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
+// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
+// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
 // 	printList(a);
 // }
