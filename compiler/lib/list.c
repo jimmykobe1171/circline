@@ -69,6 +69,11 @@ struct List* addList(int n, ...) {
 
 		case NODE:
 			data = (void*) va_arg(ap, struct Node*);
+			break;
+
+		case GRAPH:
+			data = (void*) va_arg(ap, struct Graph*);
+			break;
 
 		default:
 			break;
@@ -77,10 +82,10 @@ struct List* addList(int n, ...) {
   return addListHelper(list, data);
 }
 
-// void* getList(struct List* list, int index){
-// 	int curPos = list->curPos -1;
-// 	return *(list->arr + index);
-// }
+void* getList(struct List* list, int index){
+	int curPos = list->curPos -1;
+	return *(list->arr + index);
+}
 
 int32_t printList(struct List * list){
 	int curPos = list->curPos - 1;
@@ -127,6 +132,14 @@ int32_t printList(struct List * list){
 			printNode((struct Node*)(*(list->arr + p)));
 			break;
 
+		case GRAPH:
+			while(p < curPos){
+				printGraph((struct Graph*)(*(list->arr + p)));
+				p++;
+			}
+			printGraph((struct Graph*)(*(list->arr + p)));
+			break;
+
 		default:
 			printf("Unsupported List Type!\n");
 			return 1;
@@ -149,10 +162,12 @@ char* get_str_from_void_ptr(void * ptr){
 	return (char *) ptr;
 }
 
-// int main() {
-// 	struct List* a = createList(NODE);
-// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
-// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
-// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
-// 	printList(a);
-// }
+
+int main() {
+	struct List* a = createList(NODE);
+	addList(3, NODE, a, createNode(1, 0, 5, 0, 0, NULL));
+	addList(3, NODE, a, createNode(1, 0, 10, 0, 0, NULL));
+	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
+	printList(a);
+	//printNode(VoidtoNode(getList(a,2)));
+}

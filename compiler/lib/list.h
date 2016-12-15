@@ -20,7 +20,9 @@ struct List* addListHelper(
 	struct List * list,
 	void* addData
 );
-
+void* getList(struct List* list, int index);
 int32_t pirntList(struct List * list);
 
+
 char* get_str_from_void_ptr(void * ptr);
+
