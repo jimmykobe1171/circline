@@ -1,4 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
 
 #ifndef _UTILS_H_
 #define _UTILS_H_
@@ -6,6 +10,16 @@
 /************************************
 	Type Declaration
 ************************************/
+
+#define INT 0
+#define FLOAT 1
+#define BOOL 2
+#define STRING 3
+#define NODE 4
+#define GRAPH 5
+#define LIST 6
+#define DICT 7
+
 
 struct Node {
 	int32_t id;
