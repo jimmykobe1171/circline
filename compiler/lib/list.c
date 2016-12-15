@@ -163,11 +163,11 @@ char* get_str_from_void_ptr(void * ptr){
 }
 
 
-int main() {
-	struct List* a = createList(NODE);
-	addList(3, NODE, a, createNode(1, 0, 5, 0, 0, NULL));
-	addList(3, NODE, a, createNode(1, 0, 10, 0, 0, NULL));
-	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
-	printList(a);
-	//printNode(VoidtoNode(getList(a,2)));
-}
+// int main() {
+// 	struct List* a = createList(NODE);
+// 	addList(3, NODE, a, createNode(1, 0, 5, 0, 0, NULL));
+// 	addList(3, NODE, a, createNode(1, 0, 10, 0, 0, NULL));
+// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
+// 	printList(a);
+// 	//printNode(VoidtoNode(getList(a,2)));
+// }
