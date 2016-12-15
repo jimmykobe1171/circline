@@ -42,15 +42,31 @@ struct List* addList(int n, ...) {
 	struct List * list = va_arg(ap, struct List *);
 	void * data;
 	int* tmp0;
-	float* tmp1;
+	double* tmp1;
 	bool* tmp2;
-	char* tmp3;
 	switch (type) {
 		case INT:
 			tmp0 = (int*)malloc(sizeof(int));
 			*tmp0 = va_arg(ap, int);
 			data = (void*) tmp0;
 			break;
+
+		case FLOAT:
+			tmp1 = (double*)malloc(sizeof(double));
+			*tmp1 = va_arg(ap, double);
+			data = (void*) tmp1;
+			break;
+
+		case BOOL:
+			tmp2 = (bool*)malloc(sizeof(bool));
+			*tmp2 = va_arg(ap, bool);
+			data = (void*) tmp2;
+			break;
+
+		case STRING:
+			data = (void*) va_arg(ap, char*);
+			break;
+
 		default:
 			break;
 	}
@@ -70,9 +86,31 @@ int32_t printList(struct List * list){
 			}
 			printf("%d", *((int*)(*(list->arr + p))));
 			break;
-		// case FLOAT: fmt = "%f"; break;
-		// case BOOL: fmt = "%d"; break;
-		// case STRING: fmt = "%s"; break;
+
+		case FLOAT:
+			while(p < curPos){
+				printf("%f, ", *((double*)(*(list->arr + p))));
+				p++;
+			}
+			printf("%f", *((double*)(*(list->arr + p))));
+			break;
+
+		case BOOL:
+			while(p < curPos){
+				printf("%d, ", *((bool*)(*(list->arr + p))));
+				p++;
+			}
+			printf("%d", *((bool*)(*(list->arr + p))));
+			break;
+
+		case STRING:
+			while(p < curPos){
+				printf("%s, ", ((char*)(*(list->arr + p))));
+				p++;
+			}
+			printf("%s", ((char*)(*(list->arr + p))));
+			break;
+
 		default:
 			printf("Unsupported List Type!\n");
 			return 1;
@@ -95,10 +133,10 @@ char* get_str_from_void_ptr(void * ptr){
 	return (char *) ptr;
 }
 
-// int main() {
-// 	struct List* a = createList(INT);
-// 	addListP(3, INT, a, 1);
-// 	addListP(3, INT, a, 2);
-// 	addListP(3, INT, a, 3);
-// 	printList(a);
-// }
+int main() {
+	struct List* a = createList(STRING);
+	addList(3, STRING, a, "123");
+	addList(3, STRING, a, "456");
+	addList(3, STRING, a, "789");
+	printList(a);
+}
