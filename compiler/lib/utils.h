@@ -36,13 +36,7 @@ struct Graph {
 	struct Edge* edges;
 };
 
-// one element of a list.
-struct List {
-	int32_t type;
-	int32_t size;
-	int32_t *arr;
-	int32_t curPos;
-};
+
 
 /************************************
 	Node Methods
@@ -60,21 +54,6 @@ struct Node* createNode(
 int32_t printNode(struct Node * node);
 
 /************************************
-	List Methods
-************************************/
-
-struct List* createList(
-	int32_t type
-);
-
-struct List* addList(
-	struct List * list,
-	int32_t addData
-);
-
-int32_t pirntList(struct List * list);
-
-/************************************
 	Edge Methods
 ************************************/
 
@@ -88,7 +67,6 @@ struct Edge createEdge(
 	char* d
 );
 
-char* get_str_from_void_ptr(void * ptr);
 
 /************************************
 	Graph Methods
