@@ -93,6 +93,36 @@ let get_default_value_of_type = function
   | A.Float_t as t-> L.const_float (ltype_of_typ t) 0.
   | t-> L.const_null (ltype_of_typ t)
 
+let void_to_int_t  = L.function_type i32_t [| L.pointer_type i8_t |]
+let void_to_int_f  = L.declare_function "VoidtoInt" void_to_int_t the_module
+let void_to_int void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_int_f actuals "VoidtoInt" llbuilder
+
+let void_to_float_t  = L.function_type f_t [| L.pointer_type i8_t |]
+let void_to_float_f  = L.declare_function "VoidtoFloat" void_to_float_t the_module
+let void_to_float void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_float_f actuals "VoidtoFloat" llbuilder
+
+let void_to_string_t  = L.function_type str_t [| L.pointer_type i8_t |]
+let void_to_string_f  = L.declare_function "VoidtoString" void_to_string_t the_module
+let void_to_string void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_string_f actuals "VoidtoString" llbuilder
+
+let void_to_node_t  = L.function_type node_t [| L.pointer_type i8_t |]
+let void_to_node_f  = L.declare_function "VoidtoNode" void_to_node_t the_module
+let void_to_node void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_node_f actuals "VoidtoNode" llbuilder
+
+let void_to_graph_t  = L.function_type graph_t [| L.pointer_type i8_t |]
+let void_to_graph_f  = L.declare_function "VoidtoGraph" void_to_graph_t the_module
+let void_to_graph void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
+
 (*
 ================================================================
   Declare printf(), which the print built-in function will call
@@ -167,36 +197,6 @@ let rec put_multi_kvs_dict dict_ptr llbuilder = function
   List
 ================================================================
 *)
-
-let void_to_int_t  = L.function_type i32_t [| L.pointer_type i8_t |]
-let void_to_int_f  = L.declare_function "VoidtoInt" void_to_int_t the_module
-let void_to_int void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_int_f actuals "VoidtoInt" llbuilder
-
-let void_to_float_t  = L.function_type f_t [| L.pointer_type i8_t |]
-let void_to_float_f  = L.declare_function "VoidtoFloat" void_to_float_t the_module
-let void_to_float void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_float_f actuals "VoidtoFloat" llbuilder
-
-let void_to_string_t  = L.function_type str_t [| L.pointer_type i8_t |]
-let void_to_string_f  = L.declare_function "VoidtoString" void_to_string_t the_module
-let void_to_string void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_string_f actuals "VoidtoString" llbuilder
-
-let void_to_node_t  = L.function_type node_t [| L.pointer_type i8_t |]
-let void_to_node_f  = L.declare_function "VoidtoNode" void_to_node_t the_module
-let void_to_node void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_node_f actuals "VoidtoNode" llbuilder
-
-let void_to_graph_t  = L.function_type graph_t [| L.pointer_type i8_t |]
-let void_to_graph_f  = L.declare_function "VoidtoGraph" void_to_graph_t the_module
-let void_to_graph void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
 
 let create_list_t  = L.function_type list_t [| i32_t |]
 let create_list_f  = L.declare_function "createList" create_list_t the_module
