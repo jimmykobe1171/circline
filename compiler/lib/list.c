@@ -86,7 +86,7 @@ struct List* addList(struct List* list, ...) {
 }
 
 void* getList(struct List* list, int index){
-	index = rangeHelper(list->curPos-1, index);
+	index = rangeHelper(list->curPos, index);
 	return *(list->arr + index);
 }
 
@@ -101,7 +101,7 @@ void* popList(struct List* list){
 }
 
 int32_t setList(struct List* list, int index, ...){
-	index = rangeHelper(list->curPos-1, index);
+	index = rangeHelper(list->curPos, index);
 	va_list ap;
 	va_start(ap, 1);
 	void * data;
@@ -145,7 +145,7 @@ int getListSize(struct List* list){
 }
 
 int32_t removeList(struct List* list, int index){
-	index =rangeHelper(list->curPos-1, index);
+	index =rangeHelper(list->curPos, index);
 	for(int i=index; i < list->curPos; i++){
 		*(list->arr + i) = *(list->arr + i+1);
 	}
