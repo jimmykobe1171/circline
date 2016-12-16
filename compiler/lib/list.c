@@ -23,7 +23,7 @@ struct List* createList(
 
 int rangeHelper(int size, int index){
 	if(size <= -index || size <= index || size == 0){
-		printf("Error! getList: Index out of Range!\n");
+		printf("Error! Index out of Range!\n");
 		exit(1);
 	}
 	if (index < 0){
@@ -146,7 +146,7 @@ int getListSize(struct List* list){
 
 int32_t removeList(struct List* list, int index){
 	index =rangeHelper(list->curPos-1, index);
-	for(int i=index; i < list->curPos-1; i++){
+	for(int i=index; i < list->curPos; i++){
 		*(list->arr + i) = *(list->arr + i+1);
 	}
 	list->curPos--;
