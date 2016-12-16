@@ -3,9 +3,14 @@
  */
 #include "hashmap.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdarg.h>
+#include "utils.h"
+#include "cast.h"
 
 #define INITIAL_SIZE (256)
 #define MAX_CHAIN_LENGTH (8)
@@ -14,7 +19,7 @@
 typedef struct _hashmap_element{
 	char* key;
 	int in_use;
-	any_t data;
+	any_t data[2];
 } hashmap_element;
 
 /* A hashmap has some maximum size and current size,
@@ -22,16 +27,19 @@ typedef struct _hashmap_element{
 typedef struct _hashmap_map{
 	int table_size;
 	int size;
+	int32_t keytype;
+	int32_t valuetype;
 	hashmap_element *data;
 } hashmap_map;
 
 /*
  * Return an empty hashmap, or NULL on failure.
  */
-map_t hashmap_new() {
+map_t hashmap_new(int32_t keytyp,int32_t valuetyp) {
 	hashmap_map* m = (hashmap_map*) malloc(sizeof(hashmap_map));
 	m->data = (hashmap_element*) calloc(INITIAL_SIZE, sizeof(hashmap_element));
-
+	m->keytype = keytyp;
+	m->valuetype = valuetyp;
 	m->table_size = INITIAL_SIZE;
 	m->size = 0;
 	return m;
@@ -250,12 +258,71 @@ int hashmap_rehash(map_t in){
 /*
  * Add a pointer to the hashmap with some key
  */
-int hashmap_put(map_t in, char* key, any_t value){
+int hashmap_put(map_t in,...){
 	int index;
 	hashmap_map* m;
-
-	/* Cast the hashmap */
+	any_t data1;
+	any_t data2;
+	char* key;
 	m = (hashmap_map *) in;
+	va_list ap;
+	va_start(ap, 2);
+
+	switch (m->keytype) {
+		case INT: 
+			data1 = InttoVoid(va_arg(ap, int));
+			key = malloc(16);
+			snprintf(key, 16, "%d", VoidtoInt(data1));
+			printf("%s\n",key);
+			break;
+
+		case STRING:
+			data1 = StringtoVoid(va_arg(ap, char*));
+			key = VoidtoString(data1);
+			//printf("%s\n",key);
+			break;
+
+		case NODE:
+			data1 = NodetoVoid(va_arg(ap, struct Node*));
+			key = malloc(16);
+			snprintf(key, 16, "%d", VoidtoNode(data1)->id);
+			//printf("%s\n",key);
+			break;
+
+		default:
+			break;
+	}
+
+	switch (m->valuetype) {
+		case INT: 
+			data2 = InttoVoid(va_arg(ap, int));
+			break;
+
+		case FLOAT:
+			data2 = FloattoVoid(va_arg(ap, double));
+			break;
+
+		case BOOL:
+			data2 = BooltoVoid(va_arg(ap, double));
+			break;
+
+		case STRING:
+			data2 = StringtoVoid(va_arg(ap, char*));
+			break;
+
+		case NODE:
+			data2 = NodetoVoid(va_arg(ap, struct Node*));
+			break;
+
+		case GRAPH:
+			data2 = GraphtoVoid(va_arg(ap, struct Graph*));
+			break;
+
+		default:
+			break;
+	}
+
+	va_end(ap);
 
 	/* Find a place to put our value */
 	index = hashmap_hash(in, key);
@@ -267,7 +334,8 @@ int hashmap_put(map_t in, char* key, any_t value){
 	}
 
 	/* Set the data */
-	m->data[index].data = value;
+	m->data[index].data[0] = data1;
+	m->data[index].data[1] = data2;
 	m->data[index].key = key;
 	m->data[index].in_use = 1;
 	m->size++; 
@@ -279,13 +347,34 @@ int hashmap_put(map_t in, char* key, any_t value){
  * Get your pointer out of the hashmap with a key
  */
 // int hashmap_get(map_t in, char* key, any_t *arg){
-char* hashmap_get(map_t in, char* key){
+void* hashmap_get(map_t in,...){
 	int curr;
 	int i;
 	hashmap_map* m;
-
-	/* Cast the hashmap */
 	m = (hashmap_map *) in;
+	char* key;
+	va_list ap;
+	va_start(ap, 1);
+
+	switch (m->keytype) {
+		case INT: 
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, int));
+			break;
+
+		case STRING:
+			key = va_arg(ap, char*);
+			break;
+
+		case NODE:
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, struct Node*)->id);
+			break;
+
+		default:
+			break;
+	}
+	va_end(ap);
 
 	/* Find data location */
 	curr = hashmap_hash_int(m, key);
@@ -298,15 +387,15 @@ char* hashmap_get(map_t in, char* key){
             if (strcmp(m->data[curr].key,key)==0){
                 // *arg = (m->data[curr].data);
                 // return MAP_OK;
-                return (char *)(m->data[curr].data);
+                printf("%s\n", VoidtoString(m->data[curr].data[1]));
+                return m->data[curr].data[1];
             }
 		}
 
 		curr = (curr + 1) % m->table_size;
 	}
-	// *arg = NULL;
-	return NULL;
-	// return MAP_MISSING;
+	printf("Error! Hashmap_Get:Key not Exist!\n");
+	exit(1);
 }
 
 /*
@@ -314,76 +403,83 @@ char* hashmap_get(map_t in, char* key){
  * additional any_t argument is passed to the function as its first
  * argument and the hashmap element is the second.
  */
-int hashmap_iterate(map_t in, PFany f, any_t item) {
-	int i;
+// int hashmap_iterate(map_t in, PFany f, any_t item) {
+// 	int i;
 
-	/* Cast the hashmap */
-	hashmap_map* m = (hashmap_map*) in;
+// 	/* Cast the hashmap */
+// 	hashmap_map* m = (hashmap_map*) in;
 
-	/* On empty hashmap, return immediately */
-	if (hashmap_length(m) <= 0)
-		return MAP_MISSING;	
+// 	/* On empty hashmap, return immediately */
+// 	if (hashmap_length(m) <= 0)
+// 		return MAP_MISSING;	
 
-	/* Linear probing */
-	for(i = 0; i< m->table_size; i++)
-		if(m->data[i].in_use != 0) {
-			any_t data = (any_t) (m->data[i].data);
-			int status = f(item, data);
-			if (status != MAP_OK) {
-				return status;
-			}
-		}
+// 	/* Linear probing */
+// 	for(i = 0; i< m->table_size; i++)
+// 		if(m->data[i].in_use != 0) {
+// 			any_t data = (any_t) (m->data[i].data);
+// 			int status = f(item, data);
+// 			if (status != MAP_OK) {
+// 				return status;
+// 			}
+// 		}
 
-    return MAP_OK;
-}
+//     return MAP_OK;
+// }
 
-/*
- * Remove an element with that key from the map
- */
-int hashmap_remove(map_t in, char* key){
-	int i;
-	int curr;
-	hashmap_map* m;
+// /*
+//  * Remove an element with that key from the map
+//  */
+// int hashmap_remove(map_t in, char* key){
+// 	int i;
+// 	int curr;
+// 	hashmap_map* m;
 
-	/* Cast the hashmap */
-	m = (hashmap_map *) in;
+// 	/* Cast the hashmap */
+// 	m = (hashmap_map *) in;
 
-	/* Find key */
-	curr = hashmap_hash_int(m, key);
+// 	/* Find key */
+// 	curr = hashmap_hash_int(m, key);
 
-	/* Linear probing, if necessary */
-	for(i = 0; i<MAX_CHAIN_LENGTH; i++){
+// 	/* Linear probing, if necessary */
+// 	for(i = 0; i<MAX_CHAIN_LENGTH; i++){
 
-        int in_use = m->data[curr].in_use;
-        if (in_use == 1){
-            if (strcmp(m->data[curr].key,key)==0){
-                /* Blank out the fields */
-                m->data[curr].in_use = 0;
-                m->data[curr].data = NULL;
-                m->data[curr].key = NULL;
+//         int in_use = m->data[curr].in_use;
+//         if (in_use == 1){
+//             if (strcmp(m->data[curr].key,key)==0){
+//                 /* Blank out the fields */
+//                 m->data[curr].in_use = 0;
+//                 m->data[curr].data = NULL;
+//                 m->data[curr].key = NULL;
 
-                /* Reduce the size */
-                m->size--;
-                return MAP_OK;
-            }
-		}
-		curr = (curr + 1) % m->table_size;
-	}
+//                 /* Reduce the size */
+//                 m->size--;
+//                 return MAP_OK;
+//             }
+// 		}
+// 		curr = (curr + 1) % m->table_size;
+// 	}
 
-	/* Data not found */
-	return MAP_MISSING;
-}
+// 	/* Data not found */
+// 	return MAP_MISSING;
+// }
 
-/* Deallocate the hashmap */
-void hashmap_free(map_t in){
-	hashmap_map* m = (hashmap_map*) in;
-	free(m->data);
-	free(m);
-}
+// /* Deallocate the hashmap */
+// void hashmap_free(map_t in){
+// 	hashmap_map* m = (hashmap_map*) in;
+// 	free(m->data);
+// 	free(m);
+// }
 
-/* Return the length of the hashmap */
-int hashmap_length(map_t in){
-	hashmap_map* m = (hashmap_map *) in;
-	if(m != NULL) return m->size;
-	else return 0;
+// /* Return the length of the hashmap */
+// int hashmap_length(map_t in){
+// 	hashmap_map* m = (hashmap_map *) in;
+// 	if(m != NULL) return m->size;
+// 	else return 0;
+// }
+
+int main(){
+	hashmap_map* mymap = (hashmap_map*) hashmap_new(INT, STRING);
+	hashmap_put(mymap, 10, "Hello World");
+	printf("%s\n", VoidtoString((hashmap_get(mymap, 10))));
+	return 0;
 }

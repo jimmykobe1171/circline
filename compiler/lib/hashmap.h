@@ -1,11 +1,10 @@
-/*
- * Generic hashmap manipulation functions
- *
- * Originally by Elliot C Back - http://elliottback.com/wp/hashmap-implementation-in-c/
- *
- * Modified by Pete Warden to fix a serious performance problem, support strings as keys
- * and removed thread synchronization - http://petewarden.typepad.com
- */
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdarg.h>
+
 #ifndef __HASHMAP_H__
 #define __HASHMAP_H__
 
@@ -36,7 +35,7 @@ typedef any_t map_t;
 /*
  * Return an empty hashmap. Returns NULL if empty.
 */
-extern map_t hashmap_new();
+extern map_t hashmap_new(int32_t keytyp,int32_t valuetyp);
 
 /*
  * Iteratively call f with argument (item, data) for
@@ -50,12 +49,12 @@ extern int hashmap_iterate(map_t in, PFany f, any_t item);
 /*
  * Add an element to the hashmap. Return MAP_OK or MAP_OMEM.
  */
-extern int hashmap_put(map_t in, char* key, any_t value);
+extern int hashmap_put(map_t in,...);
 
 /*
  * Get an element from the hashmap. Return MAP_OK or MAP_MISSING.
  */
-extern char* hashmap_get(map_t in, char* key);
+extern void* hashmap_get(map_t in,...);
 
 /*
  * Remove an element from the hashmap. Return MAP_OK or MAP_MISSING.
