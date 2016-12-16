@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdbool.h>
 
+#ifndef _LIST_H_
+#define _LIST_H_
+
 // one element of a list.
 struct List {
 	int32_t type;
@@ -23,5 +26,4 @@ int getListSize(struct List* list);
 int32_t removeList(struct List* list, int index);
 int32_t pirntList(struct List * list);
 
-
-
+#endif

@@ -54,7 +54,7 @@ struct List* addList(struct List* list, ...) {
 	double* tmp1;
 	bool* tmp2;
 	switch (list->type) {
-		case INT: 
+		case INT:
 			data = InttoVoid(va_arg(ap, int));
 			break;
 
@@ -63,7 +63,7 @@ struct List* addList(struct List* list, ...) {
 			break;
 
 		case BOOL:
-			data = BooltoVoid(va_arg(ap, double));
+			data = BooltoVoid(va_arg(ap, bool));
 			break;
 
 		case STRING:
@@ -105,7 +105,7 @@ int32_t setList(struct List* list, int index, ...){
 	double* tmp1;
 	bool* tmp2;
 	switch (list->type) {
-		case INT: 
+		case INT:
 			data = InttoVoid(va_arg(ap, int));
 			break;
 
@@ -114,7 +114,7 @@ int32_t setList(struct List* list, int index, ...){
 			break;
 
 		case BOOL:
-			data = BooltoVoid(va_arg(ap, double));
+			data = BooltoVoid(va_arg(ap, bool));
 			break;
 
 		case STRING:
@@ -172,10 +172,10 @@ int32_t printList(struct List * list){
 
 		case BOOL:
 			while(p < curPos){
-				printf("%d, ", *((bool*)(*(list->arr + p))));
+				printf("%s, ", *((bool*)(*(list->arr + p))) ? "true" : "false");
 				p++;
 			}
-			printf("%d", *((bool*)(*(list->arr + p))));
+			printf("%s", *((bool*)(*(list->arr + p))) ? "true" : "false");
 			break;
 
 		case STRING:

@@ -86,6 +86,7 @@ and float_zero = L.const_float f_t 0.
 and bool_false = L.const_int i1_t 0
 and bool_true = L.const_int i1_t 1
 and str_null = L.const_null str_t
+and list_null = L.const_null list_t
 
 let get_default_value_of_type = function
   | A.Int_t as t -> L.const_int (ltype_of_typ t) 0
@@ -112,22 +113,10 @@ let codegen_string_lit s llbuilder =
 ================================================================
 *)
 let create_node_t  = L.var_arg_function_type node_t [| i32_t; i32_t |]
-let create_node_f  = L.declare_function "createNodeP" create_node_t the_module
+let create_node_f  = L.declare_function "createNode" create_node_t the_module
 let create_node (id, typ, nval) llbuilder =
   let actuals = [| id; lconst_of_typ typ; nval |] in
     L.build_call create_node_f actuals "node" llbuilder
-  (* let (typ_val, loc) = (match typ with
-    | A.Int_t -> (0, 2)
-    | A.Float_t -> (1, 3)
-    | A.Bool_t -> (2, 4)
-    | A.String_t -> (3, 5)
-    | A.Void_t | A.Null_t -> (-1, 2)
-    | _ -> raise (Failure "Unsupported node value type")
-  ) in (
-    ignore( Array.set actuals 1 (L.const_int i32_t typ_val) );
-    ignore( Array.set actuals loc nval );
-    L.build_call create_node_f actuals "node" llbuilder
-  ) *)
 
 let print_node_t  = L.function_type i32_t [| node_t |]
   let print_node_f  = L.declare_function "printNode" print_node_t the_module
@@ -180,6 +169,12 @@ let void_to_float void_ptr llbuilder =
   let actuals = [| void_ptr |] in
     L.build_call void_to_float_f actuals "VoidtoFloat" llbuilder
 
+let void_to_bool_t  = L.function_type i1_t [| L.pointer_type i1_t |]
+let void_to_bool_f  = L.declare_function "VoidtoBool" void_to_bool_t the_module
+let void_to_bool void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_bool_f actuals "VoidtoBool" llbuilder
+
 let void_to_string_t  = L.function_type str_t [| L.pointer_type i8_t |]
 let void_to_string_f  = L.declare_function "VoidtoString" void_to_string_t the_module
 let void_to_string void_ptr llbuilder =
@@ -221,10 +216,11 @@ let get_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t; i32_t
 let get_list_f  = L.declare_function "getList" get_list_t the_module
 let get_list l_ptr index typ llbuilder =
   let actuals = [| l_ptr; index|] in
-  let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in 
+  let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in
   let typ_switch = function
   | A.Int_t -> void_to_int value_void_ptr llbuilder
   | A.Float_t -> void_to_float value_void_ptr llbuilder
+  | A.Bool_t -> void_to_bool value_void_ptr llbuilder
   | A.String_t -> void_to_string value_void_ptr llbuilder
   | A.Node_t -> void_to_node value_void_ptr llbuilder
   | A.Graph_t -> void_to_graph value_void_ptr llbuilder
@@ -258,13 +254,6 @@ let create_graph_f  = L.declare_function "createGraph" create_graph_t the_module
 let create_graph llbuilder =
   L.build_call create_graph_f [| |] "graph" llbuilder
 
-
-(* let ptr_from_void_to_str_t  = L.function_type str_t [| i32_t |]
-let ptr_from_void_to_str_f  = L.declare_function "get_str_from_void_ptr" ptr_from_void_to_str_t the_module
-let ptr_from_void_to_str ptr llbuilder =
-  L.build_call ptr_from_void_to_str_f [| ptr |] "ptr_from_void_to_str" llbuilder
- *)
-
 (* Create a copy of origianl grpah *)
 let copy_graph_t  = L.function_type graph_t [| graph_t |]
 let copy_graph_f  = L.declare_function "copyGraph" copy_graph_t the_module
@@ -288,6 +277,24 @@ let graph_set_root_t  = L.function_type i32_t [| graph_t; node_t |]
 let graph_set_root_f  = L.declare_function "graphSetRoot" graph_set_root_t the_module
 let graph_set_root graph node llbuilder =
   L.build_call graph_set_root_f [| graph; node |] "setRootRes" llbuilder
+
+(* Add a list of Nodes or Graphs to graph *)
+let graph_add_list_t = L.function_type i32_t [| graph_t; i32_t; list_t; list_t |]
+let graph_add_list_f = L.declare_function "graphAddList" graph_add_list_t the_module
+let graph_add_list graph vals (edges, etyp) dir llbuilder =
+  let edges = (
+    match etyp with
+    | A.List_Int_t | A.List_Float_t | A.List_String_t | A.List_Bool_t
+    | A.List_Node_t | A.List_Graph_t -> edges
+    | _ -> list_null
+  ) in
+  let direction = (
+    match dir with
+    | A.Right_Link -> L.const_int i32_t 0
+    | A.Left_Link -> L.const_int i32_t 1
+    | A.Double_Link -> L.const_int i32_t 2
+  ) in
+  L.build_call graph_add_list_f [| graph; direction; vals; edges |] "graphAddList" llbuilder
 
 (* Add a new node to graph *)
 let graph_add_node_t = L.function_type i32_t [| graph_t; node_t |]
@@ -484,9 +491,10 @@ let translate program =
           let (nval, typ) = expr builder e in
           (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
       | A.ListP(ls) ->
-          let from_expr_typ_to_list_typ = function 
+          let from_expr_typ_to_list_typ = function
               A.Int_t -> A.List_Int_t
             | A.Float_t -> A.List_Float_t
+            | A.Bool_t -> A.List_Bool_t
             | A.String_t -> A.List_String_t
             | A.Node_t -> A.List_Node_t
             | A.Graph_t -> A.List_Graph_t
@@ -542,6 +550,14 @@ let translate program =
                     (gh, A.Graph_t)
                 )
               )
+            | (A.Node_t, A.List_Graph_t, _)
+            | (A.Node_t, A.List_Node_t, _) -> (
+                let gh = create_graph builder in (
+                  ignore(graph_add_node gh ln builder); (* Also set the root *)
+                  ignore(graph_add_list gh rn (el, el_type) op builder);
+                  (gh, A.Graph_t)
+                )
+              )
             | _ -> raise (Failure "Graph Link Under build...")
           )
       | A.Binop (e1, op, e2) ->
@@ -585,6 +601,7 @@ let translate program =
               | A.Node_t -> ignore(print_node eval builder)
               | A.List_Int_t -> ignore(print_list eval builder)
               | A.List_Float_t -> ignore(print_list eval builder)
+              | A.List_Bool_t -> ignore(print_list eval builder)
               | A.List_String_t -> ignore(print_list eval builder)
               | A.List_Node_t -> ignore(print_list eval builder)
               | A.List_Graph_t -> ignore(print_list eval builder)
@@ -608,19 +625,19 @@ let translate program =
       (* default set operator of list *)
 
       (* default get operator of dict *)
-      | A.CallDefault(val_name, default_func_name, params_list) -> 
+      | A.CallDefault(val_name, default_func_name, params_list) ->
         (* get caller tpye *)
-        let expr_tpy = snd (expr builder val_name) in 
-        let assign_func_by_typ builder = function 
-          (* deal with list *)       
-          | A.List_Int_t | A.List_Float_t | A.List_String_t 
-          | A.List_Node_t | A.List_Graph_t -> 
-              list_call_default_main builder (fst (expr builder val_name)) (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name  
-          
+        let expr_tpy = snd (expr builder val_name) in
+        let assign_func_by_typ builder = function
+          (* deal with list *)
+          | A.List_Int_t | A.List_Float_t | A.List_String_t | A.List_Bool_t
+          | A.List_Node_t | A.List_Graph_t ->
+              list_call_default_main builder (fst (expr builder val_name)) (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
+
           | _ -> raise (Failure ("Default Function Not Support!"))
-          in 
+          in
             assign_func_by_typ builder expr_tpy
-          
+
         (* below is used to deal with dict *)
            (* (get_dict (fst (expr builder e))  (fst (expr builder (List.hd el))) builder, A.String_t) *)
 

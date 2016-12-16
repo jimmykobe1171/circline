@@ -13,25 +13,7 @@
 	Node Methods
 ************************************/
 
-struct Node* createNode(
-	int32_t id,
-	int32_t type,
-	int32_t a,
-	double b,
-	bool c,
-	char* d
-) {
-	struct Node* new = (struct Node*) malloc(sizeof(struct Node));
-	new->id = id;
-	new->type = type;
-	new->a = a;
-	new->b = b;
-	new->c = c;
-	new->d = d;
-	return new;
-}
-
-struct Node* createNodeP(int32_t id, int32_t type, ...) {
+struct Node* createNode(int32_t id, int32_t type, ...) {
 	struct Node* new = (struct Node*) malloc(sizeof(struct Node));
 	new->id = id;
 	new->type = type;
@@ -55,7 +37,7 @@ struct Node* createNodeP(int32_t id, int32_t type, ...) {
 }
 
 int32_t printNode(struct Node * node) {
-	if (node == NULL) return 1;
+	if (node == NULL) exit(1);
 	switch (node->type) {
 		case 0:
 			printf("node%3d: %d\n", node->id, node->a);
@@ -94,7 +76,7 @@ struct Edge createEdge(
 }
 
 int32_t printEdge(struct Edge * edge) {
-	if (edge == NULL) return 1;
+	if (edge == NULL) exit(1);
 	switch (edge->type) {
 		case 0:
 			printf("edge%3d->%3d: %d\n", edge->sour->id, edge->dest->id, edge->a);
@@ -159,7 +141,7 @@ struct Graph* copyGraph(struct Graph* a) {
 }
 
 int32_t graphAddEdgeHelper(struct Graph* g, struct Edge e) {
-	if (g == NULL) return 1;
+	if (g == NULL) exit(1);
 	int i;
 	for (i=0; i < g->en; i++) {
 		if (g->edges[i].sour == e.sour && g->edges[i].dest == e.dest) {
@@ -195,11 +177,11 @@ struct Node* graphGetRoot(struct Graph* g) {
 int32_t graphSetRoot(struct Graph* g, struct Node * root) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
-		return 1;
+		exit(1);
 	}
 	if (root == NULL) {
 		printf("[Error] Root node doesn't exist!\n");
-		return 1;
+		exit(1);
 	}
 	int i;
 	for (i=0; i<g->vn; i++) {
@@ -209,17 +191,79 @@ int32_t graphSetRoot(struct Graph* g, struct Node * root) {
 		}
 	}
 	printf("[Error] Root doesn't exist in the graph!\n");
-	return 1;
+	exit(1);
+}
+
+int32_t graphAddList(struct Graph* g, int direction, struct List * l, struct List * edges) {
+	if (g == NULL || g->root == NULL || l == NULL) {
+		printf("[Error] Graph or List doesn't exist!\n");
+		exit(1);
+	}
+	int i, j, lsize = l->curPos, rsize = edges == NULL ? 0 : edges->curPos;
+	if (lsize != rsize && rsize > 1) {
+		printf("[Error] Edge List Not Compatible with Node/Graph List!\n");
+		exit(1);
+	}
+	for (i=0; i<lsize; i++) {
+		struct Node * node = NULL;
+		if (l->type == GRAPH) {
+			// Merge the graph
+			struct Graph * gh_tmp = (struct Graph*)l->arr[i];
+			node = gh_tmp->root;
+			for (j=0; j< gh_tmp->vn; j++) {
+				graphAddNode(g, gh_tmp->nodes[j]);
+			}
+			for (j=0; j< gh_tmp->en; j++) {
+				graphAddEdgeHelper(g, gh_tmp->edges[j]);
+			}
+		} else if (l->type == NODE) {
+			node = (struct Node*)l->arr[i];
+		} else {
+			printf("[Error] GraphAddList List Type doesn't supported!!\n");
+			exit(1);
+		}
+
+		if (node == NULL) continue;
+		if (edges != NULL && edges->curPos > 0) {
+			int edgePos = edges->curPos == 1 ? 0 : i;
+			switch (direction) {
+				case RIGHT_LINK:
+					graphAddEdgeP(g, g->root, node, edges->type, edges->arr[edgePos]); break;
+				case LEFT_LINK:
+					graphAddEdgeP(g, node, g->root, edges->type, edges->arr[edgePos]); break;
+				case DOUBLE_LINK:
+					graphAddEdgeP(g, g->root, node, edges->type, edges->arr[edgePos]);
+					graphAddEdgeP(g, node, g->root, edges->type, edges->arr[edgePos]);
+					break;
+				default:
+					break;
+			}
+		} else {
+			switch (direction) {
+				case RIGHT_LINK:
+					graphAddEdgeP(g, g->root, node, -1, NULL); break;
+				case LEFT_LINK:
+					graphAddEdgeP(g, node, g->root, -1, NULL); break;
+				case DOUBLE_LINK:
+					graphAddEdgeP(g, g->root, node, -1, NULL);
+					graphAddEdgeP(g, node, g->root, -1, NULL);
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	return 0;
 }
 
 int32_t graphAddNode(struct Graph* g, struct Node * node) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
-		return 1;
+		exit(1);
 	}
 	if (g->vn + 1 >= g->vn_len) {
 		printf("[Warning] # Graph Nodes reach the limit!\n");
-		return 1;
+		exit(1);
 	}
 	int i;
 	// Nodes already exist in the graph
@@ -235,6 +279,50 @@ int32_t graphAddNode(struct Graph* g, struct Node * node) {
 	return 0;
 }
 
+int32_t graphAddEdgeP( struct Graph* g, struct Node* sour, struct Node* dest, int32_t type, ...) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	if (g->vn + 1 >= g->vn_len) {
+		printf("[Error] # Graph Nodes reach the limit!\n");
+		exit(1);
+	}
+	if (graphAddNode(g, sour) > 0) exit(1);
+	if (graphAddNode(g, dest) > 0) exit(1);
+
+	// Assign the Edge Value
+	struct Edge e = createEdge(sour, dest, type, 0, 0, 0, NULL);
+	va_list ap;
+	va_start(ap, 1);
+	void* tmp = va_arg(ap, void*);
+	switch (type) {
+		case INT:
+			e.a = *((int*)tmp);	break;
+		case FLOAT:
+			e.b = *((double*)tmp);	break;
+		case BOOL:
+			e.c = *((bool*)tmp);	break;
+		case STRING:
+			e.d = ((char*)tmp);	break;
+		default:
+			break;
+	}
+  va_end(ap);
+
+	int i;
+	// Edges already exist in the graph
+	for (i=0; i<g->en; i++) {
+		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
+			g->edges[i] = e;
+			return 0;
+		}
+	}
+	g->edges[i] = e;
+	g->en++;
+	return 0;
+}
+
 int32_t graphAddEdge(
 	struct Graph* g,
 	struct Node* sour,
@@ -247,14 +335,14 @@ int32_t graphAddEdge(
 ) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
-		return 1;
+		exit(1);
 	}
 	if (g->vn + 1 >= g->vn_len) {
 		printf("[Error] # Graph Nodes reach the limit!\n");
-		return 1;
+		exit(1);
 	}
-	if (graphAddNode(g, sour) > 0) return 1;
-	if (graphAddNode(g, dest) > 0) return 1;
+	if (graphAddNode(g, sour) > 0) exit(1);
+	if (graphAddNode(g, dest) > 0) exit(1);
 	int i;
 	// Edges already exist in the graph
 	for (i=0; i<g->en; i++) {
@@ -274,7 +362,7 @@ int32_t graphAddEdge(
 }
 
 int32_t printGraph(struct Graph* g) {
-	if (g == NULL) return 1;
+	if (g == NULL) exit(1);
 	printf("#Nodes: %d  ", g->vn);
 	if (g->root != NULL) {
 		printf("Root Node: %d\n", g->root->id);
@@ -326,7 +414,7 @@ int32_t printGraph(struct Graph* g) {
 
 	// void * ptr = "xxx";
 	// printf("%s\n", get_str_from_void_ptr(ptr));
-	// return 1;
+	// exit(1);
 // }
 
 
@@ -374,7 +462,7 @@ int32_t printGraph(struct Graph* g) {
 //     /* Now, destroy the map */
 //     hashmap_free(mymap);
 
-//     return 1;
+//     exit(1);
 // }
 
 
@@ -390,17 +478,26 @@ int32_t printGraph(struct Graph* g) {
 // 	// struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);
 // 	// struct Node* c = createNode(3, 2, 0, 0, 0, NULL);
 // 	// struct Node* d = createNode(4, 3, 0, 0, 1, "Hello World!");
-// 	struct Node* a = createNodeP(1, 0, 12);
-// 	struct Node* b = createNodeP(2, 1, 1.2);
-// 	struct Node* c = createNodeP(3, 2, 0);
-// 	struct Node* d = createNodeP(4, 3, "Hello World!");
+// 	// struct Node* a = createNode(1, 3, "a");
+// 	// struct Node* b = createNode(2, 3, "b");
+// 	// struct Node* c = createNode(3, 3, "c");
+// 	// struct Node* d = createNode(4, 3, "d");
 //
-// 	printNode(a);
-// 	printNode(b);
-// 	printNode(c);
-// 	printNode(d);
+// 	// struct List* l = createList(NODE);
+// 	// addList(l, b);
+// 	// addList(l, c);
+// 	// addList(l, d);
+//
+// 	// struct List* e = createList(STRING);
+// 	// addList(e, "e1");
+// 	// addList(e, "e2");
+// 	// addList(e, "e3");
+// 	//
 // 	// struct Graph* g = createGraph();
 // 	// graphAddNode(g, a);
+// 	// graphAddList(g, RIGHT_LINK, l, e);
+// 	// printGraph(g);
+//
 // 	// graphAddNode(g, b);
 // 	// graphAddNode(g, c);
 // 	// // graphAddNode(g, d);
