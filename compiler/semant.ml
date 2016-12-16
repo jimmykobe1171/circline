@@ -17,11 +17,11 @@ let string_of_typ = function
   | List_String_t -> "list<string>"
   | List_Node_t -> "list<node>"
   | List_Graph_t -> "list<graph>"
-  | Dict_Int_t -> "dic<int>" 
-  | Dict_Float_t -> "dic<float>" 
-  | Dict_String_t -> "dic<string>" 
-  | Dict_Node_t -> "dic<node>" 
-  | Dict_Graph_t -> "dic<graph>" 
+  | Dict_Int_t -> "dict<int>" 
+  | Dict_Float_t -> "dict<float>" 
+  | Dict_String_t -> "dict<string>" 
+  | Dict_Node_t -> "dict<node>" 
+  | Dict_Graph_t -> "dict<graph>" 
   | Void_t -> "void"
   | Null_t -> "null"
 
@@ -112,6 +112,26 @@ let invaid_list_type_error typ =
 
 let invaid_dict_type_error typ = 
     let msg = sprintf "invalid dict type: %s" typ in
+    raise (SemanticError msg)
+
+let inconsistent_list_element_type_error typ1 typ2 =
+    let msg = sprintf "list can not contain objects of different types: %s and %s" typ1 typ2 in
+    raise (SemanticError msg)
+
+let inconsistent_dict_element_type_error typ1 typ2 =
+    let msg = sprintf "dict can not contain objects of different types: %s and %s" typ1 typ2 in
+    raise (SemanticError msg)
+
+let unmatched_func_arg_len name =
+    let msg = sprintf "args length not match in function call: %s" name in
+    raise (SemanticError msg)
+
+let incompatible_func_arg_type typ1 typ2 =
+    let msg = sprintf "incompatible argument type %s, but %s is expected" typ1 typ2 in
+    raise (SemanticError msg)
+
+let invalid_expr_after_return ss =
+    let msg = sprintf "nothing may follow a return" in
     raise (SemanticError msg)
 
 
@@ -232,8 +252,8 @@ let check_function func_map func =
                 (fun l e -> (match l with
                   [] -> [expr e]
                 | [t] when t = (expr e) -> [t]
-                | _ -> raise (Failure ("list can not contain objects of different types")))
-                ) [] ss
+                | [t] -> inconsistent_list_element_type_error (string_of_typ t) (string_of_typ (expr e))
+                )) [] ss
               in
               List.hd (determine_element_type es)
             in
@@ -247,8 +267,8 @@ let check_function func_map func =
                 (fun l (n, e) -> (match l with
                   [] -> [expr e]
                 | [t] when t = (expr e) -> [t]
-                | _ -> raise (Failure ("dict can not contain objects of different types")))
-                ) [] ss
+                | [t] -> inconsistent_dict_element_type_error (string_of_typ t) (string_of_typ (expr e))
+                )) [] ss
               in
               List.hd (determine_element_type es)
             in
@@ -257,14 +277,15 @@ let check_function func_map func =
               (* check function call such as the args length, args type *)
               let check_funciton_call func args =
                   let check_args_length l_arg r_arg = if (List.length l_arg) = (List.length r_arg)
-                      then () else raise (Failure("args length not match in function call: " ^ func.name))
+                      then () else (unmatched_func_arg_len func.name)
                   in
                   check_args_length func.args args;
                   (* l_arg is a list of Formal(typ, name), r_arg is a list of expr *)
                   let check_args_type l_arg r_arg =
                       List.iter2 
                           (fun (Formal(t, n)) r -> let r_typ = expr r in if t = r_typ then () else
-                          raise (Failure("incompatible argument type " ^ string_of_typ r_typ ^ ", but " ^ string_of_typ t ^ " is expected"))) 
+                            incompatible_func_arg_type (string_of_typ r_typ) (string_of_typ t)
+                          )
                           l_arg r_arg
                   in
                   (* do not check args type of function print, do conversion in codegen *)
@@ -285,7 +306,7 @@ let check_function func_map func =
     and
     (* check statement list *)
     stmt_list = function
-            Return _ :: ss when ss <> [] -> raise (Failure "nothing may follow a return")
+            Return _ :: ss when ss <> [] -> invalid_expr_after_return ss
             | s::ss -> stmt s ; stmt_list ss
             | [] -> ()
 
