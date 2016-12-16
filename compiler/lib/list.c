@@ -97,8 +97,9 @@ void* getList(struct List* list, int index){
 }
 
 void* popList(struct List* list){
-	if(list->curPos-1 ==0){
-		printf("Error! Nothing Can be poped T.T");
+	if(list->curPos-1 < 0){
+		printf("Error! Nothing Can be poped T.T\n");
+		exit(1);
 	}
 	void* add = *(list->arr + list->curPos-1);
 	list->curPos--;
