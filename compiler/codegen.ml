@@ -167,6 +167,37 @@ let rec put_multi_kvs_dict dict_ptr llbuilder = function
   List
 ================================================================
 *)
+
+let void_to_int_t  = L.function_type i32_t [| L.pointer_type i8_t |]
+let void_to_int_f  = L.declare_function "VoidtoInt" void_to_int_t the_module
+let void_to_int void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_int_f actuals "VoidtoInt" llbuilder
+
+let void_to_float_t  = L.function_type f_t [| L.pointer_type i8_t |]
+let void_to_float_f  = L.declare_function "VoidtoFloat" void_to_float_t the_module
+let void_to_float void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_float_f actuals "VoidtoFloat" llbuilder
+
+let void_to_string_t  = L.function_type str_t [| L.pointer_type i8_t |]
+let void_to_string_f  = L.declare_function "VoidtoString" void_to_string_t the_module
+let void_to_string void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_string_f actuals "VoidtoString" llbuilder
+
+let void_to_node_t  = L.function_type node_t [| L.pointer_type i8_t |]
+let void_to_node_f  = L.declare_function "VoidtoNode" void_to_node_t the_module
+let void_to_node void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_node_f actuals "VoidtoNode" llbuilder
+
+let void_to_graph_t  = L.function_type graph_t [| L.pointer_type i8_t |]
+let void_to_graph_f  = L.declare_function "VoidtoGraph" void_to_graph_t the_module
+let void_to_graph void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
+
 let create_list_t  = L.function_type list_t [| i32_t |]
 let create_list_f  = L.declare_function "createList" create_list_t the_module
 let create_list typ llbuilder =
@@ -174,11 +205,30 @@ let create_list typ llbuilder =
     L.build_call create_list_f actuals "createList" llbuilder
   )
 
-let add_list_t  = L.var_arg_function_type list_t [| i32_t; i32_t; list_t |]
+let add_list_t  = L.var_arg_function_type list_t [| list_t |]
 let add_list_f  = L.declare_function "addList" add_list_t the_module
 let add_list (data, typ) l_ptr llbuilder =
-  let actuals = [| L.const_int i32_t 3; lconst_of_typ typ; l_ptr; data|] in
+  let actuals = [| l_ptr; data|] in
     (L.build_call add_list_f actuals "addList" llbuilder)
+
+let set_list_t  = L.var_arg_function_type i32_t [| list_t; i32_t |]
+let set_list_f  = L.declare_function "setList" set_list_t the_module
+let set_list l_ptr index data llbuilder =
+  let actuals = [| l_ptr; index; data |] in
+    (L.build_call set_list_f actuals "setList" llbuilder)
+
+let get_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t; i32_t|]
+let get_list_f  = L.declare_function "getList" get_list_t the_module
+let get_list l_ptr index typ llbuilder =
+  let actuals = [| l_ptr; index|] in
+  let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in 
+  let typ_switch = function
+  | A.Int_t -> void_to_int value_void_ptr llbuilder
+  | A.Float_t -> void_to_float value_void_ptr llbuilder
+  | A.String_t -> void_to_string value_void_ptr llbuilder
+  | A.Node_t -> void_to_node value_void_ptr llbuilder
+  | A.Graph_t -> void_to_graph value_void_ptr llbuilder
+in typ_switch typ
 
 let rec add_multi_elements_list l_ptr typ llbuilder = function
   | [] -> l_ptr
@@ -191,8 +241,10 @@ let print_list l llbuilder =
 
 (* let list_get builder params =  *)
 (* list_call_default_main builder (fst (expr val_name)) params_list (snd (expr val_name)) default_func_name   *)
-let list_call_default_main builder list_ptr params_list typ = function
-  | "add" -> add_list (List.hd params_list, typ) list_ptr builder 
+let list_call_default_main builder list_ptr params_list expr_tpy = function
+  | "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
+  | "get" -> (get_list list_ptr (List.hd params_list) (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
+  | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), (type_of_list_type expr_tpy)
   (* | "set" ->  *)
 
 (*
@@ -437,7 +489,7 @@ let translate program =
             | A.Float_t -> A.List_Float_t
             | A.String_t -> A.List_String_t
             | A.Node_t -> A.List_Node_t
-            | A.Graph_t -> A.Graph_t
+            | A.Graph_t -> A.List_Graph_t
             | _ -> A.List_Int_t
           in
           (* get the list typ by its first element *)
@@ -563,11 +615,11 @@ let translate program =
           (* deal with list *)       
           | A.List_Int_t | A.List_Float_t | A.List_String_t 
           | A.List_Node_t | A.List_Graph_t -> 
-              list_call_default_main builder (fst (expr builder val_name)) (List.map (fun e -> fst (expr builder e)) params_list) (type_of_list_type expr_tpy) default_func_name  
+              list_call_default_main builder (fst (expr builder val_name)) (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name  
           
           | _ -> raise (Failure ("Default Function Not Support!"))
           in 
-            (assign_func_by_typ builder expr_tpy), expr_tpy
+            assign_func_by_typ builder expr_tpy
           
         (* below is used to deal with dict *)
            (* (get_dict (fst (expr builder e))  (fst (expr builder (List.hd el))) builder, A.String_t) *)

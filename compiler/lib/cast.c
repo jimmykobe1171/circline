@@ -7,8 +7,8 @@
 #include "cast.h"
 #include "utils.h"
 
-int VoidtoInt(void* add){
-	return *((int*) add);
+int32_t VoidtoInt(void* add){
+	return *((int32_t*) add);
 }
 
 double VoidtoFloat(void* add){
