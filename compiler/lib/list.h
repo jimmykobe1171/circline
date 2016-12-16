@@ -12,17 +12,16 @@ struct List {
 	int32_t curPos;
 };
 
-struct List* createList(
-	int32_t type
-);
-
-struct List* addListHelper(
-	struct List * list,
-	void* addData
-);
+int32_t rangeHelper(int size, int index);
+struct List* createList( int32_t type);
+struct List* addListHelper( struct List * list, void* addData);
+struct List* addList(struct List* list, ...);
 void* getList(struct List* list, int index);
+int32_t popList(struct List* list);
+int32_t setList(struct List* list, int index, ...);
+int getListSize(struct List* list);
+int32_t removeList(struct List* list, int index);
 int32_t pirntList(struct List * list);
 
 
-char* get_str_from_void_ptr(void * ptr);
 

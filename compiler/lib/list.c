@@ -13,12 +13,23 @@ struct List* createList(
 ) {
 	struct List* new = (struct List*) malloc(sizeof(struct List));
 	// default initialize size is 1
-	new->size = 8;
+	new->size = 1;
 	new->type = type;
 	// means that the next element would be added at curPos
 	new->curPos = 0;
 	new->arr = (void**)malloc(new->size * sizeof(void*));
 	return new;
+}
+
+int rangeHelper(int size, int index){
+	if(size <= -index || size <= index || size == 0){
+		printf("Error! getList: Index out of Range!\n");
+		exit(1);
+	}
+	if (index < 0){
+		index += size;
+	}
+	return index;
 }
 
 struct List* addListHelper(
@@ -75,11 +86,18 @@ struct List* addList(struct List* list, ...) {
 }
 
 void* getList(struct List* list, int index){
-	int curPos = list->curPos -1;
+	index = rangeHelper(list->curPos-1, index);
 	return *(list->arr + index);
 }
 
+int32_t popList(struct List* list){
+	if(list->curPos-1 > 0){
+		list->curPos--;
+	}
+}
+
 int32_t setList(struct List* list, int index, ...){
+	index = rangeHelper(list->curPos-1, index);
 	va_list ap;
 	va_start(ap, 1);
 	void * data;
@@ -114,8 +132,20 @@ int32_t setList(struct List* list, int index, ...){
 		default:
 			break;
 	}
-	int curPos = list->curPos - 1;
 	*(list->arr + index) = data;
+	return 0;
+}
+
+int getListSize(struct List* list){
+	return list->curPos-1;
+}
+
+int32_t removeList(struct List* list, int index){
+	index =rangeHelper(list->curPos-1, index);
+	for(int i=0; i < list->curPos-1; i++){
+		*(list->arr + index) = *(list->arr + index+1);
+	}
+	list->curPos--;
 	return 0;
 }
 
@@ -190,16 +220,16 @@ int32_t printList(struct List * list){
 	// return 1;
 }
 
-char* get_str_from_void_ptr(void * ptr){
-	return (char *) ptr;
-}
 
 
 // int main() {
 // 	struct List* a = createList(INT);
 // 	addList(a, 10);
 // 	addList(a, 5);
+// 	addList(a, 7);
+// 	addList(a, 9);
 // 	setList(a, 0, 3);
+// 	removeList(a, 2);
 // 	printList(a);
 // 	//printNode(VoidtoNode(getList(a,2)));
 // }
