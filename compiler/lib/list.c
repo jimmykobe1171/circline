@@ -85,12 +85,6 @@ struct List* addList(struct List* list, ...) {
   return addListHelper(list, data);
 }
 
-struct List* pushList(struct List* list, ...){
-	va_list ap;
-	va_start(ap, 1);
-	return addList(list, ap);
-}
-
 void* getList(struct List* list, int index){
 	index = rangeHelper(list->curPos-1, index);
 	return *(list->arr + index);
