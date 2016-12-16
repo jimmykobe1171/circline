@@ -85,15 +85,24 @@ struct List* addList(struct List* list, ...) {
   return addListHelper(list, data);
 }
 
+struct List* pushList(struct List* list, ...){
+	va_list ap;
+	va_start(ap, 1);
+	return addList(list, ap);
+}
+
 void* getList(struct List* list, int index){
 	index = rangeHelper(list->curPos-1, index);
 	return *(list->arr + index);
 }
 
-int32_t popList(struct List* list){
-	if(list->curPos-1 > 0){
-		list->curPos--;
+void* popList(struct List* list){
+	if(list->curPos-1 ==0){
+		printf("Error! Nothing Can be poped T.T");
 	}
+	void* add = *(list->arr + list->curPos-1);
+	list->curPos--;
+	return add;
 }
 
 int32_t setList(struct List* list, int index, ...){
@@ -137,12 +146,12 @@ int32_t setList(struct List* list, int index, ...){
 }
 
 int getListSize(struct List* list){
-	return list->curPos-1;
+	return list->curPos;
 }
 
 int32_t removeList(struct List* list, int index){
 	index =rangeHelper(list->curPos-1, index);
-	for(int i=0; i < list->curPos-1; i++){
+	for(int i=index; i < list->curPos-1; i++){
 		*(list->arr + index) = *(list->arr + index+1);
 	}
 	list->curPos--;
