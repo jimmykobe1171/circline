@@ -215,7 +215,8 @@ let set_list_t  = L.var_arg_function_type i32_t [| list_t; i32_t |]
 let set_list_f  = L.declare_function "setList" set_list_t the_module
 let set_list l_ptr index data llbuilder =
   let actuals = [| l_ptr; index; data |] in
-    (L.build_call set_list_f actuals "setList" llbuilder)
+    ignore(L.build_call set_list_f actuals "setList" llbuilder);
+    l_ptr
 
 let get_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t; i32_t|]
 let get_list_f  = L.declare_function "getList" get_list_t the_module
@@ -244,7 +245,7 @@ let print_list l llbuilder =
 let list_call_default_main builder list_ptr params_list expr_tpy = function
   | "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
   | "get" -> (get_list list_ptr (List.hd params_list) (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
-  | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), (type_of_list_type expr_tpy)
+  | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), expr_tpy
   (* | "set" ->  *)
 
 (*
