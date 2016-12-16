@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include "utils.h"
+#include "cast.h"
 #include "list.h"
 
 struct List* createList(
@@ -34,45 +35,36 @@ struct List* addListHelper(
 	return list;
 }
 
-struct List* addList(int n, ...) {
+struct List* addList(struct List* list, ...) {
 	va_list ap;
-
-	va_start(ap, n);
-	int32_t type = va_arg(ap, int);
-	struct List * list = va_arg(ap, struct List *);
+	va_start(ap, 1);
 	void * data;
 	int* tmp0;
 	double* tmp1;
 	bool* tmp2;
-	switch (type) {
-		case INT:
-			tmp0 = (int*)malloc(sizeof(int));
-			*tmp0 = va_arg(ap, int);
-			data = (void*) tmp0;
+	switch (list->type) {
+		case INT: 
+			data = InttoVoid(va_arg(ap, int));
 			break;
 
 		case FLOAT:
-			tmp1 = (double*)malloc(sizeof(double));
-			*tmp1 = va_arg(ap, double);
-			data = (void*) tmp1;
+			data = FloattoVoid(va_arg(ap, double));
 			break;
 
 		case BOOL:
-			tmp2 = (bool*)malloc(sizeof(bool));
-			*tmp2 = va_arg(ap, bool);
-			data = (void*) tmp2;
+			data = BooltoVoid(va_arg(ap, double));
 			break;
 
 		case STRING:
-			data = (void*) va_arg(ap, char*);
+			data = StringtoVoid(va_arg(ap, char*));
 			break;
 
 		case NODE:
-			data = (void*) va_arg(ap, struct Node*);
+			data = NodetoVoid(va_arg(ap, struct Node*));
 			break;
 
 		case GRAPH:
-			data = (void*) va_arg(ap, struct Graph*);
+			data = GraphtoVoid(va_arg(ap, struct Graph*));
 			break;
 
 		default:
@@ -85,6 +77,46 @@ struct List* addList(int n, ...) {
 void* getList(struct List* list, int index){
 	int curPos = list->curPos -1;
 	return *(list->arr + index);
+}
+
+int32_t setList(struct List* list, int index, ...){
+	va_list ap;
+	va_start(ap, 1);
+	void * data;
+	int* tmp0;
+	double* tmp1;
+	bool* tmp2;
+	switch (list->type) {
+		case INT: 
+			data = InttoVoid(va_arg(ap, int));
+			break;
+
+		case FLOAT:
+			data = FloattoVoid(va_arg(ap, double));
+			break;
+
+		case BOOL:
+			data = BooltoVoid(va_arg(ap, double));
+			break;
+
+		case STRING:
+			data = StringtoVoid(va_arg(ap, char*));
+			break;
+
+		case NODE:
+			data = NodetoVoid(va_arg(ap, struct Node*));
+			break;
+
+		case GRAPH:
+			data = GraphtoVoid(va_arg(ap, struct Graph*));
+			break;
+
+		default:
+			break;
+	}
+	int curPos = list->curPos - 1;
+	*(list->arr + index) = data;
+	return 0;
 }
 
 int32_t printList(struct List * list){
@@ -164,10 +196,10 @@ char* get_str_from_void_ptr(void * ptr){
 
 
 // int main() {
-// 	struct List* a = createList(NODE);
-// 	addList(3, NODE, a, createNode(1, 0, 5, 0, 0, NULL));
-// 	addList(3, NODE, a, createNode(1, 0, 10, 0, 0, NULL));
-// 	addList(3, NODE, a, createNode(1, 0, 12, 0, 0, NULL));
+// 	struct List* a = createList(INT);
+// 	addList(a, 10);
+// 	addList(a, 5);
+// 	setList(a, 0, 3);
 // 	printList(a);
 // 	//printNode(VoidtoNode(getList(a,2)));
 // }
