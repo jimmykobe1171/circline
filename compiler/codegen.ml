@@ -231,18 +231,27 @@ let size_list l_ptr llbuilder =
   let actuals = [| l_ptr |] in
     L.build_call size_list_f actuals "getListSize" llbuilder
 
+let void_start_to_tpy value_void_ptr llbuilder = function 
+    A.Int_t -> void_to_int value_void_ptr llbuilder
+  | A.Float_t -> void_to_float value_void_ptr llbuilder
+  | A.String_t -> void_to_string value_void_ptr llbuilder
+  | A.Node_t -> void_to_node value_void_ptr llbuilder
+  | A.Graph_t -> void_to_graph value_void_ptr llbuilder  
+
+let pop_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t |]
+let pop_list_f  = L.declare_function "popList" pop_list_t the_module
+let pop_list l_ptr typ llbuilder =
+  let actuals = [| l_ptr |] in
+  let value_void_ptr = L.build_call pop_list_f actuals "popList" llbuilder in
+  void_start_to_tpy value_void_ptr llbuilder typ
+
+
 let get_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t; i32_t|]
 let get_list_f  = L.declare_function "getList" get_list_t the_module
 let get_list l_ptr index typ llbuilder =
   let actuals = [| l_ptr; index|] in
-  let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in 
-  let typ_switch = function
-  | A.Int_t -> void_to_int value_void_ptr llbuilder
-  | A.Float_t -> void_to_float value_void_ptr llbuilder
-  | A.String_t -> void_to_string value_void_ptr llbuilder
-  | A.Node_t -> void_to_node value_void_ptr llbuilder
-  | A.Graph_t -> void_to_graph value_void_ptr llbuilder
-in typ_switch typ
+  let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in
+  void_start_to_tpy value_void_ptr llbuilder typ
 
 let rec add_multi_elements_list l_ptr typ llbuilder = function
   | [] -> l_ptr
@@ -253,15 +262,13 @@ let print_list_f  = L.declare_function "printList" print_list_t the_module
 let print_list l llbuilder =
   L.build_call print_list_f [| l |] "printList" llbuilder
 
-(* let list_get builder params =  *)
-(* list_call_default_main builder (fst (expr val_name)) params_list (snd (expr val_name)) default_func_name   *)
 let list_call_default_main builder list_ptr params_list expr_tpy = function
-  | "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
+    "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
   | "get" -> (get_list list_ptr (List.hd params_list) (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
   | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), expr_tpy
   | "remove" -> (remove_list list_ptr (List.hd params_list) builder) ,expr_tpy
   | "size" -> (size_list list_ptr builder), A.Int_t
-  (* | "set" ->  *)
+  | "pop" -> (pop_list list_ptr (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
 
 (*
 ================================================================
@@ -273,13 +280,6 @@ let create_graph_t  = L.function_type graph_t [| |]
 let create_graph_f  = L.declare_function "createGraph" create_graph_t the_module
 let create_graph llbuilder =
   L.build_call create_graph_f [| |] "graph" llbuilder
-
-
-(* let ptr_from_void_to_str_t  = L.function_type str_t [| i32_t |]
-let ptr_from_void_to_str_f  = L.declare_function "get_str_from_void_ptr" ptr_from_void_to_str_t the_module
-let ptr_from_void_to_str ptr llbuilder =
-  L.build_call ptr_from_void_to_str_f [| ptr |] "ptr_from_void_to_str" llbuilder
- *)
 
 (* Create a copy of origianl grpah *)
 let copy_graph_t  = L.function_type graph_t [| graph_t |]
