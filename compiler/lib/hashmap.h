@@ -28,7 +28,7 @@ struct hashmap_map{
 };
 
 
-typedef int (*PFany)(void*, void*);
+typedef int (*Func)(void*, void*, void*);
 
 
 /*
@@ -43,7 +43,7 @@ extern struct hashmap_map* hashmap_new(int32_t keytyp,int32_t valuetyp);
  * than MAP_OK the traversal is terminated. f must
  * not reenter any hashmap functions, or deadlock may arise.
  */
-extern int hashmap_iterate(struct hashmap_map* m, PFany f, void* item);
+extern int hashmap_iterate(struct hashmap_map* m, Func f, void* item);
 
 /*
  * Add an element to the hashmap. Return MAP_OK or MAP_OMEM.

@@ -46,6 +46,13 @@ struct List* addListHelper(
 	return list;
 }
 
+struct List* concatList(struct List* list1, struct List* list2){
+	for(int i =0; i < list2->curPos; i++){
+		list1 = addListHelper(list1, *(list2->arr+i));
+	}
+	return list1;
+}
+
 struct List* addList(struct List* list, ...) {
 	va_list ap;
 	va_start(ap, 1);

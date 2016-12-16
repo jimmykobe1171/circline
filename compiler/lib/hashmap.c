@@ -333,28 +333,23 @@ void* hashmap_get(struct hashmap_map* m,...){
  * additional any_t argument is passed to the function as its first
  * argument and the hashmap element is the second.
  */
-// int hashmap_iterate(map_t in, PFany f, any_t item) {
-// 	int i;
+int hashmap_iterate(struct hashmap_map* m, Func f, void* item) {
 
-// 	/* Cast the hashmap */
-// 	hashmap_map* m = (hashmap_map*) in;
+	/* On empty hashmap, return immediately */
+	if (hashmap_length(m) <= 0)
+		return MAP_MISSING;	
 
-// 	/* On empty hashmap, return immediately */
-// 	if (hashmap_length(m) <= 0)
-// 		return MAP_MISSING;	
+	/* Linear probing */
+	for(int i = 0; i< m->table_size; i++)
+		if(m->data[i].in_use != 0) {
+			int status = f(item, m->data[i].data[0], m->data[i].data[1]);
+			if (status != MAP_OK) {
+				return status;
+			}
+		}
 
-// 	/* Linear probing */
-// 	for(i = 0; i< m->table_size; i++)
-// 		if(m->data[i].in_use != 0) {
-// 			any_t data = (any_t) (m->data[i].data);
-// 			int status = f(item, data);
-// 			if (status != MAP_OK) {
-// 				return status;
-// 			}
-// 		}
-
-//     return MAP_OK;
-// }
+    return MAP_OK;
+}
 
 // /*
 //  * Remove an element with that key from the map
