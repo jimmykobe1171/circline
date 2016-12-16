@@ -218,6 +218,19 @@ let set_list l_ptr index data llbuilder =
     ignore(L.build_call set_list_f actuals "setList" llbuilder);
     l_ptr
 
+let remove_list_t  = L.var_arg_function_type i32_t [| list_t; i32_t |]
+let remove_list_f  = L.declare_function "removeList" remove_list_t the_module
+let remove_list l_ptr index llbuilder =
+  let actuals = [| l_ptr; index |] in
+    ignore(L.build_call remove_list_f actuals "removeList" llbuilder);
+    l_ptr
+
+let size_list_t  = L.var_arg_function_type i32_t [| list_t |]
+let size_list_f  = L.declare_function "getListSize" size_list_t the_module
+let size_list l_ptr llbuilder =
+  let actuals = [| l_ptr |] in
+    L.build_call size_list_f actuals "getListSize" llbuilder
+
 let get_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t; i32_t|]
 let get_list_f  = L.declare_function "getList" get_list_t the_module
 let get_list l_ptr index typ llbuilder =
@@ -246,6 +259,8 @@ let list_call_default_main builder list_ptr params_list expr_tpy = function
   | "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
   | "get" -> (get_list list_ptr (List.hd params_list) (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
   | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), expr_tpy
+  | "remove" -> (remove_list list_ptr (List.hd params_list) builder) ,expr_tpy
+  | "size" -> (size_list list_ptr builder), A.Int_t
   (* | "set" ->  *)
 
 (*
