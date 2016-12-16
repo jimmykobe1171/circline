@@ -38,7 +38,7 @@ let graph_t = L.pointer_type (match L.type_by_name llm "struct.Graph" with
     None -> raise (Failure "struct.Graph doesn't defined!")
   | Some x -> x)
 
-let dict_t = L.pointer_type (match L.type_by_name llm "struct._hashmap_map" with
+let dict_t = L.pointer_type (match L.type_by_name llm "struct.hashmap_map" with
     None -> raise (Failure "struct.hashmap_map doesn't defined!")
   | Some x -> x)
 
@@ -96,6 +96,46 @@ let get_default_value_of_type = function
 
 (*
 ================================================================
+  Casting
+================================================================
+*)
+
+let int_to_float llbuilder v = L.build_sitofp v f_t "tmp" llbuilder
+
+let void_to_int_t  = L.function_type i32_t [| L.pointer_type i8_t |]
+let void_to_int_f  = L.declare_function "VoidtoInt" void_to_int_t the_module
+let void_to_int void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_int_f actuals "VoidtoInt" llbuilder
+
+let void_to_float_t  = L.function_type f_t [| L.pointer_type i8_t |]
+let void_to_float_f  = L.declare_function "VoidtoFloat" void_to_float_t the_module
+let void_to_float void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_float_f actuals "VoidtoFloat" llbuilder
+
+let void_to_string_t  = L.function_type str_t [| L.pointer_type i8_t |]
+let void_to_string_f  = L.declare_function "VoidtoString" void_to_string_t the_module
+let void_to_string void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_string_f actuals "VoidtoString" llbuilder
+
+let void_to_node_t  = L.function_type node_t [| L.pointer_type i8_t |]
+let void_to_node_f  = L.declare_function "VoidtoNode" void_to_node_t the_module
+let void_to_node void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_node_f actuals "VoidtoNode" llbuilder
+
+let void_to_graph_t  = L.function_type graph_t [| L.pointer_type i8_t |]
+let void_to_graph_f  = L.declare_function "VoidtoGraph" void_to_graph_t the_module
+let void_to_graph void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
+
+
+
+(*
+================================================================
   Declare printf(), which the print built-in function will call
 ================================================================
 *)
@@ -129,19 +169,19 @@ let print_node_t  = L.function_type i32_t [| node_t |]
   Dict
 ================================================================
 *)
-let create_dict_t  = L.function_type dict_t [| |]
-let create_dict_f  = L.declare_function "hashmap_new" create_dict_t the_module
+let create_dict_t = L.function_type dict_t [| |]
+let create_dict_f = L.declare_function "hashmap_new" create_dict_t the_module
 let create_dict llbuilder =
     L.build_call create_dict_f [| |] "hashmap" llbuilder
 
-let put_dict_t  = L.function_type dict_t [| dict_t; str_t; str_t|]
-let put_dict_f  = L.declare_function "hashmap_put" put_dict_t the_module
+let put_dict_t = L.function_type dict_t [| dict_t; str_t; str_t|]
+let put_dict_f = L.declare_function "hashmap_put" put_dict_t the_module
 let put_dict d key val_ptr llbuilder =
     let actuals = [| d; key; val_ptr|] in
     L.build_call put_dict_f actuals "put" llbuilder
 
-let get_dict_t  = L.function_type str_t [| dict_t; str_t |]
-let get_dict_f  = L.declare_function "hashmap_get" get_dict_t the_module
+let get_dict_t = L.function_type str_t [| dict_t; str_t |]
+let get_dict_f = L.declare_function "hashmap_get" get_dict_t the_module
 let get_dict d key llbuilder =
     let actuals = [| d; key |] in
     L.build_call get_dict_f actuals "get" llbuilder
@@ -153,7 +193,7 @@ let rec put_multi_kvs_dict dict_ptr llbuilder = function
 
 (*
 ================================================================
-  List
+  Cast
 ================================================================
 *)
 
@@ -193,6 +233,12 @@ let void_to_graph void_ptr llbuilder =
   let actuals = [| void_ptr |] in
     L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
 
+(*
+================================================================
+  List
+================================================================
+*)
+
 let create_list_t  = L.function_type list_t [| i32_t |]
 let create_list_f  = L.declare_function "createList" create_list_t the_module
 let create_list typ llbuilder =
@@ -210,39 +256,63 @@ let set_list_t  = L.var_arg_function_type i32_t [| list_t; i32_t |]
 let set_list_f  = L.declare_function "setList" set_list_t the_module
 let set_list l_ptr index data llbuilder =
   let actuals = [| l_ptr; index; data |] in
-    (L.build_call set_list_f actuals "setList" llbuilder)
+    ignore(L.build_call set_list_f actuals "setList" llbuilder);
+    l_ptr
+
+let remove_list_t  = L.var_arg_function_type i32_t [| list_t; i32_t |]
+let remove_list_f  = L.declare_function "removeList" remove_list_t the_module
+let remove_list l_ptr index llbuilder =
+  let actuals = [| l_ptr; index |] in
+    ignore(L.build_call remove_list_f actuals "removeList" llbuilder);
+    l_ptr
+
+let size_list_t  = L.var_arg_function_type i32_t [| list_t |]
+let size_list_f  = L.declare_function "getListSize" size_list_t the_module
+let size_list l_ptr llbuilder =
+  let actuals = [| l_ptr |] in
+    L.build_call size_list_f actuals "getListSize" llbuilder
+
+let void_start_to_tpy value_void_ptr llbuilder = function
+    A.Int_t -> void_to_int value_void_ptr llbuilder
+  | A.Float_t -> void_to_float value_void_ptr llbuilder
+  | A.String_t -> void_to_string value_void_ptr llbuilder
+  | A.Node_t -> void_to_node value_void_ptr llbuilder
+  | A.Graph_t -> void_to_graph value_void_ptr llbuilder
+
+let pop_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t |]
+let pop_list_f  = L.declare_function "popList" pop_list_t the_module
+let pop_list l_ptr typ llbuilder =
+  let actuals = [| l_ptr |] in
+  let value_void_ptr = L.build_call pop_list_f actuals "popList" llbuilder in
+  void_start_to_tpy value_void_ptr llbuilder typ
 
 let get_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t; i32_t|]
 let get_list_f  = L.declare_function "getList" get_list_t the_module
 let get_list l_ptr index typ llbuilder =
   let actuals = [| l_ptr; index|] in
   let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in
-  let typ_switch = function
-  | A.Int_t -> void_to_int value_void_ptr llbuilder
-  | A.Float_t -> void_to_float value_void_ptr llbuilder
-  | A.Bool_t -> void_to_bool value_void_ptr llbuilder
-  | A.String_t -> void_to_string value_void_ptr llbuilder
-  | A.Node_t -> void_to_node value_void_ptr llbuilder
-  | A.Graph_t -> void_to_graph value_void_ptr llbuilder
-in typ_switch typ
+  void_start_to_tpy value_void_ptr llbuilder typ
+
+let cast_float data typ builder = if typ == A.Float_t then int_to_float builder data else data
+
 
 let rec add_multi_elements_list l_ptr typ llbuilder = function
   | [] -> l_ptr
-  | h :: tl -> add_multi_elements_list (add_list (h, typ) l_ptr llbuilder) typ llbuilder tl
+  | h :: tl -> add_multi_elements_list (add_list ((cast_float h typ llbuilder), typ) l_ptr llbuilder) typ llbuilder tl
 
 let print_list_t  = L.function_type i32_t [| list_t |]
 let print_list_f  = L.declare_function "printList" print_list_t the_module
 let print_list l llbuilder =
   L.build_call print_list_f [| l |] "printList" llbuilder
 
-(* let list_get builder params =  *)
-(* list_call_default_main builder (fst (expr val_name)) params_list (snd (expr val_name)) default_func_name   *)
 let list_call_default_main builder list_ptr params_list expr_tpy = function
-  | "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
+    "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
   | "get" -> (get_list list_ptr (List.hd params_list) (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
-  | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), (type_of_list_type expr_tpy)
-  (* | "set" ->  *)
-
+  | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), expr_tpy
+  | "remove" -> (remove_list list_ptr (List.hd params_list) builder) ,expr_tpy
+  | "size" -> (size_list list_ptr builder), A.Int_t
+  | "pop" -> (pop_list list_ptr (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
+  | "push" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
 (*
 ================================================================
   Graph
@@ -335,13 +405,6 @@ let print_graph_t  = L.function_type i32_t [| graph_t |]
 let print_graph_f  = L.declare_function "printGraph" print_graph_t the_module
 let print_graph graph llbuilder =
   L.build_call print_graph_f [| graph |] "printGraph" llbuilder
-
-(*
-================================================================
-  Casting
-================================================================
-*)
-let int_to_float llbuilder v = L.build_sitofp v f_t "tmp" llbuilder
 
 (*
 ================================================================
@@ -501,7 +564,12 @@ let translate program =
             | _ -> A.List_Int_t
           in
           (* get the list typ by its first element *)
+          let rec check_float_typ = function
+            [] -> A.Int_t
+          | hd::ls -> if (snd(expr builder hd)) == A.Float_t then A.Float_t else check_float_typ ls in
           let list_typ = snd (expr builder (List.hd ls)) in
+          let list_typ = if list_typ == A.Int_t then check_float_typ ls else list_typ in
+
           (* create a new list first *)
           let l_ptr_type = (create_list list_typ builder, from_expr_typ_to_list_typ list_typ) in
           (* then add all initial values to the list *)

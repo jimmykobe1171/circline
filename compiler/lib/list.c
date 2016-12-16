@@ -23,7 +23,7 @@ struct List* createList(
 
 int rangeHelper(int size, int index){
 	if(size <= -index || size <= index || size == 0){
-		printf("Error! getList: Index out of Range!\n");
+		printf("Error! Index out of Range!\n");
 		exit(1);
 	}
 	if (index < 0){
@@ -44,6 +44,13 @@ struct List* addListHelper(
 	*(list->arr + list->curPos) = addData;
 	list->curPos++;
 	return list;
+}
+
+struct List* concatList(struct List* list1, struct List* list2){
+	for(int i =0; i < list2->curPos; i++){
+		list1 = addListHelper(list1, *(list2->arr+i));
+	}
+	return list1;
 }
 
 struct List* addList(struct List* list, ...) {
@@ -86,18 +93,22 @@ struct List* addList(struct List* list, ...) {
 }
 
 void* getList(struct List* list, int index){
-	index = rangeHelper(list->curPos-1, index);
+	index = rangeHelper(list->curPos, index);
 	return *(list->arr + index);
 }
 
-int32_t popList(struct List* list){
-	if(list->curPos-1 > 0){
-		list->curPos--;
+void* popList(struct List* list){
+	if(list->curPos-1 < 0){
+		printf("Error! Nothing Can be poped T.T\n");
+		exit(1);
 	}
+	void* add = *(list->arr + list->curPos-1);
+	list->curPos--;
+	return add;
 }
 
 int32_t setList(struct List* list, int index, ...){
-	index = rangeHelper(list->curPos-1, index);
+	index = rangeHelper(list->curPos, index);
 	va_list ap;
 	va_start(ap, 1);
 	void * data;
@@ -137,13 +148,13 @@ int32_t setList(struct List* list, int index, ...){
 }
 
 int getListSize(struct List* list){
-	return list->curPos-1;
+	return list->curPos;
 }
 
 int32_t removeList(struct List* list, int index){
-	index =rangeHelper(list->curPos-1, index);
-	for(int i=0; i < list->curPos-1; i++){
-		*(list->arr + index) = *(list->arr + index+1);
+	index =rangeHelper(list->curPos, index);
+	for(int i=index; i < list->curPos; i++){
+		*(list->arr + i) = *(list->arr + i+1);
 	}
 	list->curPos--;
 	return 0;
@@ -229,7 +240,8 @@ int32_t printList(struct List * list){
 // 	addList(a, 7);
 // 	addList(a, 9);
 // 	setList(a, 0, 3);
-// 	removeList(a, 2);
+// 	removeList(a, 0);
+	
 // 	printList(a);
 // 	//printNode(VoidtoNode(getList(a,2)));
 // }

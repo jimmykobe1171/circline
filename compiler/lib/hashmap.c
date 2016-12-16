@@ -3,83 +3,29 @@
  */
 #include "hashmap.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdarg.h>
+#include "utils.h"
+#include "cast.h"
 
 #define INITIAL_SIZE (256)
 #define MAX_CHAIN_LENGTH (8)
 
-/* We need to keep keys and values */
-typedef struct _hashmap_element{
-	char* key;
-	int in_use;
-	any_t data;
-} hashmap_element;
 
-/* A hashmap has some maximum size and current size,
- * as well as the data to hold. */
-typedef struct _hashmap_map{
-	int table_size;
-	int size;
-	hashmap_element *data;
-} hashmap_map;
-
-/*
- * Return an empty hashmap, or NULL on failure.
- */
-map_t hashmap_new() {
-	hashmap_map* m = (hashmap_map*) malloc(sizeof(hashmap_map));
-	m->data = (hashmap_element*) calloc(INITIAL_SIZE, sizeof(hashmap_element));
-
+struct hashmap_map* hashmap_new(int32_t keytyp,int32_t valuetyp) {
+	struct hashmap_map* m = (struct hashmap_map*) malloc(sizeof(struct hashmap_map));
+	m->data = (struct hashmap_element*) calloc(INITIAL_SIZE, sizeof(struct hashmap_element));
+	m->keytype = keytyp;
+	m->valuetype = valuetyp;
 	m->table_size = INITIAL_SIZE;
 	m->size = 0;
 	return m;
 }
 
-/* The implementation here was originally done by Gary S. Brown.  I have
-   borrowed the tables directly, and made some minor changes to the
-   crc32-function (including changing the interface). //ylo */
-
-  /* ============================================================= */
-  /*  COPYRIGHT (C) 1986 Gary S. Brown.  You may use this program, or       */
-  /*  code or tables extracted from it, as desired without restriction.     */
-  /*                                                                        */
-  /*  First, the polynomial itself and its table of feedback terms.  The    */
-  /*  polynomial is                                                         */
-  /*  X^32+X^26+X^23+X^22+X^16+X^12+X^11+X^10+X^8+X^7+X^5+X^4+X^2+X^1+X^0   */
-  /*                                                                        */
-  /*  Note that we take it "backwards" and put the highest-order term in    */
-  /*  the lowest-order bit.  The X^32 term is "implied"; the LSB is the     */
-  /*  X^31 term, etc.  The X^0 term (usually shown as "+1") results in      */
-  /*  the MSB being 1.                                                      */
-  /*                                                                        */
-  /*  Note that the usual hardware shift register implementation, which     */
-  /*  is what we're using (we're merely optimizing it by doing eight-bit    */
-  /*  chunks at a time) shifts bits into the lowest-order term.  In our     */
-  /*  implementation, that means shifting towards the right.  Why do we     */
-  /*  do it this way?  Because the calculated CRC must be transmitted in    */
-  /*  order from highest-order term to lowest-order term.  UARTs transmit   */
-  /*  characters in order from LSB to MSB.  By storing the CRC this way,    */
-  /*  we hand it to the UART in the order low-byte to high-byte; the UART   */
-  /*  sends each low-bit to hight-bit; and the result is transmission bit   */
-  /*  by bit from highest- to lowest-order term without requiring any bit   */
-  /*  shuffling on our part.  Reception works similarly.                    */
-  /*                                                                        */
-  /*  The feedback terms table consists of 256, 32-bit entries.  Notes:     */
-  /*                                                                        */
-  /*      The table can be generated at runtime if desired; code to do so   */
-  /*      is shown later.  It might not be obvious, but the feedback        */
-  /*      terms simply represent the results of eight shift/xor opera-      */
-  /*      tions for all combinations of data and CRC register values.       */
-  /*                                                                        */
-  /*      The values must be right-shifted by eight bits by the "updcrc"    */
-  /*      logic; the shift must be unsigned (bring in zeroes).  On some     */
-  /*      hardware you could probably optimize the shift in assembler by    */
-  /*      using byte-swap instructions.                                     */
-  /*      polynomial $edb88320                                              */
-  /*                                                                        */
-  /*  --------------------------------------------------------------------  */
 
 static unsigned long crc32_tab[] = {
       0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L,
@@ -142,7 +88,7 @@ unsigned long crc32(const unsigned char *s, unsigned int len)
 {
   unsigned int i;
   unsigned long crc32val;
-  
+
   crc32val = 0;
   for (i = 0;  i < len;  i ++)
     {
@@ -156,7 +102,7 @@ unsigned long crc32(const unsigned char *s, unsigned int len)
 /*
  * Hashing function for a string
  */
-unsigned int hashmap_hash_int(hashmap_map * m, char* keystring){
+unsigned int hashmap_hash_int(struct hashmap_map * m, char* keystring){
 
     unsigned long key = crc32((unsigned char*)(keystring), strlen(keystring));
 
@@ -180,12 +126,9 @@ unsigned int hashmap_hash_int(hashmap_map * m, char* keystring){
  * Return the integer of the location in data
  * to store the point to the item, or MAP_FULL.
  */
-int hashmap_hash(map_t in, char* key){
+int hashmap_hash(struct hashmap_map* m, char* key){
 	int curr;
 	int i;
-
-	/* Cast the hashmap */
-	hashmap_map* m = (hashmap_map *) in;
 
 	/* If full, return immediately */
 	if(m->size >= (m->table_size/2)) return MAP_FULL;
@@ -210,15 +153,14 @@ int hashmap_hash(map_t in, char* key){
 /*
  * Doubles the size of the hashmap, and rehashes all the elements
  */
-int hashmap_rehash(map_t in){
+int hashmap_rehash(struct hashmap_map *m){
 	int i;
 	int old_size;
-	hashmap_element* curr;
+	struct hashmap_element* curr;
 
 	/* Setup the new elements */
-	hashmap_map *m = (hashmap_map *) in;
-	hashmap_element* temp = (hashmap_element *)
-		calloc(2 * m->table_size, sizeof(hashmap_element));
+	struct hashmap_element* temp = (struct hashmap_element *)
+		calloc(2 * m->table_size, sizeof(struct hashmap_element));
 	if(!temp) return MAP_OMEM;
 
 	/* Update the array */
@@ -236,7 +178,7 @@ int hashmap_rehash(map_t in){
 
         if (curr[i].in_use == 0)
             continue;
-            
+
 		status = hashmap_put(m, curr[i].key, curr[i].data);
 		if (status != MAP_OK)
 			return status;
@@ -250,27 +192,85 @@ int hashmap_rehash(map_t in){
 /*
  * Add a pointer to the hashmap with some key
  */
-int hashmap_put(map_t in, char* key, any_t value){
+int hashmap_put(struct hashmap_map* m,...){
 	int index;
-	hashmap_map* m;
+	void* data1;
+	void* data2;
+	char* key;
+	va_list ap;
+	va_start(ap, 2);
 
-	/* Cast the hashmap */
-	m = (hashmap_map *) in;
+	switch (m->keytype) {
+		case INT:
+			data1 = InttoVoid(va_arg(ap, int));
+			key = malloc(16);
+			snprintf(key, 16, "%d", VoidtoInt(data1));
+			printf("%s\n",key);
+			break;
+
+		case STRING:
+			data1 = StringtoVoid(va_arg(ap, char*));
+			key = VoidtoString(data1);
+			//printf("%s\n",key);
+			break;
+
+		case NODE:
+			data1 = NodetoVoid(va_arg(ap, struct Node*));
+			key = malloc(16);
+			snprintf(key, 16, "%d", VoidtoNode(data1)->id);
+			//printf("%s\n",key);
+			break;
+
+		default:
+			break;
+	}
+
+	switch (m->valuetype) {
+		case INT:
+			data2 = InttoVoid(va_arg(ap, int));
+			break;
+
+		case FLOAT:
+			data2 = FloattoVoid(va_arg(ap, double));
+			break;
+
+		case BOOL:
+			data2 = BooltoVoid(va_arg(ap, double));
+			break;
+
+		case STRING:
+			data2 = StringtoVoid(va_arg(ap, char*));
+			break;
+
+		case NODE:
+			data2 = NodetoVoid(va_arg(ap, struct Node*));
+			break;
+
+		case GRAPH:
+			data2 = GraphtoVoid(va_arg(ap, struct Graph*));
+			break;
+
+		default:
+			break;
+	}
+
+	va_end(ap);
 
 	/* Find a place to put our value */
-	index = hashmap_hash(in, key);
+	index = hashmap_hash(m, key);
 	while(index == MAP_FULL){
-		if (hashmap_rehash(in) == MAP_OMEM) {
+		if (hashmap_rehash(m) == MAP_OMEM) {
 			return MAP_OMEM;
 		}
-		index = hashmap_hash(in, key);
+		index = hashmap_hash(m, key);
 	}
 
 	/* Set the data */
-	m->data[index].data = value;
+	m->data[index].data[0] = data1;
+	m->data[index].data[1] = data2;
 	m->data[index].key = key;
 	m->data[index].in_use = 1;
-	m->size++; 
+	m->size++;
 
 	return MAP_OK;
 }
@@ -279,13 +279,32 @@ int hashmap_put(map_t in, char* key, any_t value){
  * Get your pointer out of the hashmap with a key
  */
 // int hashmap_get(map_t in, char* key, any_t *arg){
-char* hashmap_get(map_t in, char* key){
+void* hashmap_get(struct hashmap_map* m,...){
 	int curr;
 	int i;
-	hashmap_map* m;
+	char* key;
+	va_list ap;
+	va_start(ap, 1);
 
-	/* Cast the hashmap */
-	m = (hashmap_map *) in;
+	switch (m->keytype) {
+		case INT:
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, int));
+			break;
+
+		case STRING:
+			key = va_arg(ap, char*);
+			break;
+
+		case NODE:
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, struct Node*)->id);
+			break;
+
+		default:
+			break;
+	}
+	va_end(ap);
 
 	/* Find data location */
 	curr = hashmap_hash_int(m, key);
@@ -298,15 +317,15 @@ char* hashmap_get(map_t in, char* key){
             if (strcmp(m->data[curr].key,key)==0){
                 // *arg = (m->data[curr].data);
                 // return MAP_OK;
-                return (char *)(m->data[curr].data);
+                printf("%s\n", VoidtoString(m->data[curr].data[1]));
+                return m->data[curr].data[1];
             }
 		}
 
 		curr = (curr + 1) % m->table_size;
 	}
-	// *arg = NULL;
-	return NULL;
-	// return MAP_MISSING;
+	printf("Error! Hashmap_Get:Key not Exist!\n");
+	exit(1);
 }
 
 /*
@@ -314,21 +333,16 @@ char* hashmap_get(map_t in, char* key){
  * additional any_t argument is passed to the function as its first
  * argument and the hashmap element is the second.
  */
-int hashmap_iterate(map_t in, PFany f, any_t item) {
-	int i;
-
-	/* Cast the hashmap */
-	hashmap_map* m = (hashmap_map*) in;
+int hashmap_iterate(struct hashmap_map* m, Func f, void* item) {
 
 	/* On empty hashmap, return immediately */
 	if (hashmap_length(m) <= 0)
-		return MAP_MISSING;	
+		return MAP_MISSING;
 
 	/* Linear probing */
-	for(i = 0; i< m->table_size; i++)
+	for(int i = 0; i< m->table_size; i++)
 		if(m->data[i].in_use != 0) {
-			any_t data = (any_t) (m->data[i].data);
-			int status = f(item, data);
+			int status = f(item, m->data[i].data[0], m->data[i].data[1]);
 			if (status != MAP_OK) {
 				return status;
 			}
@@ -337,16 +351,35 @@ int hashmap_iterate(map_t in, PFany f, any_t item) {
     return MAP_OK;
 }
 
-/*
- * Remove an element with that key from the map
- */
-int hashmap_remove(map_t in, char* key){
+// /*
+//  * Remove an element with that key from the map
+//  */
+int hashmap_remove(struct hashmap_map* m,...){
 	int i;
 	int curr;
-	hashmap_map* m;
+	char* key;
+	va_list ap;
+	va_start(ap, 1);
 
-	/* Cast the hashmap */
-	m = (hashmap_map *) in;
+	switch (m->keytype) {
+		case INT:
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, int));
+			break;
+
+		case STRING:
+			key = va_arg(ap, char*);
+			break;
+
+		case NODE:
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, struct Node*)->id);
+			break;
+
+		default:
+			break;
+	}
+	va_end(ap);
 
 	/* Find key */
 	curr = hashmap_hash_int(m, key);
@@ -359,7 +392,8 @@ int hashmap_remove(map_t in, char* key){
             if (strcmp(m->data[curr].key,key)==0){
                 /* Blank out the fields */
                 m->data[curr].in_use = 0;
-                m->data[curr].data = NULL;
+                m->data[curr].data[0] = NULL;
+                m->data[curr].data[1] = NULL;
                 m->data[curr].key = NULL;
 
                 /* Reduce the size */
@@ -369,21 +403,28 @@ int hashmap_remove(map_t in, char* key){
 		}
 		curr = (curr + 1) % m->table_size;
 	}
-
-	/* Data not found */
-	return MAP_MISSING;
+	printf("Error! hashmap_remove: Missing data!\n");
+	exit(1);
 }
 
-/* Deallocate the hashmap */
-void hashmap_free(map_t in){
-	hashmap_map* m = (hashmap_map*) in;
-	free(m->data);
-	free(m);
-}
+// /* Deallocate the hashmap */
+// void hashmap_free(map_t in){
+// 	hashmap_map* m = (hashmap_map*) in;
+// 	free(m->data);
+// 	free(m);
+// }
 
-/* Return the length of the hashmap */
-int hashmap_length(map_t in){
-	hashmap_map* m = (hashmap_map *) in;
+// /* Return the length of the hashmap */
+int hashmap_length(struct hashmap_map* m){
 	if(m != NULL) return m->size;
 	else return 0;
 }
+
+// int main(){
+// 	struct hashmap_map* mymap = hashmap_new(INT, STRING);
+// 	hashmap_put(mymap, 10, "Hello World");
+//
+// 	hashmap_remove(mymap, 10);
+// 	printf("%s\n", VoidtoString((hashmap_get(mymap, 10))));
+// 	return 0;
+// }
