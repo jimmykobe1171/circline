@@ -93,6 +93,14 @@ let get_default_value_of_type = function
   | A.Float_t as t-> L.const_float (ltype_of_typ t) 0.
   | t-> L.const_null (ltype_of_typ t)
 
+(*
+================================================================
+  Casting
+================================================================
+*)
+
+let int_to_float llbuilder v = L.build_sitofp v f_t "tmp" llbuilder
+
 let void_to_int_t  = L.function_type i32_t [| L.pointer_type i8_t |]
 let void_to_int_f  = L.declare_function "VoidtoInt" void_to_int_t the_module
 let void_to_int void_ptr llbuilder =
@@ -122,6 +130,8 @@ let void_to_graph_f  = L.declare_function "VoidtoGraph" void_to_graph_t the_modu
 let void_to_graph void_ptr llbuilder =
   let actuals = [| void_ptr |] in
     L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
+
+
 
 (*
 ================================================================
@@ -170,19 +180,19 @@ let print_node_t  = L.function_type i32_t [| node_t |]
   Dict
 ================================================================
 *)
-let create_dict_t  = L.function_type dict_t [| |]
-let create_dict_f  = L.declare_function "hashmap_new" create_dict_t the_module
+let create_dict_t = L.function_type dict_t [| |]
+let create_dict_f = L.declare_function "hashmap_new" create_dict_t the_module
 let create_dict llbuilder =
     L.build_call create_dict_f [| |] "hashmap" llbuilder
 
-let put_dict_t  = L.function_type dict_t [| dict_t; str_t; str_t|]
-let put_dict_f  = L.declare_function "hashmap_put" put_dict_t the_module
+let put_dict_t = L.function_type dict_t [| dict_t; str_t; str_t|]
+let put_dict_f = L.declare_function "hashmap_put" put_dict_t the_module
 let put_dict d key val_ptr llbuilder =
     let actuals = [| d; key; val_ptr|] in
     L.build_call put_dict_f actuals "put" llbuilder
 
-let get_dict_t  = L.function_type str_t [| dict_t; str_t |]
-let get_dict_f  = L.declare_function "hashmap_get" get_dict_t the_module
+let get_dict_t = L.function_type str_t [| dict_t; str_t |]
+let get_dict_f = L.declare_function "hashmap_get" get_dict_t the_module
 let get_dict d key llbuilder =
     let actuals = [| d; key |] in
     L.build_call get_dict_f actuals "get" llbuilder
@@ -245,7 +255,6 @@ let pop_list l_ptr typ llbuilder =
   let value_void_ptr = L.build_call pop_list_f actuals "popList" llbuilder in
   void_start_to_tpy value_void_ptr llbuilder typ
 
-
 let get_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t; i32_t|]
 let get_list_f  = L.declare_function "getList" get_list_t the_module
 let get_list l_ptr index typ llbuilder =
@@ -253,10 +262,12 @@ let get_list l_ptr index typ llbuilder =
   let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in
   void_start_to_tpy value_void_ptr llbuilder typ
 
+let cast_float data typ builder = if typ == A.Float_t then int_to_float builder data else data
+
 let rec add_multi_elements_list l_ptr typ llbuilder = function
   | [] -> l_ptr
-  | h :: tl -> add_multi_elements_list (add_list (h, typ) l_ptr llbuilder) typ llbuilder tl
-
+  | h :: tl -> add_multi_elements_list (add_list ((cast_float h typ llbuilder), typ) l_ptr llbuilder) typ llbuilder tl
+  
 let print_list_t  = L.function_type i32_t [| list_t |]
 let print_list_f  = L.declare_function "printList" print_list_t the_module
 let print_list l llbuilder =
@@ -269,7 +280,7 @@ let list_call_default_main builder list_ptr params_list expr_tpy = function
   | "remove" -> (remove_list list_ptr (List.hd params_list) builder) ,expr_tpy
   | "size" -> (size_list list_ptr builder), A.Int_t
   | "pop" -> (pop_list list_ptr (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
-
+  | "push" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
 (*
 ================================================================
   Graph
@@ -344,13 +355,6 @@ let print_graph_t  = L.function_type i32_t [| graph_t |]
 let print_graph_f  = L.declare_function "printGraph" print_graph_t the_module
 let print_graph graph llbuilder =
   L.build_call print_graph_f [| graph |] "printGraph" llbuilder
-
-(*
-================================================================
-  Casting
-================================================================
-*)
-let int_to_float llbuilder v = L.build_sitofp v f_t "tmp" llbuilder
 
 (*
 ================================================================
@@ -509,7 +513,12 @@ let translate program =
             | _ -> A.List_Int_t
           in
           (* get the list typ by its first element *)
+          let rec check_float_typ = function 
+            [] -> A.Int_t
+          | hd::ls -> if (snd(expr builder hd)) == A.Float_t then A.Float_t else check_float_typ ls in
           let list_typ = snd (expr builder (List.hd ls)) in
+          let list_typ = if list_typ == A.Int_t then check_float_typ ls else list_typ in
+
           (* create a new list first *)
           let l_ptr_type = (create_list list_typ builder, from_expr_typ_to_list_typ list_typ) in
           (* then add all initial values to the list *)
