@@ -152,7 +152,7 @@ int getListSize(struct List* list){
 int32_t removeList(struct List* list, int index){
 	index =rangeHelper(list->curPos-1, index);
 	for(int i=index; i < list->curPos-1; i++){
-		*(list->arr + index) = *(list->arr + index+1);
+		*(list->arr + i) = *(list->arr + i+1);
 	}
 	list->curPos--;
 	return 0;
@@ -238,7 +238,8 @@ int32_t printList(struct List * list){
 // 	addList(a, 7);
 // 	addList(a, 9);
 // 	setList(a, 0, 3);
-// 	removeList(a, 2);
+// 	removeList(a, 0);
+	
 // 	printList(a);
 // 	//printNode(VoidtoNode(getList(a,2)));
 // }
