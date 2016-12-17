@@ -197,12 +197,64 @@ int32_t graphAddEdge(
 	return 0;
 }
 
+/*
+	Split the graph into a list of graphs, in which all graphs are connected.
+ */
+struct List* splitGraph(struct Graph * gh) {
+	struct List* l = createList(GRAPH);
+	if (gh == NULL) return l;
+
+	gh = copyGraph(gh);
+	struct Graph* gh_tmp = NULL;
+	int vn = gh->vn, en = gh->en, max_vn = gh->vn, max_en = gh->en;
+	int i, j, k;
+	struct List* queue = createList(NODE);
+	struct Node* node = NULL, *node_tmp = NULL;
+
+	while (vn > 0) {
+		gh_tmp = createGraph();
+		for (i=0; i<max_vn; i++) {
+			if (gh->nodes[i] != NULL) break;
+		}
+		addList(queue, gh->nodes[i]);
+		while (getListSize(queue) > 0) {
+			node = (struct Node*) getList(queue, 0);
+			removeList(queue, 0);
+			graphAddNode(gh_tmp, node);
+			for (k=0; k<max_vn; k++) {
+				if (gh->nodes[k] == node) {
+					gh->nodes[k] = NULL;
+					vn--;
+					break;
+				}
+			}
+			if (k == max_vn) continue;
+			for (j=0; j<max_en; j++) {
+				if (gh->edges[j].type != -9 && gh->edges[j].sour == node) {
+					node_tmp = gh->edges[j].dest;
+				} else if (gh->edges[j].type != -9 && gh->edges[j].dest == node) {
+					node_tmp = gh->edges[j].sour;
+				} else {
+					node_tmp = NULL;
+				}
+				if (node_tmp == NULL ) continue;
+				addList(queue, node_tmp);
+				graphAddEdgeHelper(gh_tmp, gh->edges[j]);
+				gh->edges[j].type = -9;
+			}
+		}
+		addList(l, gh_tmp);
+	}
+	free(gh);
+	return l;
+}
+
 struct Graph* createGraph() {
 	struct Graph* g = (struct Graph*) malloc( sizeof(struct Graph) );
 	g->vn = 0;
 	g->en = 0;
-	g->vn_len = 16;
-	g->en_len = 64;
+	g->vn_len = 32;
+	g->en_len = 128;
 	g->root = NULL;
 	g->nodes = (struct Node**) malloc( sizeof(struct Node*) * 16 );
 	g->edges = (struct Edge*) malloc( sizeof(struct Edge) * 64 );
@@ -265,6 +317,31 @@ int32_t graphSetRoot(struct Graph* g, struct Node * root) {
 	}
 	printf("[Error] Root doesn't exist in the graph!\n");
 	exit(1);
+}
+
+struct List* subGraph(struct Graph* a, struct Graph* b) {
+	if (a == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	struct Graph* gh = copyGraph(a);
+	if (b == NULL || b->en <= 0) {
+		struct List* l = createList(GRAPH);
+		addList(l, gh);
+		return l;
+	}
+	int i, j, k;
+	for (i = 0; i < b->en; i++) {
+		struct Edge e = b->edges[i];
+		for (j = 0; j < gh->en; j++) {
+			if (gh->edges[j].sour == e.sour && gh->edges[j].dest == e.dest) {
+				gh->edges[j] = gh->edges[gh->en-1];
+				gh->en --;
+				break;
+			}
+		}
+	}
+	return splitGraph(gh);
 }
 
 int32_t graphAddList(struct Graph* g, int direction, struct List * l, struct List * edges) {
@@ -350,6 +427,38 @@ int32_t graphAddNode(struct Graph* g, struct Node * node) {
 	g->nodes[i] = node;
 	g->vn++;
 	return 0;
+}
+
+struct List* graphRemoveNode(struct Graph* gh, struct Node * node) {
+	if (gh == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	int i, j;
+	// Remove Node
+	for (i=0; i<gh->vn; i++) {
+		if (gh->nodes[i] == node) {
+			for (j=i; j<gh->vn-1; j++) {
+				gh->nodes[j] = gh->nodes[j+1];
+			}
+			gh->nodes[j] = NULL;
+			gh->vn--;
+		}
+	}
+	if (gh->root == node) {
+		gh->root = gh->vn == 0 ? NULL : gh->nodes[0];
+	}
+	// Remove Edges
+	for (i=0, j=gh->en-1; i<=j;) {
+		if (gh->edges[i].sour == node || gh->edges[i].dest == node) {
+			gh->edges[i] = gh->edges[j];
+			gh->en--;
+			j--;
+		} else {
+			i++;
+		}
+	}
+	return splitGraph(gh);
 }
 
 int32_t graphNumOfNodes(struct Graph* g) {
@@ -497,45 +606,40 @@ int32_t printGraph(struct Graph* g) {
 
 // test graph
 // int main() {
-// 	// struct Node* a = createNode(1, 0, 12, 0, 0, NULL);
-// 	// struct Node* b = createNode(2, 1, 0, 1.2, 0, NULL);
-// 	// struct Node* c = createNode(3, 2, 0, 0, 0, NULL);
-// 	// struct Node* d = createNode(4, 3, 0, 0, 1, "Hello World!");
-// 	// struct Node* a = createNode(1, 3, "a");
-// 	// struct Node* b = createNode(2, 3, "b");
-// 	// struct Node* c = createNode(3, 3, "c");
-// 	// struct Node* d = createNode(4, 3, "d");
+// 	struct Node* a = createNode(1, 3, "a");
+// 	struct Node* b = createNode(2, 3, "b");
+// 	struct Node* c = createNode(3, 3, "c");
+// 	struct Node* d = createNode(4, 3, "d");
 //
-// 	// struct List* l = createList(NODE);
-// 	// addList(l, b);
-// 	// addList(l, c);
-// 	// addList(l, d);
+// 	struct Graph* g = createGraph();
+// 	graphAddNode(g, a);
+// 	graphAddNode(g, b);
+// 	graphAddNode(g, c);
+// 	graphAddNode(g, d);
+// 	graphAddEdgeP(g, a, b, STRING, "a->b");
+// 	graphAddEdgeP(g, a, c, STRING, "a->c");
+// 	graphAddEdgeP(g, a, d, STRING, "a->d");
+// 	graphAddEdgeP(g, c, d, STRING, "c->d");
 //
-// 	// struct List* e = createList(STRING);
-// 	// addList(e, "e1");
-// 	// addList(e, "e2");
-// 	// addList(e, "e3");
-// 	//
-// 	// struct Graph* g = createGraph();
-// 	// graphAddNode(g, a);
-// 	// graphAddList(g, RIGHT_LINK, l, e);
-// 	// printGraph(g);
 //
-// 	// graphAddNode(g, b);
-// 	// graphAddNode(g, c);
-// 	// // graphAddNode(g, d);
-// 	// graphAddEdge(g, a, b, 3,0,0,0,"Edge1");
-// 	// graphAddEdge(g, b, c, 2,0,0,1,NULL);
-// 	//
-// 	// struct Graph* g2 = createGraph();
-// 	// // graphAddEdge(g2, a, b, 0,11,0,0,NULL);
-// 	// graphAddEdge(g2, c, d, 1,0,3.3,0,NULL);
-// 	//
-// 	// struct Graph* g3 = mergeGraph(g, g2);
-// 	//
-// 	// printGraph(g);
-// 	// printf("****************************\n");
-// 	// printGraph(g2);
-// 	// printf("****************************\n");
-// 	// printGraph(g3);
+// 	struct Graph* g1 = createGraph();
+// 	graphAddNode(g1, a);
+// 	graphAddNode(g1, b);
+// 	graphAddNode(g1, c);
+// 	graphAddNode(g1, d);
+// 	// graphAddEdgeP(g1, a, b, STRING, "a->b");
+// 	graphAddEdgeP(g1, a, c, STRING, "a->c");
+// 	// graphAddEdgeP(g1, a, d, STRING, "a->d");
+// 	graphAddEdgeP(g1, c, d, STRING, "c->d");
+//
+//  	struct List* l = subGraph(g, g1);
+//
+//
+// 	printf("The list size is: %d\n", getListSize(l));
+// 	int i;
+// 	for (i=getListSize(l)-1; i>=0; i-- ) {
+// 		printf("===============================\n");
+// 		printGraph( getList(l, i) );
+// 		printf("===============================\n");
+// 	}
 // }

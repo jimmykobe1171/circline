@@ -426,6 +426,18 @@ let graph_get_child_nodes_f  = L.declare_function "graphGetChildNodes" graph_get
 let graph_get_child_nodes graph root llbuilder =
   L.build_call graph_get_child_nodes_f [| graph; root |] "childNodes" llbuilder
 
+(* Remove a particular node of the graph *)
+let graph_remove_node_t = L.function_type list_t [| graph_t; node_t |]
+let graph_remove_node_f = L.declare_function "graphRemoveNode" graph_remove_node_t the_module
+let graph_remove_node graph node llbuilder =
+  L.build_call graph_remove_node_f [| graph; node |] "listOfSubGraphs" llbuilder
+
+(* Remove a particular node of the graph *)
+let graph_sub_graph_t = L.function_type list_t [| graph_t; graph_t |]
+let graph_sub_graph_f = L.declare_function "subGraph" graph_sub_graph_t the_module
+let graph_sub_graph g1 g2 llbuilder =
+  L.build_call graph_sub_graph_f [| g1; g2 |] "listOfSubGraphs" llbuilder
+
 let graph_call_default_main llbuilder gh params_list obj_tpy = function
   | "root" -> graph_get_root gh llbuilder , A.Node_t
   | "size" -> graph_num_of_nodes gh llbuilder, A.Int_t
@@ -661,12 +673,14 @@ let translate program =
           | ( A.Graph_t, A.Graph_t) -> (
                 match op with
                 | A.Add -> (merge_graph e1' e2' builder, A.Graph_t)
+                | A.Sub -> (graph_sub_graph e1' e2' builder, A.List_Graph_t)
                 | _ -> raise (Failure ("Unsuported Binop Type On Graph!"))
               )
           | ( A.Graph_t, A.Node_t ) -> (
                 match  op with
                 | A.RootAs -> (graph_set_root e1' e2' builder, A.Graph_t)
                 | A.ListNodesAt -> (graph_get_child_nodes e1' e2' builder, A.List_Node_t)
+                | A.Sub -> (graph_remove_node e1' e2' builder, A.List_Graph_t)
                 | _ -> raise (Failure ("Unsuported Binop Type On Graph * Node!"))
             )
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
