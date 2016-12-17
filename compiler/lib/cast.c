@@ -31,7 +31,7 @@ struct Graph* VoidtoGraph(void* add){
 	return (struct Graph*) add;
 }
 
-void* InttoVoid(int val){
+void* InttoVoid(int32_t val){
 	int* tmp = (int*)malloc(sizeof(int));
 	*tmp = val;
 	return (void*) tmp;

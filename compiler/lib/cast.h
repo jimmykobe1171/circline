@@ -4,14 +4,14 @@
 #include <string.h>
 #include <stdbool.h>
 
-int VoidtoInt(void* add);
+int32_t VoidtoInt(void* add);
 double VoidtoFloat(void* add);
 bool VoidtoBool(void* add);
 char* VoidtoString(void* add);
 struct Node* VoidtoNode(void* add);
 struct Graph* VoidtoGraph(void* add);
 
-void* InttoVoid(int val);
+void* InttoVoid(int32_t val);
 void* FloattoVoid(double val);
 void* BooltoVoid(bool val);
 void* StringtoVoid(char* val);

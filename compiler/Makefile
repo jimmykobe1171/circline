@@ -5,6 +5,7 @@ default: circline.native
 .PHONY : circline.native
 
 circline.native :
+	clang -emit-llvm -o utils.bc -c lib/utils.c;
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis,llvm.linker,llvm.bitreader,llvm.irreader -cflags -w,+a-4 \
 		circline.native
 
@@ -34,6 +35,7 @@ parser.ml parser.mli : parser.mly
 .PHONY : clean
 clean :
 	ocamlbuild -clean
+	rm -f utils.bc
 	rm -f *.cmx *.cmi *.cmo *.cmx *.o
 	rm -f circline parser.ml parser.mli scanner.ml *.cmo *.cmi
 

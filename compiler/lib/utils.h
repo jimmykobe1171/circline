@@ -8,6 +8,8 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+int32_t printBool(bool a);
+
 /************************************
 	Type Declaration
 ************************************/
@@ -63,6 +65,7 @@ struct Graph {
 
 struct Node* createNode(int32_t id, int32_t type, ...);
 
+void* nodeGetValue(struct Node* node, int32_t type);
 int32_t printNode(struct Node * node);
 
 /************************************

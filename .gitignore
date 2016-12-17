@@ -50,3 +50,5 @@ tests/code_gen/test_node_basic.in
 compiler/test_codegen_tmp.in
 
 compiler/test_codegen_tmp.in
+
+compiler/utils.bc

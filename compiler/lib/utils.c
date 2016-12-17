@@ -9,6 +9,10 @@
 #include "list.c"
 #include "cast.c"
 
+int32_t printBool(bool a) {
+	printf("%s\n", a ? "true" : "false");
+}
+
 /************************************
 	Node Methods
 ************************************/
@@ -34,6 +38,33 @@ struct Node* createNode(int32_t id, int32_t type, ...) {
 	}
   va_end(ap);
   return new;
+}
+
+void* nodeGetValue(struct Node* node, int32_t type) {
+		if (node == NULL) {
+			printf("[Error] Node doesn't exist!\n");
+			exit(1);
+		}
+		if (node->type != type) {
+			printf("[Error] Node Value Type Doesn't Consistent!\n");
+			exit(1);
+		}
+		void* res;
+		switch (type) {
+			case INT:
+				res = InttoVoid(node->a); break;
+			case FLOAT:
+				res = FloattoVoid(node->b); break;
+			case BOOL:
+				res = BooltoVoid(node->c); break;
+			case STRING:
+				res = StringtoVoid(node->d); break;
+			default:
+				printf("[Error] Node Value Type Error!\n");
+				exit(1);
+				break;
+		}
+		return res;
 }
 
 int32_t printNode(struct Node * node) {

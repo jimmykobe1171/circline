@@ -29,6 +29,7 @@ and i8_t   = L.i8_type   context
 and i1_t   = L.i1_type   context
 and str_t  = L.pointer_type (L.i8_type context)
 and void_t = L.void_type context
+and void_ptr_t = L.pointer_type (L.i8_type context)
 
 let node_t = L.pointer_type (match L.type_by_name llm "struct.Node" with
     None -> raise (Failure "struct.Node doesn't defined!")
@@ -73,7 +74,7 @@ let type_of_list_type = function
   | A.List_String_t -> A.String_t
   | A.List_Node_t -> A.Node_t
   | A.List_Graph_t -> A.Graph_t
-  | A.List_Bool_t -> A.Graph_t
+  | A.List_Bool_t -> A.Bool_t
   | _ -> raise (Failure ("Type Not Found for type_of_list_type!"))
 
 let type_of_dict_type = function
@@ -128,6 +129,12 @@ let void_to_float void_ptr llbuilder =
   let actuals = [| void_ptr |] in
     L.build_call void_to_float_f actuals "VoidtoFloat" llbuilder
 
+let void_to_bool_t  = L.function_type i1_t [| L.pointer_type i8_t |]
+let void_to_bool_f  = L.declare_function "VoidtoBool" void_to_bool_t the_module
+let void_to_bool void_ptr llbuilder =
+  let actuals = [| void_ptr |] in
+    L.build_call void_to_bool_f actuals "VoidtoBool" llbuilder
+
 let void_to_string_t  = L.function_type str_t [| L.pointer_type i8_t |]
 let void_to_string_f  = L.declare_function "VoidtoString" void_to_string_t the_module
 let void_to_string void_ptr llbuilder =
@@ -146,12 +153,13 @@ let void_to_graph void_ptr llbuilder =
   let actuals = [| void_ptr |] in
     L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
 
-let void_start_to_tpy value_void_ptr llbuilder = function 
+let void_start_to_tpy value_void_ptr llbuilder = function
     A.Int_t -> void_to_int value_void_ptr llbuilder
   | A.Float_t -> void_to_float value_void_ptr llbuilder
+  | A.Bool_t -> void_to_bool value_void_ptr llbuilder
   | A.String_t -> void_to_string value_void_ptr llbuilder
   | A.Node_t -> void_to_node value_void_ptr llbuilder
-  | A.Graph_t -> void_to_graph value_void_ptr llbuilder  
+  | A.Graph_t -> void_to_graph value_void_ptr llbuilder
 
 (*
 ================================================================
@@ -162,6 +170,11 @@ let printf_t = L.var_arg_function_type i32_t [| str_t |]
 let printf_func = L.declare_function "printf" printf_t the_module
 let codegen_print llbuilder el =
   L.build_call printf_func (Array.of_list el) "printf" llbuilder
+
+let print_bool_t = L.function_type i32_t [| i1_t |]
+let print_bool_f = L.declare_function "printBool" print_bool_t the_module
+let print_bool e llbuilder =
+  L.build_call print_bool_f [| e |] "print_bool" llbuilder
 
 let codegen_string_lit s llbuilder =
   L.build_global_stringptr s "str_tmp" llbuilder
@@ -176,6 +189,19 @@ let create_node_f  = L.declare_function "createNode" create_node_t the_module
 let create_node (id, typ, nval) llbuilder =
   let actuals = [| id; lconst_of_typ typ; nval |] in
     L.build_call create_node_f actuals "node" llbuilder
+
+let node_get_value_t = L.function_type void_ptr_t [| node_t; i32_t |]
+let node_get_value_f = L.declare_function "nodeGetValue" node_get_value_t the_module
+let node_get_value node typ llbuilder =
+  let actuals = [| node; lconst_of_typ typ |] in
+  let ret = L.build_call node_get_value_f actuals "nodeValue" llbuilder in
+  (   match typ with
+    | A.Int_t -> void_to_int ret llbuilder
+    | A.Float_t -> void_to_float ret llbuilder
+    | A.Bool_t -> void_to_bool ret llbuilder
+    | A.String_t -> void_to_string ret llbuilder
+    | _ -> raise (Failure("[Error] Unsupported node value type!"))
+  )
 
 let print_node_t  = L.function_type i32_t [| node_t |]
   let print_node_f  = L.declare_function "printNode" print_node_t the_module
@@ -203,7 +229,7 @@ let get_dict_t = L.var_arg_function_type (L.pointer_type i8_t) [| dict_t |]
 let get_dict_f = L.declare_function "hashmap_get" get_dict_t the_module
 let get_dict dict_ptr key llbuilder v_typ =
     let actuals = [| dict_ptr; key |] in
-    let value_void_ptr = L.build_call get_dict_f actuals "hashmap_get" llbuilder in 
+    let value_void_ptr = L.build_call get_dict_f actuals "hashmap_get" llbuilder in
     void_start_to_tpy value_void_ptr llbuilder v_typ
 
 let remove_dict_t = L.var_arg_function_type i32_t [| dict_t |]
@@ -251,48 +277,6 @@ let dict_call_default_main builder dict_ptr params_list v_typ = function
   | "size" -> (size_dict dict_ptr builder), A.Int_t
   | "keys" -> (keys_dict dict_ptr builder), (ast_list_typ_from_key_typ (key_type_dict dict_ptr builder))
   | _ -> raise (Failure ("Unsupported Default Call for Dict!"))
-(* type_of_dict_type expr_tpy *)
-(*
-================================================================
-  Cast
-================================================================
-*)
-
-let void_to_int_t  = L.function_type i32_t [| L.pointer_type i8_t |]
-let void_to_int_f  = L.declare_function "VoidtoInt" void_to_int_t the_module
-let void_to_int void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_int_f actuals "VoidtoInt" llbuilder
-
-let void_to_float_t  = L.function_type f_t [| L.pointer_type i8_t |]
-let void_to_float_f  = L.declare_function "VoidtoFloat" void_to_float_t the_module
-let void_to_float void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_float_f actuals "VoidtoFloat" llbuilder
-
-let void_to_bool_t  = L.function_type i1_t [| L.pointer_type i1_t |]
-let void_to_bool_f  = L.declare_function "VoidtoBool" void_to_bool_t the_module
-let void_to_bool void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_bool_f actuals "VoidtoBool" llbuilder
-
-let void_to_string_t  = L.function_type str_t [| L.pointer_type i8_t |]
-let void_to_string_f  = L.declare_function "VoidtoString" void_to_string_t the_module
-let void_to_string void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_string_f actuals "VoidtoString" llbuilder
-
-let void_to_node_t  = L.function_type node_t [| L.pointer_type i8_t |]
-let void_to_node_f  = L.declare_function "VoidtoNode" void_to_node_t the_module
-let void_to_node void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_node_f actuals "VoidtoNode" llbuilder
-
-let void_to_graph_t  = L.function_type graph_t [| L.pointer_type i8_t |]
-let void_to_graph_f  = L.declare_function "VoidtoGraph" void_to_graph_t the_module
-let void_to_graph void_ptr llbuilder =
-  let actuals = [| void_ptr |] in
-    L.build_call void_to_graph_f actuals "VoidtoGraph" llbuilder
 
 (*
 ================================================================
@@ -332,13 +316,6 @@ let size_list_f  = L.declare_function "getListSize" size_list_t the_module
 let size_list l_ptr llbuilder =
   let actuals = [| l_ptr |] in
     L.build_call size_list_f actuals "getListSize" llbuilder
-
-let void_start_to_tpy value_void_ptr llbuilder = function
-    A.Int_t -> void_to_int value_void_ptr llbuilder
-  | A.Float_t -> void_to_float value_void_ptr llbuilder
-  | A.String_t -> void_to_string value_void_ptr llbuilder
-  | A.Node_t -> void_to_node value_void_ptr llbuilder
-  | A.Graph_t -> void_to_graph value_void_ptr llbuilder
 
 let pop_list_t  = L.var_arg_function_type (L.pointer_type i8_t) [| list_t |]
 let pop_list_f  = L.declare_function "popList" pop_list_t the_module
@@ -681,9 +658,9 @@ let translate program =
           in
           let first_expr_kv = List.hd expr_list in
           (* get type of key and value *)
-          let first_typ = lconst_of_typ (snd (expr builder (fst first_expr_kv))) in 
-          let second_typ = lconst_of_typ (snd (expr builder (snd first_expr_kv))) in 
-          let return_typ = from_type_to_dict_typ (snd (expr builder (snd first_expr_kv))) in 
+          let first_typ = lconst_of_typ (snd (expr builder (fst first_expr_kv))) in
+          let second_typ = lconst_of_typ (snd (expr builder (snd first_expr_kv))) in
+          let return_typ = from_type_to_dict_typ (snd (expr builder (snd first_expr_kv))) in
           let dict_ptr = create_dict first_typ second_typ builder in
           ignore(put_multi_kvs_dict dict_ptr builder
                 (List.map (fun (key, v) -> fst(expr builder key), fst(expr builder v)) expr_list), return_typ);
@@ -769,8 +746,8 @@ let translate program =
           let print_expr e =
             let (eval, etyp) = expr builder e in (
               match etyp with
-              | A.Int_t
-              | A.Bool_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); eval])
+              | A.Int_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); eval])
+              | A.Bool_t -> ignore(print_bool eval builder)
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); eval])
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
               | A.Node_t -> ignore(print_node eval builder)
@@ -787,6 +764,35 @@ let translate program =
           (codegen_print builder (List.map
             (fun e -> (let (eval, _) = expr builder e in eval))
             el), A.Void_t)
+      | A.Call ("int", el) ->
+            let (eval, etyp) = expr builder (List.hd el) in
+            ((  match etyp with
+              | A.Int_t -> eval
+              | A.Node_t -> node_get_value eval A.Int_t builder
+              | _ -> raise (Failure("[Error] Can't convert to int!"))
+              ), A.Int_t)
+      | A.Call ("float", el) ->
+            let (eval, etyp) = expr builder (List.hd el) in
+            ((  match etyp with
+              | A.Int_t -> int_to_float builder eval
+              | A.Float_t -> eval
+              | A.Node_t -> node_get_value eval A.Float_t builder
+              | _ -> raise (Failure("[Error] Can't convert to float!"))
+              ), A.Float_t)
+      | A.Call ("bool", el) ->
+            let (eval, etyp) = expr builder (List.hd el) in
+            ((  match etyp with
+              | A.Bool_t -> eval
+              | A.Node_t -> node_get_value eval A.Bool_t builder
+              | _ -> raise (Failure("[Error] Can't convert to bool!"))
+              ), A.Bool_t)
+      | A.Call ("string", el) ->
+            let (eval, etyp) = expr builder (List.hd el) in
+            ((  match etyp with
+              | A.String_t -> eval
+              | A.Node_t -> node_get_value eval A.String_t builder
+              | _ -> raise (Failure("[Error] Can't convert to string!"))
+              ), A.String_t)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
       	 let actuals = List.rev (List.map
@@ -804,7 +810,7 @@ let translate program =
           | A.List_Int_t | A.List_Float_t | A.List_String_t | A.List_Bool_t
           | A.List_Node_t | A.List_Graph_t ->
               list_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
-          | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t -> 
+          | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t ->
               dict_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
           | A.Graph_t ->
               graph_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name

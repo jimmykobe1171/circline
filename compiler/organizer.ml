@@ -83,6 +83,7 @@ let rec convert_expr m = function
         | (A.ListP(_), _) -> C.ListP([convert_expr m d])
         | _ -> convert_expr m d
       ))
+|   A.EdgeAt(a,b,c) -> C.EdgeAt(convert_expr m a, convert_expr m b, convert_expr m c) 
 |   A.Binop(a,b,c) -> C.Binop(convert_expr m a, convert_binop b, convert_expr m c)
 |   A.Unop(a,b) -> C.Unop(convert_unop a, convert_expr m b)
 |   A.Id(a) -> C.Id(a)

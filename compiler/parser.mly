@@ -135,10 +135,15 @@ expr:
 | NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { Node($3) }
 | ID 					                    { Id($1) }
 | ID ASSIGN expr 					        { Assign($1, $3) }
+| expr AT LEFTROUNDBRACKET expr SEQUENCE expr RIGHTROUNDBRACKET { EdgeAt($1, $4, $6) }
 | LEFTBRACKET list RIGHTBRACKET   			{ ListP(List.rev $2) }
 | LEFTCURLYBRACKET dict RIGHTCURLYBRACKET 	{ DictP(List.rev $2) }
 | LEFTROUNDBRACKET expr RIGHTROUNDBRACKET 	{ $2 }
 | ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call($1, List.rev $3) }
+| INT LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call("int", List.rev $3) }
+| FLOAT LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call("float", List.rev $3) }
+| BOOL LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call("bool", List.rev $3) }
+| STRING LEFTROUNDBRACKET list RIGHTROUNDBRACKET              { Call("string", List.rev $3) }
 | expr DOT ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET   {CallDefault($1, $3, List.rev $5)}
 
 /* Lists */
