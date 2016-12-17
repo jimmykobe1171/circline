@@ -99,6 +99,7 @@ var_type:
 | LIST SMALLER INT GREATER {List_Int_t}
 | LIST SMALLER FLOAT GREATER {List_Float_t}
 | LIST SMALLER STRING GREATER {List_String_t}
+| LIST SMALLER BOOL GREATER {List_Bool_t}
 | LIST SMALLER NODE GREATER {List_Node_t}
 | LIST SMALLER GRAPH GREATER {List_Graph_t}
 
@@ -157,7 +158,7 @@ list_graph_literal:
 }
 
 dict_key_value:
-| STRING_LITERAL COLUMN expr { (String_Lit($1), $3) }
+| expr COLUMN expr { ($1, $3) }
 
 /* dict */
 dict:

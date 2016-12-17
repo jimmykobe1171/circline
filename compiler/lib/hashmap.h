@@ -45,6 +45,8 @@ extern struct hashmap_map* hashmap_new(int32_t keytyp,int32_t valuetyp);
  */
 extern int hashmap_iterate(struct hashmap_map* m, Func f, void* item);
 
+
+extern struct List* hashmap_keys(struct hashmap_map* m);
 /*
  * Add an element to the hashmap. Return MAP_OK or MAP_OMEM.
  */
@@ -75,5 +77,7 @@ extern void hashmap_free(struct hashmap_map* m);
  * Get the current size of a hashmap
  */
 extern int hashmap_length(struct hashmap_map* m);
+extern int32_t hashmap_keytype(struct hashmap_map* m);
+extern int32_t hashmap_valuetype(struct hashmap_map* m);
 
 #endif //__HASHMAP_H__
