@@ -7,6 +7,8 @@ else
 fi
 clang utils.bc a.ll -o $1.exe
 echo please run with $1.exe
+clear;
+./$1.exe
 # rm a.ll
 # rm run
 

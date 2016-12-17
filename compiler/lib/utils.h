@@ -87,10 +87,12 @@ struct Edge createEdge(
 struct Graph* createGraph();
 struct Graph* copyGraph(struct Graph* a);
 struct Graph* mergeGraph(struct Graph* a, struct Graph* b);
+struct List* subGraph(struct Graph* a, struct Graph* b);
 struct Node* graphGetRoot(struct Graph* g);
 int32_t graphSetRoot(struct Graph* g, struct Node * root);
 int32_t graphAddList(struct Graph* g, int direction, struct List * l, struct List * edges);
 int32_t graphAddNode(struct Graph* g, struct Node * node);
+struct List* graphRemoveNode(struct Graph* g, struct Node * node);
 int32_t graphAddEdgeP( struct Graph* g, struct Node* sour, struct Node* dest, int32_t type, ...);
 int32_t graphAddEdge(
 	struct Graph* g,

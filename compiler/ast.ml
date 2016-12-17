@@ -44,6 +44,7 @@ type var_type =
 | List_Int_t
 | List_Float_t
 | List_String_t
+| List_Bool_t
 | List_Node_t
 | List_Graph_t
 | Void_t
