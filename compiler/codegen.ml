@@ -218,6 +218,27 @@ let size_dict dict_ptr llbuilder =
     let actuals = [| dict_ptr |] in
     L.build_call size_dict_f actuals "hashmap_length" llbuilder
 
+let keys_dict_t = L.var_arg_function_type list_t [| dict_t |]
+let keys_dict_f = L.declare_function "hashmap_keys" keys_dict_t the_module
+let keys_dict dict_ptr llbuilder =
+    let actuals = [| dict_ptr |] in
+    L.build_call keys_dict_f actuals "hashmap_keys" llbuilder
+
+let key_type_dict_t = L.var_arg_function_type i32_t [| dict_t |]
+let key_type_dict_f = L.declare_function "hashmap_keytype" key_type_dict_t the_module
+let key_type_dict dict_ptr llbuilder =
+    let actuals = [| dict_ptr |] in
+    L.build_call key_type_dict_f actuals "hashmap_keytype" llbuilder
+
+let l_const_zero = L.const_int i32_t 0
+and l_const_three = L.const_int i32_t 3
+and l_const_four = L.const_int i32_t 4
+
+let ast_list_typ_from_key_typ = function
+    l_const_zero -> A.List_Int_t
+  | l_const_three -> A.List_String_t
+  | l_const_four -> A.List_Node_t
+
 let rec put_multi_kvs_dict dict_ptr llbuilder = function
   | [] -> dict_ptr
   | hd :: tl -> ignore(put_dict dict_ptr (fst hd) (snd hd) llbuilder); put_multi_kvs_dict dict_ptr llbuilder tl
@@ -228,6 +249,7 @@ let dict_call_default_main builder dict_ptr params_list v_typ = function
   | "put" -> (put_dict dict_ptr (List.hd params_list) (List.nth params_list 1) builder), v_typ
   | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder (type_of_dict_type v_typ)), v_typ
   | "size" -> (size_dict dict_ptr builder), A.Int_t
+  | "keys" -> (keys_dict dict_ptr builder), (ast_list_typ_from_key_typ (key_type_dict dict_ptr builder))
   | _ -> raise (Failure ("Unsupported Default Call for Dict!"))
 (* type_of_dict_type expr_tpy *)
 (*
@@ -333,7 +355,6 @@ let get_list l_ptr index typ llbuilder =
   void_start_to_tpy value_void_ptr llbuilder typ
 
 let cast_float data typ builder = if typ == A.Float_t then int_to_float builder data else data
-
 
 let rec add_multi_elements_list l_ptr typ llbuilder = function
   | [] -> l_ptr
