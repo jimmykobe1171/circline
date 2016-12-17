@@ -1,5 +1,6 @@
 open Cast
 open Printf
+open Str
 
 
 module StringMap = Map.Make(String)
@@ -122,16 +123,20 @@ let inconsistent_dict_element_type_error typ1 typ2 =
     let msg = sprintf "dict can not contain objects of different types: %s and %s" typ1 typ2 in
     raise (SemanticError msg)
 
-let unmatched_func_arg_len name =
+let unmatched_func_arg_len_error name =
     let msg = sprintf "args length not match in function call: %s" name in
     raise (SemanticError msg)
 
-let incompatible_func_arg_type typ1 typ2 =
+let incompatible_func_arg_type_error typ1 typ2 =
     let msg = sprintf "incompatible argument type %s, but %s is expected" typ1 typ2 in
     raise (SemanticError msg)
 
-let invalid_expr_after_return ss =
+let invalid_expr_after_return_error _ =
     let msg = sprintf "nothing may follow a return" in
+    raise (SemanticError msg)
+
+let redefine_print_func_error _ =
+    let msg = sprintf "function print may not be defined" in
     raise (SemanticError msg)
 
 
@@ -277,14 +282,14 @@ let check_function func_map func =
               (* check function call such as the args length, args type *)
               let check_funciton_call func args =
                   let check_args_length l_arg r_arg = if (List.length l_arg) = (List.length r_arg)
-                      then () else (unmatched_func_arg_len func.name)
+                      then () else (unmatched_func_arg_len_error func.name)
                   in
                   check_args_length func.args args;
                   (* l_arg is a list of Formal(typ, name), r_arg is a list of expr *)
                   let check_args_type l_arg r_arg =
                       List.iter2 
                           (fun (Formal(t, n)) r -> let r_typ = expr r in if t = r_typ then () else
-                            incompatible_func_arg_type (string_of_typ r_typ) (string_of_typ t)
+                            incompatible_func_arg_type_error (string_of_typ r_typ) (string_of_typ t)
                           )
                           l_arg r_arg
                   in
@@ -306,7 +311,7 @@ let check_function func_map func =
     and
     (* check statement list *)
     stmt_list = function
-            Return _ :: ss when ss <> [] -> invalid_expr_after_return ss
+            Return _ :: ss when ss <> [] -> invalid_expr_after_return_error ss
             | s::ss -> stmt s ; stmt_list ss
             | [] -> ()
 
@@ -315,8 +320,15 @@ let check_function func_map func =
 
 (* program here is a list of functions *)
 let check program =
-    if List.mem "print" (List.map (fun f -> f.name) program)
-        then raise (Failure ("function print may not be defined")) else ();
+    let end_with s1 s2 =
+        let len1 = String.length s1 and len2 = String.length s2 in
+        if len1 < len2 then false
+        else 
+            let last = String.sub s1 (len1-len2) len2 in 
+            if last = s2 then true else false
+    in
+    if List.mem true (List.map (fun f -> end_with f.name "print") program)
+        then redefine_print_func_error "_" else ();
     (* TODO: check duplicate function *)
 
     (* Function declaration for a named function *)
