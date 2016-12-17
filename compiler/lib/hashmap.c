@@ -448,6 +448,13 @@ int hashmap_length(struct hashmap_map* m){
 	else return 0;
 }
 
+int32_t hashmap_keytype(struct hashmap_map* m){
+	return m->keytype;
+}
+
+int32_t hashmap_valuetype(struct hashmap_map* m){
+	return m->valuetype;
+}
 // int hashmap_print(void* a, void* data1, void* data2){
 // 	printf("data1: %d\n", *((int*) data1));
 // 	printf("data2: %s\n", data2);

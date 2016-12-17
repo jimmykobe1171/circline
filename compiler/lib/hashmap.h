@@ -77,5 +77,7 @@ extern void hashmap_free(struct hashmap_map* m);
  * Get the current size of a hashmap
  */
 extern int hashmap_length(struct hashmap_map* m);
+extern int32_t hashmap_keytype(struct hashmap_map* m);
+extern int32_t hashmap_valuetype(struct hashmap_map* m);
 
 #endif //__HASHMAP_H__
