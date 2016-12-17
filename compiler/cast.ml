@@ -35,6 +35,7 @@ type var_type =
 | String_t                (* string *)
 | Bool_t
 | Node_t
+| Edge_t
 | Graph_t
 | Dict_Int_t
 | Dict_Float_t

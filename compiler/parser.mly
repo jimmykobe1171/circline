@@ -130,6 +130,7 @@ for_expr:
 
 expr:
   literals {$1}
+| NULL                            { Null }
 | arith_ops                       { $1 }
 | graph_ops                       { $1 }
 | NODE LEFTROUNDBRACKET expr RIGHTROUNDBRACKET { Node($3) }

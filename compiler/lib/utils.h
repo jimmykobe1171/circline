@@ -22,6 +22,7 @@ int32_t printBool(bool a);
 #define GRAPH 5
 #define LIST 6
 #define DICT 7
+#define EDGE 8
 
 #define RIGHT_LINK 0
 #define LEFT_LINK 1
@@ -82,6 +83,8 @@ struct Edge createEdge(
 	char* d
 );
 
+int32_t printEdge(struct Edge * edge);
+void* edgeGetValue(struct Edge* edge, int32_t type);
 
 /************************************
 	Graph Methods
@@ -107,6 +110,8 @@ int32_t graphAddEdge(
 	bool c,
 	char* d
 );
+bool graphEdgeExist(struct Graph* g, struct Node* sour, struct Node* dest);
+struct Edge* graphGetEdge(struct Graph* g, struct Node* sour, struct Node* dest);
 int32_t graphNumOfNodes(struct Graph* g);
 int32_t graphNumOfEdges(struct Graph* g);
 struct List* graphGetChildNodes(struct Graph* g, struct Node* rt);

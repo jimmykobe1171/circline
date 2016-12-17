@@ -68,7 +68,10 @@ void* nodeGetValue(struct Node* node, int32_t type) {
 }
 
 int32_t printNode(struct Node * node) {
-	if (node == NULL) exit(1);
+	if (node == NULL) {
+		printf("null\n");
+		return 0;
+	}
 	switch (node->type) {
 		case 0:
 			printf("node%3d: %d\n", node->id, node->a);
@@ -104,6 +107,33 @@ struct Edge createEdge(
 ) {
 	struct Edge e = {sour, dest, type, a, b, c, d};
 	return e;
+}
+
+void* edgeGetValue(struct Edge* edge, int32_t type) {
+	if (edge == NULL) {
+		printf("[Error] Edge doesn't exist!\n");
+		exit(1);
+	}
+	if (edge->type != type) {
+		printf("[Error] Edge Value Type Doesn't Consistent!\n");
+		exit(1);
+	}
+	void* res;
+	switch (type) {
+		case INT:
+			res = InttoVoid(edge->a); break;
+		case FLOAT:
+			res = FloattoVoid(edge->b); break;
+		case BOOL:
+			res = BooltoVoid(edge->c); break;
+		case STRING:
+			res = StringtoVoid(edge->d); break;
+		default:
+			printf("[Error] Edge Value Type Error!\n");
+			exit(1);
+			break;
+	}
+	return res;
 }
 
 int32_t printEdge(struct Edge * edge) {
@@ -226,6 +256,33 @@ int32_t graphAddEdge(
 	g->edges[i] = e;
 	g->en++;
 	return 0;
+}
+
+bool graphEdgeExist(struct Graph* g, struct Node* sour, struct Node* dest) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	int i;
+	for (i=0; i<g->en; i++) {
+		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
+			return true;
+		}
+	}
+	return false;
+}
+struct Edge* graphGetEdge(struct Graph* g, struct Node* sour, struct Node* dest) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	int i;
+	for (i=0; i<g->en; i++) {
+		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
+			return &g->edges[i];
+		}
+	}
+	return NULL;
 }
 
 /*
@@ -525,7 +582,10 @@ struct List* graphGetChildNodes(struct Graph* g, struct Node* rt) {
 }
 
 int32_t printGraph(struct Graph* g) {
-	if (g == NULL) exit(1);
+	if (g == NULL) {
+		printf("null\n");
+		return 0;
+	}
 	printf("#Nodes: %d  ", g->vn);
 	if (g->root != NULL) {
 		printf("Root Node: %d\n", g->root->id);

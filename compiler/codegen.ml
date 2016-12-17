@@ -35,6 +35,10 @@ let node_t = L.pointer_type (match L.type_by_name llm "struct.Node" with
     None -> raise (Failure "struct.Node doesn't defined!")
   | Some x -> x)
 
+let edge_t = L.pointer_type (match L.type_by_name llm "struct.Edge" with
+    None -> raise (Failure "struct.Edge doesn't defined!")
+  | Some x -> x)
+
 let graph_t = L.pointer_type (match L.type_by_name llm "struct.Graph" with
     None -> raise (Failure "struct.Graph doesn't defined!")
   | Some x -> x)
@@ -54,6 +58,7 @@ let ltype_of_typ = function
   | A.String_t -> str_t
   | A.Void_t -> void_t
   | A.Node_t -> node_t
+  | A.Edge_t -> edge_t
   | A.List_Int_t -> list_t
   | A.List_Float_t -> list_t
   | A.List_String_t -> list_t
@@ -92,6 +97,7 @@ let lconst_of_typ = function
   | A.String_t -> L.const_int i32_t 3
   | A.Node_t -> L.const_int i32_t 4
   | A.Graph_t -> L.const_int i32_t 5
+  | A.Edge_t -> L.const_int i32_t 8
   (* | A.List_Int_t -> list_t
   | A.Dict_String_t -> dict_t *)
   | _ -> raise (Failure ("Type Not Found for lconst_of_typ!"))
@@ -100,8 +106,12 @@ let int_zero = L.const_int i32_t 0
 and float_zero = L.const_float f_t 0.
 and bool_false = L.const_int i1_t 0
 and bool_true = L.const_int i1_t 1
+and const_null = L.const_int i32_t 0
 and str_null = L.const_null str_t
+and node_null = L.const_null node_t
+and graph_null = L.const_null graph_t
 and list_null = L.const_null list_t
+and dict_null = L.const_null dict_t
 
 let get_default_value_of_type = function
   | A.Int_t as t -> L.const_int (ltype_of_typ t) 0
@@ -181,7 +191,7 @@ let codegen_string_lit s llbuilder =
 
 (*
 ================================================================
-  Node
+  Node & Edge
 ================================================================
 *)
 let create_node_t  = L.var_arg_function_type node_t [| i32_t; i32_t |]
@@ -201,6 +211,19 @@ let node_get_value node typ llbuilder =
     | A.Bool_t -> void_to_bool ret llbuilder
     | A.String_t -> void_to_string ret llbuilder
     | _ -> raise (Failure("[Error] Unsupported node value type!"))
+  )
+
+let edge_get_value_t = L.function_type void_ptr_t [| edge_t; i32_t |]
+let edge_get_value_f = L.declare_function "edgeGetValue" edge_get_value_t the_module
+let edge_get_value edge typ llbuilder =
+  let actuals = [| edge; lconst_of_typ typ |] in
+  let ret = L.build_call edge_get_value_f actuals "edgeValue" llbuilder in
+  (   match typ with
+    | A.Int_t -> void_to_int ret llbuilder
+    | A.Float_t -> void_to_float ret llbuilder
+    | A.Bool_t -> void_to_bool ret llbuilder
+    | A.String_t -> void_to_string ret llbuilder
+    | _ -> raise (Failure("[Error] Unsupported edge value type!"))
   )
 
 let print_node_t  = L.function_type i32_t [| node_t |]
@@ -452,6 +475,16 @@ let graph_add_edge graph (sour, dest) op (typ, vals) llbuilder =
       )
   )
 
+let graph_edge_exist_t = L.function_type i1_t [| graph_t; node_t; node_t |]
+let graph_edge_exist_f = L.declare_function "graphEdgeExist" graph_edge_exist_t the_module
+let graph_edge_exist graph sour dest llbuilder =
+  L.build_call graph_edge_exist_f [| graph; sour; dest |] "boolValue" llbuilder
+
+let graph_get_edge_t = L.function_type edge_t [| graph_t; node_t; node_t |]
+let graph_get_edge_f = L.declare_function "graphGetEdge" graph_get_edge_t the_module
+let graph_get_edge graph sour dest llbuilder =
+  L.build_call graph_get_edge_f [| graph; sour; dest |] "edgeValue" llbuilder
+
 (* Print out the graph *)
 let print_graph_t  = L.function_type i32_t [| graph_t |]
 let print_graph_f  = L.declare_function "printGraph" print_graph_t the_module
@@ -621,13 +654,23 @@ let translate program =
       | A.Bool_lit b -> (L.const_int i1_t (if b then 1 else 0), A.Bool_t)
       | A.String_Lit s -> (codegen_string_lit s builder, A.String_t)
       | A.Noexpr -> (L.const_int i32_t 0, A.Void_t)
-      | A.Null -> (L.const_int i32_t 0, A.Null_t)
+      | A.Null -> (const_null, A.Null_t)
       | A.Id s ->
           let (var, typ) = lookup s in
           (L.build_load var s builder, typ)
       | A.Node(id, e) ->
           let (nval, typ) = expr builder e in
           (create_node (L.const_int i32_t id, typ, nval) builder, A.Node_t)
+      | A.EdgeAt(e0, e1, e2) ->
+          let (gh_val, gh_typ) = expr builder e0 in
+          let (n1_val, n1_typ) = expr builder e1 in
+          let (n2_val, n2_typ) = expr builder e2 in (
+                match (gh_typ, n1_typ, n2_typ) with
+              | (A.Graph_t, A.Node_t, A.Node_t) -> (
+                  (graph_get_edge gh_val n1_val n2_val builder, A.Edge_t)
+                )
+              | _ -> raise (Failure("[Error] Unsupported EdgeAt() Expr!"))
+          )
       | A.ListP(ls) ->
           let from_expr_typ_to_list_typ = function
               A.Int_t -> A.List_Int_t
@@ -722,6 +765,16 @@ let translate program =
                 | A.Sub -> (graph_remove_node e1' e2' builder, A.List_Graph_t)
                 | _ -> raise (Failure ("Unsuported Binop Type On Graph * Node!"))
             )
+          | ( _, A.Null_t ) -> (
+                  match op with
+                | A.Equal -> (L.build_is_null e1' "isNull" builder, A.Bool_t)
+                | _ -> raise (Failure("[Error] Unsupported Null Type Operation!"))
+            )
+          | ( A.Null_t, _ ) -> (
+                  match op with
+                | A.Equal -> (L.build_is_null e2' "isNull" builder, A.Bool_t)
+                | _ -> raise (Failure("[Error] Unsupported Null Type Operation!"))
+            )
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
           | ( A.Int_t, A.Float_t) ->
               handle_binop (int_to_float builder e1') op e2' A.Float_t builder
@@ -739,6 +792,8 @@ let translate program =
           let (var, typ) = lookup s in
           (( match (etyp, typ) with
             | (t1, t2) when t1 = t2 -> ignore (L.build_store e' var builder); e'
+            | (A.Null_t, A.Node_t) -> ignore (L.build_store node_null var builder); node_null
+            | (A.Null_t, A.Graph_t) -> ignore (L.build_store graph_null var builder); graph_null
             | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
             | _ -> raise (Failure("Assign Type inconsist"))
           ), typ)
@@ -747,6 +802,7 @@ let translate program =
             let (eval, etyp) = expr builder e in (
               match etyp with
               | A.Int_t -> ignore(codegen_print builder [(codegen_string_lit "%d\n" builder); eval])
+              | A.Null_t -> ignore(codegen_print builder [(codegen_string_lit "null\n" builder)])
               | A.Bool_t -> ignore(print_bool eval builder)
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); eval])
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
@@ -769,6 +825,7 @@ let translate program =
             ((  match etyp with
               | A.Int_t -> eval
               | A.Node_t -> node_get_value eval A.Int_t builder
+              | A.Edge_t -> edge_get_value eval A.Int_t builder
               | _ -> raise (Failure("[Error] Can't convert to int!"))
               ), A.Int_t)
       | A.Call ("float", el) ->
@@ -777,6 +834,7 @@ let translate program =
               | A.Int_t -> int_to_float builder eval
               | A.Float_t -> eval
               | A.Node_t -> node_get_value eval A.Float_t builder
+              | A.Edge_t -> edge_get_value eval A.Float_t builder
               | _ -> raise (Failure("[Error] Can't convert to float!"))
               ), A.Float_t)
       | A.Call ("bool", el) ->
@@ -784,6 +842,7 @@ let translate program =
             ((  match etyp with
               | A.Bool_t -> eval
               | A.Node_t -> node_get_value eval A.Bool_t builder
+              | A.Edge_t -> edge_get_value eval A.Bool_t builder
               | _ -> raise (Failure("[Error] Can't convert to bool!"))
               ), A.Bool_t)
       | A.Call ("string", el) ->
@@ -791,6 +850,7 @@ let translate program =
             ((  match etyp with
               | A.String_t -> eval
               | A.Node_t -> node_get_value eval A.String_t builder
+              | A.Edge_t -> edge_get_value eval A.String_t builder
               | _ -> raise (Failure("[Error] Can't convert to string!"))
               ), A.String_t)
       | A.Call (f, act) ->
