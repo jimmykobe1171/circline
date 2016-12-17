@@ -180,9 +180,7 @@ int hashmap_rehash(struct hashmap_map *m){
         if (curr[i].in_use == 0)
             continue;
 
-		status = hashmap_put(m, curr[i].key, curr[i].data);
-		if (status != MAP_OK)
-			return status;
+		hashmap_put(m, curr[i].key, curr[i].data);
 	}
 
 	free(curr);
@@ -193,7 +191,7 @@ int hashmap_rehash(struct hashmap_map *m){
 /*
  * Add a pointer to the hashmap with some key
  */
-int hashmap_put(struct hashmap_map* m,...){
+struct hashmap_map* hashmap_put(struct hashmap_map* m,...){
 	int index;
 	void* data1;
 	void* data2;
@@ -260,7 +258,8 @@ int hashmap_put(struct hashmap_map* m,...){
 	index = hashmap_hash(m, key);
 	while(index == MAP_FULL){
 		if (hashmap_rehash(m) == MAP_OMEM) {
-			return MAP_OMEM;
+			printf("Error! Hashmap out of Memory\n");
+			exit(1);
 		}
 		index = hashmap_hash(m, key);
 	}
@@ -272,7 +271,7 @@ int hashmap_put(struct hashmap_map* m,...){
 	m->data[index].in_use = 1;
 	m->size++;
 
-	return MAP_OK;
+	return m;
 }
 
 /*
@@ -427,7 +426,7 @@ struct List* hashmap_keys(struct hashmap_map* m){
 // /*
 //  * Remove an element with that key from the map
 //  */
-int hashmap_remove(struct hashmap_map* m,...){
+struct hashmap_map* hashmap_remove(struct hashmap_map* m,...){
 	int i;
 	int curr;
 	char* key;
@@ -471,7 +470,7 @@ int hashmap_remove(struct hashmap_map* m,...){
 
                 /* Reduce the size */
                 m->size--;
-                return MAP_OK;
+                return m;
             }
 		}
 		curr = (curr + 1) % m->table_size;

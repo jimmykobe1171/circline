@@ -51,7 +51,7 @@ extern struct List* hashmap_keys(struct hashmap_map* m);
 /*
  * Add an element to the hashmap. Return MAP_OK or MAP_OMEM.
  */
-extern int hashmap_put(struct hashmap_map* m,...);
+extern struct hashmap_map* hashmap_put(struct hashmap_map* m,...);
 
 /*
  * Get an element from the hashmap. Return MAP_OK or MAP_MISSING.
@@ -61,13 +61,7 @@ extern void* hashmap_get(struct hashmap_map* m,...);
 /*
  * Remove an element from the hashmap. Return MAP_OK or MAP_MISSING.
  */
-extern int hashmap_remove(struct hashmap_map* m,...);
-
-/*
- * Get any element. Return MAP_OK or MAP_MISSING.
- * remove - should the element be removed from the hashmap
- */
-extern int hashmap_get_one(struct hashmap_map* m, void* *arg, int remove);
+extern struct hashmap_map* hashmap_remove(struct hashmap_map* m,...);
 
 /*
  * Free the hashmap
