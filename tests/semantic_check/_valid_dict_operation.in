@@ -1,0 +1,3 @@
+dict<int> a = {"a": 1, "b":2};
+a.put("c": 3);
+a.get("a");

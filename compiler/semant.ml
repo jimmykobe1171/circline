@@ -1,5 +1,6 @@
 open Cast
 open Printf
+open Str
 
 
 module StringMap = Map.Make(String)
@@ -122,16 +123,28 @@ let inconsistent_dict_element_type_error typ1 typ2 =
     let msg = sprintf "dict can not contain objects of different types: %s and %s" typ1 typ2 in
     raise (SemanticError msg)
 
-let unmatched_func_arg_len name =
+let unmatched_func_arg_len_error name =
     let msg = sprintf "args length not match in function call: %s" name in
     raise (SemanticError msg)
 
-let incompatible_func_arg_type typ1 typ2 =
+let incompatible_func_arg_type_error typ1 typ2 =
     let msg = sprintf "incompatible argument type %s, but %s is expected" typ1 typ2 in
     raise (SemanticError msg)
 
-let invalid_expr_after_return ss =
+let invalid_expr_after_return_error _ =
     let msg = sprintf "nothing may follow a return" in
+    raise (SemanticError msg)
+
+let redefine_print_func_error _ =
+    let msg = sprintf "function print may not be defined" in
+    raise (SemanticError msg)
+
+let duplicate_func_error name =
+    let msg = sprintf "duplicate function declaration: %s" name in
+    raise (SemanticError msg)
+
+let unsupport_operation_error typ name =
+    let msg = sprintf "unsupport operation on type %s: %s" typ name in
     raise (SemanticError msg)
 
 
@@ -143,6 +156,13 @@ let  match_list_type = function
 | Graph_t -> List_Graph_t
 | _ as t-> invaid_list_type_error (string_of_typ t)
 
+let  reverse_match_list_type = function
+  List_Int_t -> Int_t
+| List_Float_t -> Float_t
+| List_String_t -> String_t
+| List_Node_t -> Node_t
+| List_Graph_t -> Graph_t
+
 let  match_dict_type = function
   Int_t -> Dict_Int_t
 | Float_t -> Dict_Float_t
@@ -150,6 +170,13 @@ let  match_dict_type = function
 | Node_t -> Dict_Node_t
 | Graph_t -> Dict_Graph_t
 | _ as t-> invaid_dict_type_error (string_of_typ t)
+
+let  reverse_match_dict_type = function
+  Dict_Int_t -> Int_t
+| Dict_Float_t ->  Float_t
+| Dict_String_t -> String_t
+| Dict_Node_t -> Node_t
+| Dict_Graph_t -> Graph_t
 
 let check_valid_list_type typ =
     if typ = List_Int_t || typ = List_Float_t || typ = List_String_t || typ = List_Node_t || typ = List_Graph_t then typ
@@ -277,14 +304,14 @@ let check_function func_map func =
               (* check function call such as the args length, args type *)
               let check_funciton_call func args =
                   let check_args_length l_arg r_arg = if (List.length l_arg) = (List.length r_arg)
-                      then () else (unmatched_func_arg_len func.name)
+                      then () else (unmatched_func_arg_len_error func.name)
                   in
                   check_args_length func.args args;
                   (* l_arg is a list of Formal(typ, name), r_arg is a list of expr *)
                   let check_args_type l_arg r_arg =
                       List.iter2 
                           (fun (Formal(t, n)) r -> let r_typ = expr r in if t = r_typ then () else
-                            incompatible_func_arg_type (string_of_typ r_typ) (string_of_typ t)
+                            incompatible_func_arg_type_error (string_of_typ r_typ) (string_of_typ t)
                           )
                           l_arg r_arg
                   in
@@ -293,7 +320,21 @@ let check_function func_map func =
               in
               ignore(check_funciton_call func_obj args); func_obj.returnType
               (* TODO: implement call default *)
-        (* |   CallDefault(e, n, es) -> *)
+        | CallDefault(e, n, es) -> let typ = expr e in
+              match typ with
+                  List_Int_t | List_Float_t | List_String_t | List_Node_t | List_Graph_t -> 
+                    (match n with
+                      "add" | "remove" | "push" | "set" -> typ
+                      | "pop" | "get" -> reverse_match_list_type typ
+                      | _ -> unsupport_operation_error (string_of_typ typ) n
+                    )
+                  | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t ->
+                    (match n with
+                      "put" -> typ
+                      | "get" -> reverse_match_dict_type typ
+                      | _ -> unsupport_operation_error (string_of_typ typ) n
+                    )
+                  | _ -> unsupport_operation_error (string_of_typ typ) n
     in
     (* check statement *)
     let rec stmt = function
@@ -306,7 +347,7 @@ let check_function func_map func =
     and
     (* check statement list *)
     stmt_list = function
-            Return _ :: ss when ss <> [] -> invalid_expr_after_return ss
+            Return _ :: ss when ss <> [] -> invalid_expr_after_return_error ss
             | s::ss -> stmt s ; stmt_list ss
             | [] -> ()
 
@@ -315,10 +356,21 @@ let check_function func_map func =
 
 (* program here is a list of functions *)
 let check program =
-    if List.mem "print" (List.map (fun f -> f.name) program)
-        then raise (Failure ("function print may not be defined")) else ();
-    (* TODO: check duplicate function *)
-
+    let end_with s1 s2 =
+        let len1 = String.length s1 and len2 = String.length s2 in
+        if len1 < len2 then false
+        else 
+            let last = String.sub s1 (len1-len2) len2 in 
+            if last = s2 then true else false
+    in
+    if List.mem true (List.map (fun f -> end_with f.name "print") program)
+    then redefine_print_func_error "_" else ();
+    (* check duplicate function *)
+    let m = StringMap.empty in
+    List.map (fun f ->
+        if StringMap.mem f.name m 
+        then (duplicate_func_error f.name)
+        else StringMap.add f.name true m) program;
     (* Function declaration for a named function *)
     let built_in_funcs =  StringMap.add "print"
        { returnType = Void_t; name = "print"; args = [Formal(String_t, "x")];
