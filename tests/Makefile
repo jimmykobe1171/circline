@@ -5,6 +5,7 @@ default: test
 
 
 test: clean build
+	clang -emit-llvm -o utils.bc -c ../compiler/lib/utils.c
 	bash ./test_scanner.sh
 	bash ./test_parser.sh
 	bash ./test_semantic.sh
@@ -17,6 +18,7 @@ build:
 
 .PHONY: clean
 clean:
+	rm -f utils.bc
 	cd scanner; make clean
 	cd parser; make clean
 	cd semantic_check; make clean

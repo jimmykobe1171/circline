@@ -98,6 +98,7 @@ struct Node* graphGetRoot(struct Graph* g);
 int32_t graphSetRoot(struct Graph* g, struct Node * root);
 int32_t graphAddList(struct Graph* g, int direction, struct List * l, struct List * edges);
 int32_t graphAddNode(struct Graph* g, struct Node * node);
+struct List* graphGetAllNodes(struct Graph* g);
 struct List* graphRemoveNode(struct Graph* g, struct Node * node);
 int32_t graphAddEdgeP( struct Graph* g, struct Node* sour, struct Node* dest, int32_t type, ...);
 int32_t graphAddEdge(

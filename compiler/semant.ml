@@ -225,7 +225,9 @@ let check_function func_map func =
     (* Raise an exception of the given rvalue type cannot be assigned to
     he given lvalue type, noted that int could be assinged to float type variable *)
     let check_assign lvaluet rvaluet ex = match lvaluet with
-        Float_t when rvaluet = Int_t -> lvaluet
+          Float_t when rvaluet = Int_t -> lvaluet
+        | Node_t when rvaluet = Null_t -> lvaluet
+        | Graph_t when rvaluet = Null_t -> lvaluet
         | _ -> if lvaluet == rvaluet then lvaluet else 
             illegal_assignment_error (string_of_typ lvaluet) (string_of_typ rvaluet) (string_of_expr ex)
     in

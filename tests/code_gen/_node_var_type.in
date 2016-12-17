@@ -1,0 +1,24 @@
+node a = null;
+
+print(a);
+
+a = node(1);
+
+print( int(a) );
+
+a = node(-3.4);
+
+print( float(a) );
+
+a = node(1>2);
+
+print( bool(a) );
+
+a = node(true);
+
+print( bool(a) );
+
+a = node("Hello World!");
+
+print( string(a) );
+

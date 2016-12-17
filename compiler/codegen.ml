@@ -497,6 +497,12 @@ let graph_get_child_nodes_f  = L.declare_function "graphGetChildNodes" graph_get
 let graph_get_child_nodes graph root llbuilder =
   L.build_call graph_get_child_nodes_f [| graph; root |] "childNodes" llbuilder
 
+(* Get all nodes of the graph *)
+let graph_get_all_nodes_t  = L.function_type list_t [| graph_t |]
+let graph_get_all_nodes_f  = L.declare_function "graphGetAllNodes" graph_get_all_nodes_t the_module
+let graph_get_all_nodes graph llbuilder =
+  L.build_call graph_get_all_nodes_f [| graph |] "nodesList" llbuilder
+
 (* Remove a particular node of the graph *)
 let graph_remove_node_t = L.function_type list_t [| graph_t; node_t |]
 let graph_remove_node_f = L.declare_function "graphRemoveNode" graph_remove_node_t the_module
@@ -512,6 +518,7 @@ let graph_sub_graph g1 g2 llbuilder =
 let graph_call_default_main llbuilder gh params_list obj_tpy = function
   | "root" -> graph_get_root gh llbuilder , A.Node_t
   | "size" -> graph_num_of_nodes gh llbuilder, A.Int_t
+  | "nodes" -> graph_get_all_nodes gh llbuilder, A.List_Node_t
   | _ as name -> raise (Failure("[Error] Unsupported graph methods: " ^ name ))
 
 (*

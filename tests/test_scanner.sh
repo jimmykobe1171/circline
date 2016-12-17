@@ -21,8 +21,10 @@ for input_file in $INPUT_FILES; do
     fi
 done
 
-if $result; then
-	exit 0
-else
-	exit 1
-fi
+exit 0
+
+# if $result; then
+# 	exit 0
+# else
+# 	exit 1
+# fi

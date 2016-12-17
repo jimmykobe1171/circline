@@ -33,9 +33,10 @@ tests/pig
 
 compiler/test_in
 
+compiler/run
+
 tests/semantic_check/semantic_check
 
-compiler/test.in
 
 *.out
 
@@ -52,3 +53,5 @@ compiler/test_codegen_tmp.in
 compiler/test_codegen_tmp.in
 
 compiler/utils.bc
+
+tests/utils.bc

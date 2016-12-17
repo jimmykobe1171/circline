@@ -1,0 +1,8 @@
+node a = node("a");
+node b = node("b");
+node c = node("c");
+node d = node("d");
+
+graph g = a -> "a->b"& b -> "b->c"& c -> "c->d"& d;
+
+print(g.nodes());

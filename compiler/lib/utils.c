@@ -549,6 +549,19 @@ struct List* graphRemoveNode(struct Graph* gh, struct Node * node) {
 	return splitGraph(gh);
 }
 
+struct List* graphGetAllNodes(struct Graph* g) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	struct List* ret = createList(NODE);
+	int i;
+	for (i=0; i < g->vn; i++) {
+		addList(ret, g->nodes[i]);
+	}
+	return ret;
+}
+
 int32_t graphNumOfNodes(struct Graph* g) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
