@@ -418,11 +418,19 @@ int hashmap_length(struct hashmap_map* m){
 	else return 0;
 }
 
+// int hashmap_print(void* a, void* data1, void* data2){
+// 	printf("data1: %d\n", *((int*) data1));
+// 	printf("data2: %s\n", data2);
+// 	return 0;
+// }
+
 // int main(){
 // 	struct hashmap_map* mymap = hashmap_new(INT, STRING);
 // 	hashmap_put(mymap, 10, "Hello World");
-//
-// 	hashmap_remove(mymap, 10);
-// 	printf("%s\n", VoidtoString((hashmap_get(mymap, 10))));
+// 	hashmap_put(mymap, 20, "Hello World1");
+// 	hashmap_put(mymap, 30, "Hello World2");
+// 	hashmap_iterate(mymap, hashmap_print, 0);
+// 	//hashmap_remove(mymap, 10);
+// 	//printf("%s\n", VoidtoString((hashmap_get(mymap, 10))));
 // 	return 0;
 // }
