@@ -157,7 +157,7 @@ list_graph_literal:
 }
 
 dict_key_value:
-| STRING_LITERAL COLUMN expr { (String_Lit($1), $3) }
+| expr COLUMN expr { ($1, $3) }
 
 /* dict */
 dict:

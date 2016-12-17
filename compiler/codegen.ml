@@ -58,7 +58,11 @@ let ltype_of_typ = function
   | A.List_String_t -> list_t
   | A.List_Node_t -> list_t
   | A.List_Graph_t -> list_t
+  | A.Dict_Int_t -> dict_t
+  | A.Dict_Float_t -> dict_t
   | A.Dict_String_t -> dict_t
+  | A.Dict_Node_t -> dict_t
+  | A.Dict_Graph_t -> dict_t
   | A.Graph_t -> graph_t
   | _ -> raise (Failure ("Type Not Found for ltype_of_typ!"))
 
