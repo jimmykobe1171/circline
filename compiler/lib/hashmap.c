@@ -205,7 +205,6 @@ int hashmap_put(struct hashmap_map* m,...){
 			data1 = InttoVoid(va_arg(ap, int));
 			key = malloc(16);
 			snprintf(key, 16, "%d", VoidtoInt(data1));
-			printf("%s\n",key);
 			break;
 
 		case STRING:
@@ -317,7 +316,6 @@ void* hashmap_get(struct hashmap_map* m,...){
             if (strcmp(m->data[curr].key,key)==0){
                 // *arg = (m->data[curr].data);
                 // return MAP_OK;
-                //printf("%s\n", VoidtoString(m->data[curr].data[1]));
                 return m->data[curr].data[1];
             }
 		}
