@@ -332,7 +332,7 @@ void* hashmap_get(struct hashmap_map* m,...){
  * additional any_t argument is passed to the function as its first
  * argument and the hashmap element is the second.
  */
-int hashmap_iterate(struct hashmap_map* m, Func f, void* item) {
+int hashmap_iterate(struct hashmap_map* m, Func f) {
 
 	/* On empty hashmap, return immediately */
 	if (hashmap_length(m) <= 0)
@@ -341,13 +341,58 @@ int hashmap_iterate(struct hashmap_map* m, Func f, void* item) {
 	/* Linear probing */
 	for(int i = 0; i< m->table_size; i++)
 		if(m->data[i].in_use != 0) {
-			int status = f(item, m->data[i].data[0], m->data[i].data[1]);
+			int status = f(m->data[i].key, m->data[i].data[0], m->data[i].data[1]);
 			if (status != MAP_OK) {
 				return status;
 			}
 		}
 
     return MAP_OK;
+}
+
+int hashmap_printhelper(char* key, int32_t type, void* value){
+	switch (type) {
+		case INT:
+			printf("%s: %d",key, VoidtoInt(value));
+			break;
+
+		case FLOAT:
+			printf("%s: %f",key, VoidtoFloat(value));
+			break;
+
+		case BOOL:
+			printf("%s: %d",key, VoidtoBool(value));
+			break;
+
+		case STRING:
+			printf("%s: %s",key, VoidtoString(value));
+			break;
+
+		case NODE:
+			printf("%s: ",key);
+			printNode(VoidtoNode(value));
+			break;
+
+		case GRAPH:
+			printf("%s: ",key);
+			printGraph(VoidtoGraph(value));
+			break;
+
+		default:
+			break;
+	}
+	return 0;
+}
+
+int hashmap_print(struct hashmap_map* m){
+	printf("[");
+	for(int i = 0; i< m->table_size; i++)
+		if(m->data[i].in_use != 0) {
+			hashmap_printhelper(m->data[i].key, m->valuetype, m->data[i].data[1]);
+			printf(", ");
+		}
+	printf("]\n");
+	return 0;
 }
 
 struct List* hashmap_keys(struct hashmap_map* m){
@@ -466,6 +511,7 @@ int32_t hashmap_valuetype(struct hashmap_map* m){
 // 	hashmap_put(mymap, 10, "Hello World");
 // 	hashmap_put(mymap, 20, "Hello World1");
 // 	hashmap_put(mymap, 30, "Hello World2");
+// 	hashmap_print(mymap);
 // 	printList(hashmap_keys(mymap));
 // 	//hashmap_iterate(mymap, hashmap_print, 0);
 // 	//hashmap_remove(mymap, 10);

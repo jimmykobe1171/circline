@@ -6,3 +6,16 @@ node d = node("d");
 graph g = a -> "a->b"& b -> "b->c"& c -> "c->d"& d;
 
 print(g.nodes());
+
+print("\n List Tests!\n");
+
+list<int> l1 = [1,2,3,4];
+print(l1);
+print(l1.add(5));
+print(l1);
+print(l1.remove(-1));
+print(l1);
+print([1,2,3,4,5].set(1,3));
+
+dict<int> d1 = {1:2};
+print(d1);
