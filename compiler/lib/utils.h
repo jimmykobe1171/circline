@@ -102,6 +102,9 @@ int32_t graphAddEdge(
 	bool c,
 	char* d
 );
+int32_t graphNumOfNodes(struct Graph* g);
+int32_t graphNumOfEdges(struct Graph* g);
+struct List* graphGetChildNodes(struct Graph* g, struct Node* rt);
 int32_t printGraph(struct Graph* g);
 
 #endif /* #ifndef _UTILS_H_ */

@@ -324,6 +324,18 @@ let create_graph_f  = L.declare_function "createGraph" create_graph_t the_module
 let create_graph llbuilder =
   L.build_call create_graph_f [| |] "graph" llbuilder
 
+(* Get the number of nodes in a graph *)
+let graph_num_of_nodes_t  = L.function_type i32_t [| graph_t |]
+let graph_num_of_nodes_f  = L.declare_function "graphNumOfNodes" graph_num_of_nodes_t the_module
+let graph_num_of_nodes g llbuilder =
+  L.build_call graph_num_of_nodes_f [| g |] "graphNodeSize" llbuilder
+
+(* Get the number of edges in a graph *)
+let graph_num_of_edges_t  = L.function_type i32_t [| graph_t |]
+let graph_num_of_edges_f  = L.declare_function "graphNumOfEdges" graph_num_of_edges_t the_module
+let graph_num_of_edges g llbuilder =
+  L.build_call graph_num_of_edges_f [| g |] "graphEdgeSize" llbuilder
+
 (* Create a copy of origianl grpah *)
 let copy_graph_t  = L.function_type graph_t [| graph_t |]
 let copy_graph_f  = L.declare_function "copyGraph" copy_graph_t the_module
@@ -345,8 +357,10 @@ let graph_get_root g llbuilder =
 (* Set the root node of the graph *)
 let graph_set_root_t  = L.function_type i32_t [| graph_t; node_t |]
 let graph_set_root_f  = L.declare_function "graphSetRoot" graph_set_root_t the_module
-let graph_set_root graph node llbuilder =
-  L.build_call graph_set_root_f [| graph; node |] "setRootRes" llbuilder
+let graph_set_root graph node llbuilder = (
+    ignore(L.build_call graph_set_root_f [| graph; node |] "setRootRes" llbuilder);
+    graph
+  )
 
 (* Add a list of Nodes or Graphs to graph *)
 let graph_add_list_t = L.function_type i32_t [| graph_t; i32_t; list_t; list_t |]
@@ -405,6 +419,17 @@ let print_graph_t  = L.function_type i32_t [| graph_t |]
 let print_graph_f  = L.declare_function "printGraph" print_graph_t the_module
 let print_graph graph llbuilder =
   L.build_call print_graph_f [| graph |] "printGraph" llbuilder
+
+(* Get all neighbor nodes of the specific node which a graph *)
+let graph_get_child_nodes_t  = L.function_type list_t [| graph_t; node_t |]
+let graph_get_child_nodes_f  = L.declare_function "graphGetChildNodes" graph_get_child_nodes_t the_module
+let graph_get_child_nodes graph root llbuilder =
+  L.build_call graph_get_child_nodes_f [| graph; root |] "childNodes" llbuilder
+
+let graph_call_default_main llbuilder gh params_list obj_tpy = function
+  | "root" -> graph_get_root gh llbuilder , A.Node_t
+  | "size" -> graph_num_of_nodes gh llbuilder, A.Int_t
+  | _ as name -> raise (Failure("[Error] Unsupported graph methods: " ^ name ))
 
 (*
 ================================================================
@@ -638,6 +663,12 @@ let translate program =
                 | A.Add -> (merge_graph e1' e2' builder, A.Graph_t)
                 | _ -> raise (Failure ("Unsuported Binop Type On Graph!"))
               )
+          | ( A.Graph_t, A.Node_t ) -> (
+                match  op with
+                | A.RootAs -> (graph_set_root e1' e2' builder, A.Graph_t)
+                | A.ListNodesAt -> (graph_get_child_nodes e1' e2' builder, A.List_Node_t)
+                | _ -> raise (Failure ("Unsuported Binop Type On Graph * Node!"))
+            )
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
           | ( A.Int_t, A.Float_t) ->
               handle_binop (int_to_float builder e1') op e2' A.Float_t builder
@@ -687,21 +718,18 @@ let translate program =
       	 let result = (match fdecl.A.returnType with A.Void_t -> ""
                                                    | _ -> f ^ "_result") in
          (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.returnType)
-      (* default get operator of list *)
-      (* default size operator of list *)
-      (* default remove operator of list *)
-      (* default set operator of list *)
 
       (* default get operator of dict *)
       | A.CallDefault(val_name, default_func_name, params_list) ->
         (* get caller tpye *)
-        let expr_tpy = snd (expr builder val_name) in
+        let (id_val, expr_tpy) = (expr builder val_name) in
         let assign_func_by_typ builder = function
           (* deal with list *)
           | A.List_Int_t | A.List_Float_t | A.List_String_t | A.List_Bool_t
           | A.List_Node_t | A.List_Graph_t ->
-              list_call_default_main builder (fst (expr builder val_name)) (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
-
+              list_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
+          | A.Graph_t ->
+              graph_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
           | _ -> raise (Failure ("Default Function Not Support!"))
           in
             assign_func_by_typ builder expr_tpy

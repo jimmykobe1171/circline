@@ -101,14 +101,101 @@ int32_t printEdge(struct Edge * edge) {
 	Graph Methods
 ************************************/
 
-// struct Graph {
-// 	int32_t vn;
-// 	int32_t en;
-//  int32_t vn_len;
-//  int32_t en_len;
-// 	Node** nodes;
-// 	Edge* edges;
-// };
+int32_t graphAddEdgeHelper(struct Graph* g, struct Edge e) {
+	if (g == NULL) exit(1);
+	int i;
+	for (i=0; i < g->en; i++) {
+		if (g->edges[i].sour == e.sour && g->edges[i].dest == e.dest) {
+			g->edges[i] = e;
+			return 0;
+		}
+	}
+	g->edges[i] = e;
+	g->en ++;
+	return 0;
+}
+
+int32_t graphAddEdgeP( struct Graph* g, struct Node* sour, struct Node* dest, int32_t type, ...) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	if (g->vn + 1 >= g->vn_len) {
+		printf("[Error] # Graph Nodes reach the limit!\n");
+		exit(1);
+	}
+	if (graphAddNode(g, sour) > 0) exit(1);
+	if (graphAddNode(g, dest) > 0) exit(1);
+
+	// Assign the Edge Value
+	struct Edge e = createEdge(sour, dest, type, 0, 0, 0, NULL);
+	va_list ap;
+	va_start(ap, 1);
+	void* tmp = va_arg(ap, void*);
+	switch (type) {
+		case INT:
+			e.a = *((int*)tmp);	break;
+		case FLOAT:
+			e.b = *((double*)tmp);	break;
+		case BOOL:
+			e.c = *((bool*)tmp);	break;
+		case STRING:
+			e.d = ((char*)tmp);	break;
+		default:
+			break;
+	}
+  va_end(ap);
+
+	int i;
+	// Edges already exist in the graph
+	for (i=0; i<g->en; i++) {
+		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
+			g->edges[i] = e;
+			return 0;
+		}
+	}
+	g->edges[i] = e;
+	g->en++;
+	return 0;
+}
+
+int32_t graphAddEdge(
+	struct Graph* g,
+	struct Node* sour,
+	struct Node* dest,
+	int32_t type,
+	int32_t a,
+	double b,
+	bool c,
+	char* d
+) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
+		exit(1);
+	}
+	if (g->vn + 1 >= g->vn_len) {
+		printf("[Error] # Graph Nodes reach the limit!\n");
+		exit(1);
+	}
+	if (graphAddNode(g, sour) > 0) exit(1);
+	if (graphAddNode(g, dest) > 0) exit(1);
+	int i;
+	// Edges already exist in the graph
+	for (i=0; i<g->en; i++) {
+		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
+			g->edges[i].type = type;
+			g->edges[i].a = a;
+			g->edges[i].b = b;
+			g->edges[i].c = c;
+			g->edges[i].d = d;
+			return 0;
+		}
+	}
+	struct Edge e = createEdge(sour, dest, type, a, b, c, d);
+	g->edges[i] = e;
+	g->en++;
+	return 0;
+}
 
 struct Graph* createGraph() {
 	struct Graph* g = (struct Graph*) malloc( sizeof(struct Graph) );
@@ -140,20 +227,6 @@ struct Graph* copyGraph(struct Graph* a) {
 	return g;
 }
 
-int32_t graphAddEdgeHelper(struct Graph* g, struct Edge e) {
-	if (g == NULL) exit(1);
-	int i;
-	for (i=0; i < g->en; i++) {
-		if (g->edges[i].sour == e.sour && g->edges[i].dest == e.dest) {
-			g->edges[i] = e;
-			return 0;
-		}
-	}
-	g->edges[i] = e;
-	g->en ++;
-	return 0;
-}
-
 struct Graph* mergeGraph(struct Graph* a, struct Graph* b) {
 	if (b == NULL) return copyGraph(a);
 	if (a == NULL) return copyGraph(b);
@@ -170,7 +243,7 @@ struct Graph* mergeGraph(struct Graph* a, struct Graph* b) {
 struct Node* graphGetRoot(struct Graph* g) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
-		return NULL;
+		exit(1);
 	}
 	return g->root;
 }
@@ -279,86 +352,36 @@ int32_t graphAddNode(struct Graph* g, struct Node * node) {
 	return 0;
 }
 
-int32_t graphAddEdgeP( struct Graph* g, struct Node* sour, struct Node* dest, int32_t type, ...) {
+int32_t graphNumOfNodes(struct Graph* g) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
 		exit(1);
 	}
-	if (g->vn + 1 >= g->vn_len) {
-		printf("[Error] # Graph Nodes reach the limit!\n");
-		exit(1);
-	}
-	if (graphAddNode(g, sour) > 0) exit(1);
-	if (graphAddNode(g, dest) > 0) exit(1);
-
-	// Assign the Edge Value
-	struct Edge e = createEdge(sour, dest, type, 0, 0, 0, NULL);
-	va_list ap;
-	va_start(ap, 1);
-	void* tmp = va_arg(ap, void*);
-	switch (type) {
-		case INT:
-			e.a = *((int*)tmp);	break;
-		case FLOAT:
-			e.b = *((double*)tmp);	break;
-		case BOOL:
-			e.c = *((bool*)tmp);	break;
-		case STRING:
-			e.d = ((char*)tmp);	break;
-		default:
-			break;
-	}
-  va_end(ap);
-
-	int i;
-	// Edges already exist in the graph
-	for (i=0; i<g->en; i++) {
-		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
-			g->edges[i] = e;
-			return 0;
-		}
-	}
-	g->edges[i] = e;
-	g->en++;
-	return 0;
+	return g->vn;
 }
 
-int32_t graphAddEdge(
-	struct Graph* g,
-	struct Node* sour,
-	struct Node* dest,
-	int32_t type,
-	int32_t a,
-	double b,
-	bool c,
-	char* d
-) {
+int32_t graphNumOfEdges(struct Graph* g) {
 	if (g == NULL) {
 		printf("[Error] Graph doesn't exist!\n");
 		exit(1);
 	}
-	if (g->vn + 1 >= g->vn_len) {
-		printf("[Error] # Graph Nodes reach the limit!\n");
+	return g->en;
+}
+
+struct List* graphGetChildNodes(struct Graph* g, struct Node* rt) {
+	if (g == NULL) {
+		printf("[Error] Graph doesn't exist!\n");
 		exit(1);
 	}
-	if (graphAddNode(g, sour) > 0) exit(1);
-	if (graphAddNode(g, dest) > 0) exit(1);
+	struct List* children = createList(NODE);
+	if (rt == NULL) return children;
 	int i;
-	// Edges already exist in the graph
-	for (i=0; i<g->en; i++) {
-		if (g->edges[i].sour == sour && g->edges[i].dest == dest) {
-			g->edges[i].type = type;
-			g->edges[i].a = a;
-			g->edges[i].b = b;
-			g->edges[i].c = c;
-			g->edges[i].d = d;
-			return 0;
+	for (i=0; i< g->en; i++) {
+		if (g->edges[i].sour == rt) {
+			addList(children, g->edges[i].dest);
 		}
 	}
-	struct Edge e = createEdge(sour, dest, type, a, b, c, d);
-	g->edges[i] = e;
-	g->en++;
-	return 0;
+	return children;
 }
 
 int32_t printGraph(struct Graph* g) {

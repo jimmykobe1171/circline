@@ -162,6 +162,10 @@ int32_t removeList(struct List* list, int index){
 
 int32_t printList(struct List * list){
 	int curPos = list->curPos - 1;
+	if (curPos < 0) {
+		printf("list:[]\n");
+		return 0;
+	}
 	int p = 0;
 	printf("list:[");
 	switch (list->type) {
@@ -241,7 +245,7 @@ int32_t printList(struct List * list){
 // 	addList(a, 9);
 // 	setList(a, 0, 3);
 // 	removeList(a, 0);
-	
+
 // 	printList(a);
 // 	//printNode(VoidtoNode(getList(a,2)));
 // }
