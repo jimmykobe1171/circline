@@ -14,15 +14,6 @@ echo "yes" | sudo add-apt-repository ppa:$ppa
 sudo apt-get update -qq
 sudo apt-get install -qq ocaml ocaml-native-compilers
 
-sudo apt-get install m4 llvm software-properties-common
-sudo add-apt-repository --yes ppa:avsm/ppa
-echo "yes" | sudo apt-get install -y opam
-echo "yes" | opam init
-
-eval `opam config env`
-
-echo "yes" | opam install llvm.3.4 ocamlfind
-
 echo OCaml version
 ocaml -version
 
