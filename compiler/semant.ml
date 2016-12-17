@@ -139,6 +139,10 @@ let redefine_print_func_error _ =
     let msg = sprintf "function print may not be defined" in
     raise (SemanticError msg)
 
+let duplicate_func_error name =
+    let msg = sprintf "duplicate function declaration: %s" name in
+    raise (SemanticError msg)
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -328,9 +332,13 @@ let check program =
             if last = s2 then true else false
     in
     if List.mem true (List.map (fun f -> end_with f.name "print") program)
-        then redefine_print_func_error "_" else ();
-    (* TODO: check duplicate function *)
-
+    then redefine_print_func_error "_" else ();
+    (* check duplicate function *)
+    let m = StringMap.empty in
+    List.map (fun f ->
+        if StringMap.mem f.name m 
+        then (duplicate_func_error f.name)
+        else StringMap.add f.name true m) program;
     (* Function declaration for a named function *)
     let built_in_funcs =  StringMap.add "print"
        { returnType = Void_t; name = "print"; args = [Formal(String_t, "x")];

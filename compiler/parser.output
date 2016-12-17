@@ -68,7 +68,7 @@
 
   55  list_graph_literal : LEFTBRACKET list_graph RIGHTBRACKET
 
-  56  dict_key_value : STRING_LITERAL COLUMN expr
+  56  dict_key_value : expr COLUMN expr
 
   57  dict :
   58       | dict_key_value
@@ -371,10 +371,24 @@ state 22
 	expr : LEFTCURLYBRACKET . dict RIGHTCURLYBRACKET  (46)
 	dict : .  (57)
 
-	STRING_LITERAL  shift 50
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 38
+	LEFTBRACKET  shift 21
+	LEFTCURLYBRACKET  shift 22
+	LEFTROUNDBRACKET  shift 23
+	ID  shift 25
+	INT_LITERAL  shift 26
+	STRING_LITERAL  shift 27
+	FLOAT_LITERAL  shift 28
+	BOOL_LITERAL  shift 29
 	SEQUENCE  reduce 57
 	RIGHTCURLYBRACKET  reduce 57
 
+	expr  goto 50
+	literals  goto 35
+	arith_ops  goto 36
+	graph_ops  goto 37
 	dict  goto 51
 	dict_key_value  goto 52
 
@@ -421,6 +435,7 @@ state 25
 	MOD  reduce 43
 	SEMICOLUMN  reduce 43
 	SEQUENCE  reduce 43
+	COLUMN  reduce 43
 	DOT  reduce 43
 	GREATER  reduce 43
 	GREATEREQUAL  reduce 43
@@ -612,6 +627,7 @@ state 39
 	MINUS  reduce 74
 	SEMICOLUMN  reduce 74
 	SEQUENCE  reduce 74
+	COLUMN  reduce 74
 	GREATER  reduce 74
 	GREATEREQUAL  reduce 74
 	SMALLER  reduce 74
@@ -668,6 +684,7 @@ state 40
 	MOD  reduce 73
 	SEMICOLUMN  reduce 73
 	SEQUENCE  reduce 73
+	COLUMN  reduce 73
 	GREATER  reduce 73
 	GREATEREQUAL  reduce 73
 	SMALLER  reduce 73
@@ -918,9 +935,54 @@ state 49
 
 
 state 50
-	dict_key_value : STRING_LITERAL . COLUMN expr  (56)
+	expr : expr . DOT ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET  (49)
+	dict_key_value : expr . COLUMN expr  (56)
+	arith_ops : expr . PLUS expr  (60)
+	arith_ops : expr . MINUS expr  (61)
+	arith_ops : expr . TIMES expr  (62)
+	arith_ops : expr . DIVIDE expr  (63)
+	arith_ops : expr . EQUAL expr  (64)
+	arith_ops : expr . NOTEQUAL expr  (65)
+	arith_ops : expr . SMALLER expr  (66)
+	arith_ops : expr . SMALLEREQUAL expr  (67)
+	arith_ops : expr . GREATER expr  (68)
+	arith_ops : expr . GREATEREQUAL expr  (69)
+	arith_ops : expr . AND expr  (70)
+	arith_ops : expr . MOD expr  (71)
+	arith_ops : expr . OR expr  (72)
+	arith_ops : expr . SIMILARITY expr  (75)
+	arith_ops : expr . AT AT expr  (76)
+	arith_ops : expr . AT expr  (77)
+	graph_ops : expr . LINK expr  (78)
+	graph_ops : expr . LINK list_graph_literal  (79)
+	graph_ops : expr . LINK expr AMPERSAND expr  (80)
+	graph_ops : expr . RIGHTLINK expr  (81)
+	graph_ops : expr . RIGHTLINK list_graph_literal  (82)
+	graph_ops : expr . RIGHTLINK expr AMPERSAND expr  (83)
+	graph_ops : expr . LEFTLINK expr  (84)
+	graph_ops : expr . LEFTLINK list_graph_literal  (85)
+	graph_ops : expr . LEFTLINK expr AMPERSAND expr  (86)
 
+	PLUS  shift 56
+	MINUS  shift 57
+	TIMES  shift 58
+	DIVIDE  shift 59
+	MOD  shift 60
 	COLUMN  shift 96
+	DOT  shift 62
+	GREATER  shift 63
+	GREATEREQUAL  shift 64
+	SMALLER  shift 65
+	SMALLEREQUAL  shift 66
+	EQUAL  shift 67
+	NOTEQUAL  shift 68
+	AND  shift 69
+	OR  shift 70
+	LINK  shift 71
+	RIGHTLINK  shift 72
+	LEFTLINK  shift 73
+	SIMILARITY  shift 74
+	AT  shift 75
 	.  error
 
 
@@ -1795,7 +1857,7 @@ state 95
 
 
 state 96
-	dict_key_value : STRING_LITERAL COLUMN . expr  (56)
+	dict_key_value : expr COLUMN . expr  (56)
 
 	MINUS  shift 5
 	NOT  shift 6
@@ -1819,9 +1881,23 @@ state 96
 state 97
 	dict : dict SEQUENCE . dict_key_value  (59)
 
-	STRING_LITERAL  shift 50
+	MINUS  shift 5
+	NOT  shift 6
+	NODE  shift 38
+	LEFTBRACKET  shift 21
+	LEFTCURLYBRACKET  shift 22
+	LEFTROUNDBRACKET  shift 23
+	ID  shift 25
+	INT_LITERAL  shift 26
+	STRING_LITERAL  shift 27
+	FLOAT_LITERAL  shift 28
+	BOOL_LITERAL  shift 29
 	.  error
 
+	expr  goto 50
+	literals  goto 35
+	arith_ops  goto 36
+	graph_ops  goto 37
 	dict_key_value  goto 144
 
 
@@ -1887,6 +1963,7 @@ state 100
 	AT  shift 75
 	SEMICOLUMN  reduce 44
 	SEQUENCE  reduce 44
+	COLUMN  reduce 44
 	AMPERSAND  reduce 44
 	RIGHTBRACKET  reduce 44
 	RIGHTCURLYBRACKET  reduce 44
@@ -1944,6 +2021,7 @@ state 102
 	MINUS  reduce 60
 	SEMICOLUMN  reduce 60
 	SEQUENCE  reduce 60
+	COLUMN  reduce 60
 	GREATER  reduce 60
 	GREATEREQUAL  reduce 60
 	SMALLER  reduce 60
@@ -2000,6 +2078,7 @@ state 103
 	MINUS  reduce 61
 	SEMICOLUMN  reduce 61
 	SEQUENCE  reduce 61
+	COLUMN  reduce 61
 	GREATER  reduce 61
 	GREATEREQUAL  reduce 61
 	SMALLER  reduce 61
@@ -2056,6 +2135,7 @@ state 104
 	MOD  reduce 62
 	SEMICOLUMN  reduce 62
 	SEQUENCE  reduce 62
+	COLUMN  reduce 62
 	GREATER  reduce 62
 	GREATEREQUAL  reduce 62
 	SMALLER  reduce 62
@@ -2112,6 +2192,7 @@ state 105
 	MOD  reduce 63
 	SEMICOLUMN  reduce 63
 	SEQUENCE  reduce 63
+	COLUMN  reduce 63
 	GREATER  reduce 63
 	GREATEREQUAL  reduce 63
 	SMALLER  reduce 63
@@ -2168,6 +2249,7 @@ state 106
 	MOD  reduce 71
 	SEMICOLUMN  reduce 71
 	SEQUENCE  reduce 71
+	COLUMN  reduce 71
 	GREATER  reduce 71
 	GREATEREQUAL  reduce 71
 	SMALLER  reduce 71
@@ -2231,6 +2313,7 @@ state 108
 	AT  shift 75
 	SEMICOLUMN  reduce 68
 	SEQUENCE  reduce 68
+	COLUMN  reduce 68
 	GREATER  reduce 68
 	GREATEREQUAL  reduce 68
 	SMALLER  reduce 68
@@ -2287,6 +2370,7 @@ state 109
 	AT  shift 75
 	SEMICOLUMN  reduce 69
 	SEQUENCE  reduce 69
+	COLUMN  reduce 69
 	GREATER  reduce 69
 	GREATEREQUAL  reduce 69
 	SMALLER  reduce 69
@@ -2343,6 +2427,7 @@ state 110
 	AT  shift 75
 	SEMICOLUMN  reduce 66
 	SEQUENCE  reduce 66
+	COLUMN  reduce 66
 	GREATER  reduce 66
 	GREATEREQUAL  reduce 66
 	SMALLER  reduce 66
@@ -2399,6 +2484,7 @@ state 111
 	AT  shift 75
 	SEMICOLUMN  reduce 67
 	SEQUENCE  reduce 67
+	COLUMN  reduce 67
 	GREATER  reduce 67
 	GREATEREQUAL  reduce 67
 	SMALLER  reduce 67
@@ -2459,6 +2545,7 @@ state 112
 	AT  shift 75
 	SEMICOLUMN  reduce 64
 	SEQUENCE  reduce 64
+	COLUMN  reduce 64
 	EQUAL  reduce 64
 	NOTEQUAL  reduce 64
 	AND  reduce 64
@@ -2515,6 +2602,7 @@ state 113
 	AT  shift 75
 	SEMICOLUMN  reduce 65
 	SEQUENCE  reduce 65
+	COLUMN  reduce 65
 	EQUAL  reduce 65
 	NOTEQUAL  reduce 65
 	AND  reduce 65
@@ -2573,6 +2661,7 @@ state 114
 	AT  shift 75
 	SEMICOLUMN  reduce 70
 	SEQUENCE  reduce 70
+	COLUMN  reduce 70
 	AND  reduce 70
 	OR  reduce 70
 	AMPERSAND  reduce 70
@@ -2629,6 +2718,7 @@ state 115
 	AT  shift 75
 	SEMICOLUMN  reduce 72
 	SEQUENCE  reduce 72
+	COLUMN  reduce 72
 	AND  reduce 72
 	OR  reduce 72
 	AMPERSAND  reduce 72
@@ -2708,6 +2798,7 @@ state 117
 	MOD  reduce 78
 	SEMICOLUMN  reduce 78
 	SEQUENCE  reduce 78
+	COLUMN  reduce 78
 	GREATER  reduce 78
 	GREATEREQUAL  reduce 78
 	SMALLER  reduce 78
@@ -2771,6 +2862,7 @@ state 119
 	MOD  reduce 81
 	SEMICOLUMN  reduce 81
 	SEQUENCE  reduce 81
+	COLUMN  reduce 81
 	GREATER  reduce 81
 	GREATEREQUAL  reduce 81
 	SMALLER  reduce 81
@@ -2834,6 +2926,7 @@ state 121
 	MOD  reduce 84
 	SEMICOLUMN  reduce 84
 	SEQUENCE  reduce 84
+	COLUMN  reduce 84
 	GREATER  reduce 84
 	GREATEREQUAL  reduce 84
 	SMALLER  reduce 84
@@ -2890,6 +2983,7 @@ state 123
 	MOD  reduce 75
 	SEMICOLUMN  reduce 75
 	SEQUENCE  reduce 75
+	COLUMN  reduce 75
 	GREATER  reduce 75
 	GREATEREQUAL  reduce 75
 	SMALLER  reduce 75
@@ -2968,6 +3062,7 @@ state 125
 	MOD  reduce 77
 	SEMICOLUMN  reduce 77
 	SEQUENCE  reduce 77
+	COLUMN  reduce 77
 	GREATER  reduce 77
 	GREATEREQUAL  reduce 77
 	SMALLER  reduce 77
@@ -3189,7 +3284,7 @@ state 142
 
 state 143
 	expr : expr . DOT ID LEFTROUNDBRACKET list RIGHTROUNDBRACKET  (49)
-	dict_key_value : STRING_LITERAL COLUMN expr .  (56)
+	dict_key_value : expr COLUMN expr .  (56)
 	arith_ops : expr . PLUS expr  (60)
 	arith_ops : expr . MINUS expr  (61)
 	arith_ops : expr . TIMES expr  (62)
@@ -3442,6 +3537,7 @@ state 152
 	MOD  reduce 76
 	SEMICOLUMN  reduce 76
 	SEQUENCE  reduce 76
+	COLUMN  reduce 76
 	GREATER  reduce 76
 	GREATEREQUAL  reduce 76
 	SMALLER  reduce 76
@@ -3712,6 +3808,7 @@ state 165
 	MOD  reduce 80
 	SEMICOLUMN  reduce 80
 	SEQUENCE  reduce 80
+	COLUMN  reduce 80
 	GREATER  reduce 80
 	GREATEREQUAL  reduce 80
 	SMALLER  reduce 80
@@ -3768,6 +3865,7 @@ state 166
 	MOD  reduce 83
 	SEMICOLUMN  reduce 83
 	SEQUENCE  reduce 83
+	COLUMN  reduce 83
 	GREATER  reduce 83
 	GREATEREQUAL  reduce 83
 	SMALLER  reduce 83
@@ -3824,6 +3922,7 @@ state 167
 	MOD  reduce 86
 	SEMICOLUMN  reduce 86
 	SEQUENCE  reduce 86
+	COLUMN  reduce 86
 	GREATER  reduce 86
 	GREATEREQUAL  reduce 86
 	SMALLER  reduce 86
