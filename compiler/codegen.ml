@@ -32,23 +32,23 @@ and void_t = L.void_type context
 and void_ptr_t = L.pointer_type (L.i8_type context)
 
 let node_t = L.pointer_type (match L.type_by_name llm "struct.Node" with
-    None -> raise (Failure "struct.Node doesn't defined!")
+    None -> raise (Failure "struct.Node doesn't defined.")
   | Some x -> x)
 
 let edge_t = L.pointer_type (match L.type_by_name llm "struct.Edge" with
-    None -> raise (Failure "struct.Edge doesn't defined!")
+    None -> raise (Failure "struct.Edge doesn't defined.")
   | Some x -> x)
 
 let graph_t = L.pointer_type (match L.type_by_name llm "struct.Graph" with
-    None -> raise (Failure "struct.Graph doesn't defined!")
+    None -> raise (Failure "struct.Graph doesn't defined.")
   | Some x -> x)
 
 let dict_t = L.pointer_type (match L.type_by_name llm "struct.hashmap_map" with
-    None -> raise (Failure "struct.hashmap_map doesn't defined!")
+    None -> raise (Failure "struct.hashmap_map doesn't defined.")
   | Some x -> x)
 
 let list_t = L.pointer_type (match L.type_by_name llm "struct.List" with
-    None -> raise (Failure "struct.List doesn't defined!")
+    None -> raise (Failure "struct.List doesn't defined.")
   | Some x -> x)
 
 let ltype_of_typ = function
@@ -71,7 +71,7 @@ let ltype_of_typ = function
   | A.Dict_Node_t -> dict_t
   | A.Dict_Graph_t -> dict_t
   | A.Graph_t -> graph_t
-  | _ -> raise (Failure ("Type Not Found for ltype_of_typ!"))
+  | _ -> raise (Failure ("[Error] Type Not Found for ltype_of_typ."))
 
 let type_of_list_type = function
     A.List_Int_t -> A.Int_t
@@ -80,7 +80,7 @@ let type_of_list_type = function
   | A.List_Node_t -> A.Node_t
   | A.List_Graph_t -> A.Graph_t
   | A.List_Bool_t -> A.Bool_t
-  | _ -> raise (Failure ("Type Not Found for type_of_list_type!"))
+  | _ -> raise (Failure ("[Error] Type Not Found for type_of_list_type."))
 
 let type_of_dict_type = function
     A.Dict_Int_t -> A.Int_t
@@ -88,7 +88,7 @@ let type_of_dict_type = function
   | A.Dict_String_t -> A.String_t
   | A.Dict_Node_t -> A.Node_t
   | A.Dict_Graph_t -> A.Graph_t
-  | _ -> raise (Failure ("Type Not Found for type_of_dict_type!"))
+  | _ -> raise (Failure ("[Error] Type Not Found for type_of_dict_type."))
 
 let lconst_of_typ = function
     A.Int_t -> L.const_int i32_t 0
@@ -100,7 +100,7 @@ let lconst_of_typ = function
   | A.Edge_t -> L.const_int i32_t 8
   (* | A.List_Int_t -> list_t
   | A.Dict_String_t -> dict_t *)
-  | _ -> raise (Failure ("Type Not Found for lconst_of_typ!"))
+  | _ -> raise (Failure ("[Error] Type Not Found for lconst_of_typ."))
 
 let int_zero = L.const_int i32_t 0
 and float_zero = L.const_float f_t 0.
@@ -170,6 +170,7 @@ let void_start_to_tpy value_void_ptr llbuilder = function
   | A.String_t -> void_to_string value_void_ptr llbuilder
   | A.Node_t -> void_to_node value_void_ptr llbuilder
   | A.Graph_t -> void_to_graph value_void_ptr llbuilder
+  | _ -> raise (Failure("[Error] Unsupported value type."))
 
 (*
 ================================================================
@@ -210,7 +211,7 @@ let node_get_value node typ llbuilder =
     | A.Float_t -> void_to_float ret llbuilder
     | A.Bool_t -> void_to_bool ret llbuilder
     | A.String_t -> void_to_string ret llbuilder
-    | _ -> raise (Failure("[Error] Unsupported node value type!"))
+    | _ -> raise (Failure("[Error] Unsupported node value type."))
   )
 
 let edge_get_value_t = L.function_type void_ptr_t [| edge_t; i32_t |]
@@ -223,7 +224,7 @@ let edge_get_value edge typ llbuilder =
     | A.Float_t -> void_to_float ret llbuilder
     | A.Bool_t -> void_to_bool ret llbuilder
     | A.String_t -> void_to_string ret llbuilder
-    | _ -> raise (Failure("[Error] Unsupported edge value type!"))
+    | _ -> raise (Failure("[Error] Unsupported edge value type."))
   )
 
 let print_node_t  = L.function_type i32_t [| node_t |]
@@ -257,7 +258,7 @@ let get_dict dict_ptr key llbuilder v_typ =
 
 let remove_dict_t = L.var_arg_function_type i32_t [| dict_t |]
 let remove_dict_f = L.declare_function "hashmap_remove" remove_dict_t the_module
-let remove_dict dict_ptr key llbuilder v_typ =
+let remove_dict dict_ptr key llbuilder =
     let actuals = [| dict_ptr; key |] in
     L.build_call remove_dict_f actuals "hashmap_remove" llbuilder
 
@@ -287,19 +288,19 @@ let ast_list_typ_from_key_typ = function
     l_const_zero -> A.List_Int_t
   | l_const_three -> A.List_String_t
   | l_const_four -> A.List_Node_t
+  | _ -> raise (Failure ("[Error] Unsupported key type for dict."))
 
 let rec put_multi_kvs_dict dict_ptr llbuilder = function
   | [] -> dict_ptr
   | hd :: tl -> ignore(put_dict dict_ptr (fst hd) (snd hd) llbuilder); put_multi_kvs_dict dict_ptr llbuilder tl
-  | _ -> dict_ptr
 
 let dict_call_default_main builder dict_ptr params_list v_typ = function
   | "get" -> (get_dict dict_ptr (List.hd params_list) builder (type_of_dict_type v_typ)), (type_of_dict_type v_typ)
   | "put" -> (put_dict dict_ptr (List.hd params_list) (List.nth params_list 1) builder), v_typ
-  | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder (type_of_dict_type v_typ)), v_typ
+  | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder), v_typ
   | "size" -> (size_dict dict_ptr builder), A.Int_t
   | "keys" -> (keys_dict dict_ptr builder), (ast_list_typ_from_key_typ (key_type_dict dict_ptr builder))
-  | _ -> raise (Failure ("Unsupported Default Call for Dict!"))
+  | _ -> raise (Failure ("[Error] Unsupported default call for dict."))
 
 (*
 ================================================================
@@ -316,7 +317,7 @@ let create_list typ llbuilder =
 
 let add_list_t  = L.var_arg_function_type list_t [| list_t |]
 let add_list_f  = L.declare_function "addList" add_list_t the_module
-let add_list (data, typ) l_ptr llbuilder =
+let add_list data l_ptr llbuilder =
   let actuals = [| l_ptr; data|] in
     (L.build_call add_list_f actuals "addList" llbuilder)
 
@@ -358,7 +359,7 @@ let cast_float data typ builder = if typ == A.Float_t then int_to_float builder 
 
 let rec add_multi_elements_list l_ptr typ llbuilder = function
   | [] -> l_ptr
-  | h :: tl -> add_multi_elements_list (add_list ((cast_float h typ llbuilder), typ) l_ptr llbuilder) typ llbuilder tl
+  | h :: tl -> add_multi_elements_list (add_list (cast_float h typ llbuilder) l_ptr llbuilder) typ llbuilder tl
 
 let print_list_t  = L.function_type i32_t [| list_t |]
 let print_list_f  = L.declare_function "printList" print_list_t the_module
@@ -366,14 +367,14 @@ let print_list l llbuilder =
   L.build_call print_list_f [| l |] "printList" llbuilder
 
 let list_call_default_main builder list_ptr params_list expr_tpy = function
-    "add" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
+    "add" -> (add_list (List.hd params_list) list_ptr builder), expr_tpy
   | "get" -> (get_list list_ptr (List.hd params_list) (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
   | "set" -> (set_list list_ptr (List.hd params_list) (List.nth params_list 1) builder), expr_tpy
   | "remove" -> (remove_list list_ptr (List.hd params_list) builder) ,expr_tpy
   | "size" -> (size_list list_ptr builder), A.Int_t
   | "pop" -> (pop_list list_ptr (type_of_list_type expr_tpy) builder), (type_of_list_type expr_tpy)
-  | "push" -> (add_list (List.hd params_list, (type_of_list_type expr_tpy)) list_ptr builder), expr_tpy
-  | _ -> raise (Failure ("Unsupported Default Call for List!"))
+  | "push" -> (add_list (List.hd params_list) list_ptr builder), expr_tpy
+  | _ -> raise (Failure ("[Error] Unsupported default call for list."))
 (*
 ================================================================
   Graph
@@ -460,7 +461,7 @@ let graph_add_edge graph (sour, dest) op (typ, vals) llbuilder =
     | A.Bool_t -> (2, 6)
     | A.String_t -> (3, 7)
     | A.Void_t | A.Null_t -> (-1, 4)
-    | _ -> raise (Failure "Unsupported edge value type")
+    | _ -> raise (Failure "[Error] Unsupported edge value type.")
   ) in (
     ignore( actuals.(3) <- (L.const_int i32_t typ_val) );
     ignore( actuals_r.(3) <- (L.const_int i32_t typ_val) );
@@ -597,7 +598,7 @@ let translate program =
         try StringMap.find (get_var_name fname n) (Hashtbl.find context_funcs_vars fname)
         with Not_found -> (
           if fname = "main" then
-            (raise (Failure("Local Variable not found...")))
+            (raise (Failure("[Error] Local Variable not found.")))
           else
             (aux n (get_parent_func_name fname))
         )
@@ -622,7 +623,7 @@ let translate program =
         | A.Leq     -> L.build_fcmp L.Fcmp.Ole e1 e2 "flt_leqtmp" llbuilder
         | A.Greater -> L.build_fcmp L.Fcmp.Ogt e1 e2 "flt_sgttmp" llbuilder
         | A.Geq     -> L.build_fcmp L.Fcmp.Oge e1 e2 "flt_sgetmp" llbuilder
-        | _ -> raise (Failure("Unrecognized float binop opreation!"))
+        | _ -> raise (Failure("[Error] Unrecognized float binop opreation."))
       in
 
       (* chars are considered ints, so they will use int_ops as well*)
@@ -641,13 +642,13 @@ let translate program =
         | A.Geq     -> L.build_icmp L.Icmp.Sge e1 e2 "sgetmp" llbuilder
         | A.And     -> L.build_and e1 e2 "andtmp" llbuilder
         | A.Or      -> L.build_or  e1 e2 "ortmp" llbuilder
-        | _ -> raise (Failure("Unrecognized int binop opreation!"))
+        | _ -> raise (Failure("[Error] Unrecognized int binop opreation."))
       in
       let type_handler d = match d with
         | A.Float_t -> float_ops op e1 e2
         | A.Bool_t
         | A.Int_t -> int_ops op e1 e2
-        | _ -> raise (Failure("Unrecognized binop data type!"))
+        | _ -> raise (Failure("[Error] Unrecognized binop data type."))
       in (type_handler dtype,
         match op with
         | A.Add | A.Sub | A.Mult | A.Div | A.Mod -> dtype
@@ -676,7 +677,7 @@ let translate program =
               | (A.Graph_t, A.Node_t, A.Node_t) -> (
                   (graph_get_edge gh_val n1_val n2_val builder, A.Edge_t)
                 )
-              | _ -> raise (Failure("[Error] Unsupported EdgeAt() Expr!"))
+              | _ -> raise (Failure("[Error] Unsupported EdgeAt() Expr."))
           )
       | A.ListP(ls) ->
           let from_expr_typ_to_list_typ = function
@@ -705,6 +706,7 @@ let translate program =
               A.Int_t -> A.Dict_Int_t
             | A.String_t -> A.Dict_String_t
             | A.Node_t -> A.Dict_Node_t
+            | _ -> raise (Failure "[Error] Unsupported key typ for dict.")
           in
           let first_expr_kv = List.hd expr_list in
           (* get type of key and value *)
@@ -752,7 +754,7 @@ let translate program =
                   (gh, A.Graph_t)
                 )
               )
-            | _ -> raise (Failure "Graph Link Under build...")
+            | _ -> raise (Failure "[Error] Graph Link Under build.")
           )
       | A.Binop (e1, op, e2) ->
         let (e1', t1) = expr builder e1
@@ -763,31 +765,31 @@ let translate program =
                 match op with
                 | A.Add -> (merge_graph e1' e2' builder, A.Graph_t)
                 | A.Sub -> (graph_sub_graph e1' e2' builder, A.List_Graph_t)
-                | _ -> raise (Failure ("Unsuported Binop Type On Graph!"))
+                | _ -> raise (Failure ("[Error] Unsuported Binop Type On Graph."))
               )
           | ( A.Graph_t, A.Node_t ) -> (
                 match  op with
                 | A.RootAs -> (graph_set_root e1' e2' builder, A.Graph_t)
                 | A.ListNodesAt -> (graph_get_child_nodes e1' e2' builder, A.List_Node_t)
                 | A.Sub -> (graph_remove_node e1' e2' builder, A.List_Graph_t)
-                | _ -> raise (Failure ("Unsuported Binop Type On Graph * Node!"))
+                | _ -> raise (Failure ("[Error] Unsuported Binop Type On Graph * Node."))
             )
           | ( _, A.Null_t ) -> (
                   match op with
                 | A.Equal -> (L.build_is_null e1' "isNull" builder, A.Bool_t)
-                | _ -> raise (Failure("[Error] Unsupported Null Type Operation!"))
+                | _ -> raise (Failure("[Error] Unsupported Null Type Operation."))
             )
           | ( A.Null_t, _ ) -> (
                   match op with
                 | A.Equal -> (L.build_is_null e2' "isNull" builder, A.Bool_t)
-                | _ -> raise (Failure("[Error] Unsupported Null Type Operation!"))
+                | _ -> raise (Failure("[Error] Unsupported Null Type Operation."))
             )
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
           | ( A.Int_t, A.Float_t) ->
               handle_binop (int_to_float builder e1') op e2' A.Float_t builder
           | ( A.Float_t, A.Int_t ) ->
               handle_binop e1' op (int_to_float builder e2') A.Float_t builder
-          | _ -> raise (Failure ("Unsuported Binop Type!"))
+          | _ -> raise (Failure ("[Error] Unsuported Binop Type."))
         )
       | A.Unop(op, e) ->
       	  let (e', typ) = expr builder e in
@@ -802,7 +804,7 @@ let translate program =
             | (A.Null_t, A.Node_t) -> ignore (L.build_store node_null var builder); node_null
             | (A.Null_t, A.Graph_t) -> ignore (L.build_store graph_null var builder); graph_null
             | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
-            | _ -> raise (Failure("Assign Type inconsist"))
+            | _ -> raise (Failure("[Error] Assign Type inconsist."))
           ), typ)
       | A.Call ("print", el) ->
           let print_expr e =
@@ -821,7 +823,7 @@ let translate program =
               | A.List_Node_t -> ignore(print_list eval builder)
               | A.List_Graph_t -> ignore(print_list eval builder)
               | A.Graph_t -> ignore(print_graph eval builder)
-              | _ -> raise (Failure("Unsupported type for print..."))
+              | _ -> raise (Failure("[Error] Unsupported type for print."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
       | A.Call ("printf", el) ->
           (codegen_print builder (List.map
@@ -833,7 +835,7 @@ let translate program =
               | A.Int_t -> eval
               | A.Node_t -> node_get_value eval A.Int_t builder
               | A.Edge_t -> edge_get_value eval A.Int_t builder
-              | _ -> raise (Failure("[Error] Can't convert to int!"))
+              | _ -> raise (Failure("[Error] Can't convert to int."))
               ), A.Int_t)
       | A.Call ("float", el) ->
             let (eval, etyp) = expr builder (List.hd el) in
@@ -842,7 +844,7 @@ let translate program =
               | A.Float_t -> eval
               | A.Node_t -> node_get_value eval A.Float_t builder
               | A.Edge_t -> edge_get_value eval A.Float_t builder
-              | _ -> raise (Failure("[Error] Can't convert to float!"))
+              | _ -> raise (Failure("[Error] Can't convert to float."))
               ), A.Float_t)
       | A.Call ("bool", el) ->
             let (eval, etyp) = expr builder (List.hd el) in
@@ -850,7 +852,7 @@ let translate program =
               | A.Bool_t -> eval
               | A.Node_t -> node_get_value eval A.Bool_t builder
               | A.Edge_t -> edge_get_value eval A.Bool_t builder
-              | _ -> raise (Failure("[Error] Can't convert to bool!"))
+              | _ -> raise (Failure("[Error] Can't convert to bool."))
               ), A.Bool_t)
       | A.Call ("string", el) ->
             let (eval, etyp) = expr builder (List.hd el) in
@@ -858,7 +860,7 @@ let translate program =
               | A.String_t -> eval
               | A.Node_t -> node_get_value eval A.String_t builder
               | A.Edge_t -> edge_get_value eval A.String_t builder
-              | _ -> raise (Failure("[Error] Can't convert to string!"))
+              | _ -> raise (Failure("[Error] Can't convert to string."))
               ), A.String_t)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
@@ -877,11 +879,11 @@ let translate program =
           | A.List_Int_t | A.List_Float_t | A.List_String_t | A.List_Bool_t
           | A.List_Node_t | A.List_Graph_t ->
               list_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
-          | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t ->
+          | A.Dict_Int_t | A.Dict_Float_t | A.Dict_String_t | A.Dict_Node_t | A.Dict_Graph_t ->
               dict_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
           | A.Graph_t ->
               graph_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
-          | _ -> raise (Failure ("Default Function Not Support!"))
+          | _ -> raise (Failure ("[Error] Default function not support."))
           in
             assign_func_by_typ builder expr_tpy
 
@@ -906,7 +908,7 @@ let translate program =
   	          (A.Void_t, _) -> L.build_ret_void builder
   	        | (t1, t2) when t1 = t2 -> L.build_ret ev builder
             | (A.Float_t, A.Int_t) -> L.build_ret (int_to_float builder ev) builder
-            | _ -> raise (Failure("Return Type Doesn't match..."))
+            | _ -> raise (Failure("[Error] Return type doesn't match."))
           ); builder
       | A.If (predicate, then_stmt, else_stmt) ->
          let (bool_val, _) = expr builder predicate in
