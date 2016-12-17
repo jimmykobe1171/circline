@@ -42,6 +42,7 @@ let convert_var_type = function
   | A.List_String_t -> C.List_String_t
   | A.List_Node_t -> C.List_Node_t
   | A.List_Graph_t -> C.List_Graph_t
+  | A.List_Bool_t -> C.List_Bool_t
   | A.Dict_Int_t -> C.Dict_Int_t
   | A.Dict_Float_t -> C.Dict_Float_t
   | A.Dict_String_t -> C.Dict_String_t

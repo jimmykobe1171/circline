@@ -58,6 +58,7 @@ let ltype_of_typ = function
   | A.List_String_t -> list_t
   | A.List_Node_t -> list_t
   | A.List_Graph_t -> list_t
+  | A.List_Bool_t -> list_t
   | A.Dict_Int_t -> dict_t
   | A.Dict_Float_t -> dict_t
   | A.Dict_String_t -> dict_t
@@ -72,6 +73,7 @@ let type_of_list_type = function
   | A.List_String_t -> A.String_t
   | A.List_Node_t -> A.Node_t
   | A.List_Graph_t -> A.Graph_t
+  | A.List_Bool_t -> A.Graph_t
   | _ -> raise (Failure ("Type Not Found for type_of_list_type!"))
 
 let type_of_dict_type = function
@@ -204,16 +206,30 @@ let get_dict dict_ptr key llbuilder v_typ =
     let value_void_ptr = L.build_call get_dict_f actuals "hashmap_get" llbuilder in 
     void_start_to_tpy value_void_ptr llbuilder v_typ
 
+let remove_dict_t = L.var_arg_function_type i32_t [| dict_t |]
+let remove_dict_f = L.declare_function "hashmap_remove" remove_dict_t the_module
+let remove_dict dict_ptr key llbuilder v_typ =
+    let actuals = [| dict_ptr; key |] in
+    L.build_call remove_dict_f actuals "hashmap_remove" llbuilder
+
+let size_dict_t = L.var_arg_function_type i32_t [| dict_t |]
+let size_dict_f = L.declare_function "hashmap_length" size_dict_t the_module
+let size_dict dict_ptr llbuilder =
+    let actuals = [| dict_ptr |] in
+    L.build_call size_dict_f actuals "hashmap_length" llbuilder
+
 let rec put_multi_kvs_dict dict_ptr llbuilder = function
   | [] -> dict_ptr
   | hd :: tl -> ignore(put_dict dict_ptr (fst hd) (snd hd) llbuilder); put_multi_kvs_dict dict_ptr llbuilder tl
   | _ -> dict_ptr
 
 let dict_call_default_main builder dict_ptr params_list v_typ = function
-  | "get" -> (get_dict dict_ptr (List.hd params_list) builder v_typ), v_typ
-  (* | "put" ->  *)
+  | "get" -> (get_dict dict_ptr (List.hd params_list) builder (type_of_dict_type v_typ)), (type_of_dict_type v_typ)
+  | "put" -> (put_dict dict_ptr (List.hd params_list) (List.nth params_list 1) builder), v_typ
+  | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder (type_of_dict_type v_typ)), v_typ
+  | "size" -> (size_dict dict_ptr builder), A.Int_t
   | _ -> raise (Failure ("Unsupported Default Call for Dict!"))
-
+(* type_of_dict_type expr_tpy *)
 (*
 ================================================================
   Cast
@@ -393,7 +409,7 @@ let graph_add_list graph vals (edges, etyp) dir llbuilder =
   let edges = (
     match etyp with
     | A.List_Int_t | A.List_Float_t | A.List_String_t | A.List_Bool_t
-    | A.List_Node_t | A.List_Graph_t -> edges
+    | A.List_Node_t | A.List_Graph_t | A.List_Bool_t -> edges
     | _ -> list_null
   ) in
   let direction = (
@@ -610,6 +626,7 @@ let translate program =
             | A.String_t -> A.List_String_t
             | A.Node_t -> A.List_Node_t
             | A.Graph_t -> A.List_Graph_t
+            | A.Bool_t -> A.List_Bool_t
             | _ -> A.List_Int_t
           in
           (* get the list typ by its first element *)
@@ -753,7 +770,7 @@ let translate program =
           | A.List_Node_t | A.List_Graph_t ->
               list_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
           | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t -> 
-            dict_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) (type_of_dict_type expr_tpy) default_func_name
+              dict_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
           | A.Graph_t ->
               graph_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
           | _ -> raise (Failure ("Default Function Not Support!"))
