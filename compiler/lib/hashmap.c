@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include "utils.h"
 #include "cast.h"
+#include "list.h"
 
 #define INITIAL_SIZE (256)
 #define MAX_CHAIN_LENGTH (8)
@@ -349,6 +350,35 @@ int hashmap_iterate(struct hashmap_map* m, Func f, void* item) {
     return MAP_OK;
 }
 
+struct List* hashmap_keys(struct hashmap_map* m){
+	if (hashmap_length(m) <= 0){
+		printf("Error! hashmap_getkey: No keys!\n");
+		exit(1);
+	}
+	struct List* dataset = createList(m->keytype);
+	for(int i = 0; i< m->table_size; i++){
+		if(m->data[i].in_use != 0) {
+			switch (m->keytype) {
+				case INT:
+					addList(dataset, VoidtoInt(m->data[i].data[0]));
+					break;
+
+				case STRING:
+					addList(dataset, VoidtoString(m->data[i].data[0]));
+					break;
+
+				case NODE:
+					addList(dataset, VoidtoNode(m->data[i].data[0]));
+					break;
+
+				default:
+					break;
+	}
+		}
+	}
+	return dataset;
+}
+
 // /*
 //  * Remove an element with that key from the map
 //  */
@@ -429,7 +459,8 @@ int hashmap_length(struct hashmap_map* m){
 // 	hashmap_put(mymap, 10, "Hello World");
 // 	hashmap_put(mymap, 20, "Hello World1");
 // 	hashmap_put(mymap, 30, "Hello World2");
-// 	hashmap_iterate(mymap, hashmap_print, 0);
+// 	printList(hashmap_keys(mymap));
+// 	//hashmap_iterate(mymap, hashmap_print, 0);
 // 	//hashmap_remove(mymap, 10);
 // 	//printf("%s\n", VoidtoString((hashmap_get(mymap, 10))));
 // 	return 0;
