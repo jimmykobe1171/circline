@@ -143,6 +143,10 @@ let duplicate_func_error name =
     let msg = sprintf "duplicate function declaration: %s" name in
     raise (SemanticError msg)
 
+let unsupport_operation_error typ name =
+    let msg = sprintf "unsupport operation on type %s: %s" typ name in
+    raise (SemanticError msg)
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -152,6 +156,13 @@ let  match_list_type = function
 | Graph_t -> List_Graph_t
 | _ as t-> invaid_list_type_error (string_of_typ t)
 
+let  reverse_match_list_type = function
+  List_Int_t -> Int_t
+| List_Float_t -> Float_t
+| List_String_t -> String_t
+| List_Node_t -> Node_t
+| List_Graph_t -> Graph_t
+
 let  match_dict_type = function
   Int_t -> Dict_Int_t
 | Float_t -> Dict_Float_t
@@ -159,6 +170,13 @@ let  match_dict_type = function
 | Node_t -> Dict_Node_t
 | Graph_t -> Dict_Graph_t
 | _ as t-> invaid_dict_type_error (string_of_typ t)
+
+let  reverse_match_dict_type = function
+  Dict_Int_t -> Int_t
+| Dict_Float_t ->  Float_t
+| Dict_String_t -> String_t
+| Dict_Node_t -> Node_t
+| Dict_Graph_t -> Graph_t
 
 let check_valid_list_type typ =
     if typ = List_Int_t || typ = List_Float_t || typ = List_String_t || typ = List_Node_t || typ = List_Graph_t then typ
@@ -302,7 +320,21 @@ let check_function func_map func =
               in
               ignore(check_funciton_call func_obj args); func_obj.returnType
               (* TODO: implement call default *)
-        (* |   CallDefault(e, n, es) -> *)
+        | CallDefault(e, n, es) -> let typ = expr e in
+              match typ with
+                  List_Int_t | List_Float_t | List_String_t | List_Node_t | List_Graph_t -> 
+                    (match n with
+                      "add" | "remove" | "push" | "set" -> typ
+                      | "pop" | "get" -> reverse_match_list_type typ
+                      | _ -> unsupport_operation_error (string_of_typ typ) n
+                    )
+                  | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t ->
+                    (match n with
+                      "put" -> typ
+                      | "get" -> reverse_match_dict_type typ
+                      | _ -> unsupport_operation_error (string_of_typ typ) n
+                    )
+                  | _ -> unsupport_operation_error (string_of_typ typ) n
     in
     (* check statement *)
     let rec stmt = function

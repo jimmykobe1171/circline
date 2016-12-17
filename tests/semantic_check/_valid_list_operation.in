@@ -1,0 +1,7 @@
+list<int> a = [1,2,3];
+a.add(2);
+a.remove(0);
+a.push(2);
+a.pop();
+a.get(0);
+a.set(0, 5);
