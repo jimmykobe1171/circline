@@ -1,2 +1,5 @@
+node a = node("1");
+node b = node("1");
+node c = node("1");
 graph g = a--b--c;
 g.nodes(1);

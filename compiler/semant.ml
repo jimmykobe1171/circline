@@ -221,6 +221,17 @@ let invalid_graph_edges_method_error ex =
     let msg = sprintf "graph edges method do not take arguments: %s" ex in
     raise (SemanticError msg)
 
+let invalid_graph_link_error ex =
+    let msg = sprintf "left side of graph link should be node type: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_graph_edge_at_error ex =
+    let msg = sprintf "invalid graph edge at: %s" ex in
+    raise (SemanticError msg)
+
+
+
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -362,7 +373,20 @@ let check_function func_map func =
         | Bool_lit _ -> Bool_t
         (* TODO: check node and graph *)
         | Node(_, e) -> Node_t
-        | Graph_Link(e1, op, e2, e3) -> Graph_t
+        | Graph_Link(e1, op, e2, e3) -> 
+            let check_graph_link e1 op e2 e3 =
+                let typ = expr e1 in
+                match typ with
+                Node_t -> ()
+                |_ -> invalid_graph_link_error (string_of_expr e1)
+            in
+            ignore(check_graph_link e1 op e2 e3); Graph_t
+        | EdgeAt(e, n1, n2) -> 
+            let check_edge_at e n1 n2 =
+                if (expr e) = Graph_t && (expr n1) = Node_t && (expr n2) = Node_t then ()
+                else invalid_graph_edge_at_error (string_of_expr e)
+            in
+            ignore(check_edge_at e n1 n2); Edge_t
         | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
             (match op with
             (* +,-,*,/ *)
@@ -378,6 +402,9 @@ let check_function func_map func =
             | And | Or when t1 = Bool_t && t2 = Bool_t -> Bool_t
             (* mode *)
             | Mod when t1 = Int_t && t2 = Int_t -> Int_t
+     (*        | ListNodesAt ->
+            | ListEdgesAt ->
+            | RootAs -> *)
             | _ -> illegal_binary_operation_error (string_of_typ t1) (string_of_typ t2) (string_of_op op) (string_of_expr e)
             )
         | Unop(op, e) as ex -> let t = expr e in

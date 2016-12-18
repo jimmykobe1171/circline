@@ -1,0 +1,3 @@
+int a = 1;
+node b = node("1");
+a -- b;

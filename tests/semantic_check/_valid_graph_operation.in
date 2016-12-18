@@ -1,3 +1,6 @@
+node a = node("1");
+node b = node("1");
+node c = node("1");
 graph g = a--b--c;
 g.root();
 g.size();
