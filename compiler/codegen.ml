@@ -286,6 +286,11 @@ let key_type_dict dict_ptr llbuilder =
     let actuals = [| dict_ptr |] in
     L.build_call key_type_dict_f actuals "hashmap_keytype" llbuilder
 
+let print_dict_t  = L.function_type i32_t [| dict_t |]
+let print_dict_f  = L.declare_function "hashmap_print" print_dict_t the_module
+let print_dict d llbuilder =
+  L.build_call print_dict_f [| d |] "hashmap_print" llbuilder
+
 let l_const_zero = L.const_int i32_t 0
 and l_const_three = L.const_int i32_t 3
 and l_const_four = L.const_int i32_t 4
@@ -852,6 +857,11 @@ let translate program =
               | A.List_String_t -> ignore(print_list eval builder)
               | A.List_Node_t -> ignore(print_list eval builder)
               | A.List_Graph_t -> ignore(print_list eval builder)
+              | A.Dict_Int_t -> ignore(print_dict eval builder)
+              | A.Dict_Float_t -> ignore(print_dict eval builder)
+              | A.Dict_String_t -> ignore(print_dict eval builder)
+              | A.Dict_Node_t -> ignore(print_dict eval builder)
+              | A.Dict_Graph_t -> ignore(print_dict eval builder)
               | A.Graph_t -> ignore(print_graph eval builder)
               | _ -> raise (Failure("[Error] Unsupported type for print."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
