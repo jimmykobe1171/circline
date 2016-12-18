@@ -329,7 +329,7 @@ let dict_call_default_main builder dict_ptr params_list v_typ = function
   | "put" -> (put_dict dict_ptr (List.hd params_list) (List.nth params_list 1) builder), v_typ
   | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder), v_typ
   | "size" -> (size_dict dict_ptr builder), A.Int_t
-  | "keys" -> (keys_dict dict_ptr builder), A.List_null_t
+  | "keys" -> (keys_dict dict_ptr builder), A.List_Null_t
   | "has" -> (haskey_dict dict_ptr (List.hd params_list) builder), A.Bool_t
   | _ as name -> raise (Failure ("[Error] Unsupported default call for dict." ^ name))
 
@@ -865,7 +865,7 @@ let translate program =
           let (var, typ) = lookup s in
           (( match (etyp, typ) with
             | (t1, t2) when t1 = t2 -> ignore (L.build_store e' var builder); e'
-            | (t1, A.List_null_t) -> ignore (L.build_store e' var builder); e' 
+            | (t1, A.List_Null_t) -> ignore (L.build_store e' var builder); e' 
             | (A.Null_t, _) -> ignore (L.build_store (get_null_value_of_type typ) var builder); (get_null_value_of_type typ)
             | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
             | _ -> raise (Failure("[Error] Assign Type inconsist."))

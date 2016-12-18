@@ -1,0 +1,20 @@
+list<int> l_int = [1, 2, 3];
+list<float> l_float = [1.0, 2.0, 3.0];
+list<string> l_string = ["a", "b", "c"];
+
+node n1 = node(1);
+node n2 = node(2);
+node n3 = node(3);
+
+list<node> l_node = [n1, n2, n3];
+
+list<graph> l_graph = [n1->n2, n2->n3, n3->n1];
+
+print(l_int);
+print(l_float);
+print(l_string);
+print(l_node);
+print(l_graph);
+
+
+
