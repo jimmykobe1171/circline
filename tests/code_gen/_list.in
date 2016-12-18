@@ -1,54 +1,95 @@
+print("------------------test for list of int type------------------");
+
 list<int> l_int = [1, 2, 3];
 print(l_int);
-
 l_int.add(4);
 print(l_int);
-
 print(l_int.get(0));
-
 l_int.set(0, 4);
 print(l_int);
-
-
 l_int.remove(0);
 print(l_int);
-
 print(l_int.size());
-
 print(l_int.pop());
 print(l_int);
-
 print(l_int.push(5));
-/*
 
-
-
-
-
-
-
-
-
-
-
-
+print("------------------test for list of float type------------------");
 
 list<float> l_float = [1.0, 2.0, 3.0];
+print(l_float);
+l_float.add(4.0);
+print(l_float);
+print(l_float.get(0));
+l_float.set(0, 4.0);
+print(l_float);
+l_float.remove(0);
+print(l_float);
+print(l_float.size());
+print(l_float.pop());
+print(l_float);
+print(l_float.push(5.0));
+
+print("------------------test for list of float type------------------");
+
 list<string> l_string = ["a", "b", "c"];
+print(l_string);
+l_string.add("d");
+print(l_string.get(0));
+l_string.set(0, "e");
+print(l_string);
+l_string.remove(0);
+print(l_string);
+print(l_string.size());
+print(l_string.pop());
+print(l_string);
+print(l_string.push("x"));
+
+print("------------------test for list of bool type------------------");
+
+list<bool> l_bool = [true, false, true];
+print(l_bool);
+l_bool.add(false);
+print(l_bool.get(0));
+l_bool.set(0, false);
+print(l_bool);
+l_bool.remove(0);
+print(l_bool);
+print(l_bool.size());
+print(l_bool.pop());
+print(l_bool);
+print(l_bool.push(true));
+
+print("------------------test for list of node type------------------");
 
 node n1 = node(1);
 node n2 = node(2);
 node n3 = node(3);
-
 list<node> l_node = [n1, n2, n3];
+print(l_node);
+l_node.add(node(4));
+print(l_node.get(0));
+l_node.set(0, node("x"));
+print(l_node);
+l_node.remove(0);
+print(l_node);
+print(l_node.size());
+print(l_node.pop());
+print(l_node);
+print(l_node.push(node("y")));
+
+print("------------------test for list of graph type------------------");
 
 list<graph> l_graph = [n1->n2, n2->n3, n3->n1];
 
-
-print(l_float);
-print(l_string);
-print(l_node);
 print(l_graph);
-
-
-*/
+l_graph.add(n1<-n2);
+print(l_graph.get(0));
+l_graph.set(0, n1--n2);
+print(l_graph);
+l_graph.remove(0);
+print(l_graph);
+print(l_graph.size());
+print(l_graph.pop());
+print(l_graph);
+print(l_graph.push(node(5)->node(6)));

@@ -865,7 +865,7 @@ let translate program =
           let (var, typ) = lookup s in
           (( match (etyp, typ) with
             | (t1, t2) when t1 = t2 -> ignore (L.build_store e' var builder); e'
-            | (t1, A.List_Null_t) -> ignore (L.build_store e' var builder); e' 
+            | (A.List_Null_t, _) -> ignore (L.build_store e' var builder); e' 
             | (A.Null_t, _) -> ignore (L.build_store (get_null_value_of_type typ) var builder); (get_null_value_of_type typ)
             | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
             | _ -> raise (Failure("[Error] Assign Type inconsist."))
