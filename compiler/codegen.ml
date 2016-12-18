@@ -243,11 +243,11 @@ let create_dict fst_typ snd_typ llbuilder =
     L.build_call create_dict_f [| fst_typ; snd_typ |] "hashmap" llbuilder
     (* L.build_call create_dict_f [| L.const_int i32_t 3; L.const_int i32_t 3 |] "hashmap_new" llbuilder *)
 
-let put_dict_t = L.var_arg_function_type i32_t [| dict_t |]
+let put_dict_t = L.var_arg_function_type dict_t [| dict_t |]
 let put_dict_f = L.declare_function "hashmap_put" put_dict_t the_module
 let put_dict d key v llbuilder =
     let actuals = [| d; key; v |] in
-    L.build_call put_dict_f actuals "hashmap_put" llbuilder
+    ignore (L.build_call put_dict_f actuals "hashmap_put" llbuilder); d
 
 let get_dict_t = L.var_arg_function_type (L.pointer_type i8_t) [| dict_t |]
 let get_dict_f = L.declare_function "hashmap_get" get_dict_t the_module
@@ -256,7 +256,7 @@ let get_dict dict_ptr key llbuilder v_typ =
     let value_void_ptr = L.build_call get_dict_f actuals "hashmap_get" llbuilder in
     void_start_to_tpy value_void_ptr llbuilder v_typ
 
-let remove_dict_t = L.var_arg_function_type i32_t [| dict_t |]
+let remove_dict_t = L.var_arg_function_type dict_t [| dict_t |]
 let remove_dict_f = L.declare_function "hashmap_remove" remove_dict_t the_module
 let remove_dict dict_ptr key llbuilder =
     let actuals = [| dict_ptr; key |] in
