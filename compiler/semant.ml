@@ -147,6 +147,18 @@ let unsupport_operation_error typ name =
     let msg = sprintf "unsupport operation on type %s: %s" typ name in
     raise (SemanticError msg)
 
+let invalid_list_size_method_error ex =
+    let msg = sprintf "list size method do not take arguments: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_list_pop_method_error ex =
+    let msg = sprintf "list pop method do not take arguments: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_list_get_method_error ex =
+    let msg = sprintf "list get method should only take one argument of type int: %s" ex in
+    raise (SemanticError msg)
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -178,10 +190,28 @@ let  reverse_match_dict_type = function
 | Dict_Node_t -> Node_t
 | Dict_Graph_t -> Graph_t
 
+(* list check helper function  *)
 let check_valid_list_type typ =
     if typ = List_Int_t || typ = List_Float_t || typ = List_String_t || typ = List_Node_t || typ = List_Graph_t then typ
     else invaid_list_type_error (string_of_typ typ)
 
+let check_list_size_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_list_size_method_error (string_of_expr ex)
+
+let check_list_pop_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_list_pop_method_error (string_of_expr ex)
+
+
+
+
+
+
+
+(* dict check helper function  *)
 let check_valid_dict_type typ =
     if typ = Dict_Int_t || typ = Dict_Float_t || typ = Dict_String_t || typ = Dict_Node_t || typ = Dict_Graph_t then typ
     else invaid_dict_type_error (string_of_typ typ)
@@ -323,11 +353,19 @@ let check_function func_map func =
               ignore(check_funciton_call func_obj args); func_obj.returnType
               (* TODO: implement call default *)
         | CallDefault(e, n, es) -> let typ = expr e in
+              (* should not put it here, but we need function expr, so we cann't put outside *)
+              let check_list_get_method ex es =
+                  match es with
+                  [x] when (expr x) = Int_t -> ()
+                  | _ -> invalid_list_get_method_error (string_of_expr ex)
+              in
               match typ with
                   List_Int_t | List_Float_t | List_String_t | List_Node_t | List_Graph_t -> 
                     (match n with
                       "add" | "remove" | "push" | "set" -> typ
-                      | "pop" | "get" -> reverse_match_list_type typ
+                      | "pop" -> ignore(check_list_pop_method e es); reverse_match_list_type typ
+                      | "get" -> ignore(check_list_get_method e es); reverse_match_list_type typ
+                      | "size" -> ignore(check_list_size_method e es); Int_t
                       | _ -> unsupport_operation_error (string_of_typ typ) n
                     )
                   | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t ->
