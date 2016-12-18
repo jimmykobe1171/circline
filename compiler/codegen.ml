@@ -377,7 +377,7 @@ let concat_list_t  = L.var_arg_function_type list_t [| list_t; list_t |]
 let concat_list_f  = L.declare_function "concatList" concat_list_t the_module
 let concat_list l_ptr1 l_ptr2 llbuilder = 
   let actuals = [| l_ptr1; l_ptr2 |] in
-    L.build_call size_list_f actuals "concatList" llbuilder
+    L.build_call concat_list_f actuals "concatList" llbuilder
 
 let cast_float data typ builder = if typ == A.Float_t then int_to_float builder data else data
 
