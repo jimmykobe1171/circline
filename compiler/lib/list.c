@@ -47,7 +47,8 @@ struct List* addListHelper(
 }
 
 struct List* concatList(struct List* list1, struct List* list2){
-	for(int i =0; i < list2->curPos; i++){
+	int curPos = list2->curPos;
+	for(int i =0; i < curPos; i++){
 		list1 = addListHelper(list1, *(list2->arr+i));
 	}
 	return list1;
@@ -244,6 +245,7 @@ int32_t printList(struct List * list){
 // 	addList(a, 7);
 // 	addList(a, 9);
 // 	setList(a, 0, 3);
+// 	a = concatList(a, a);
 // 	removeList(a, 0);
 
 // 	printList(a);
