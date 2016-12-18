@@ -8,3 +8,17 @@ list<int> l_int = d_int.keys();
 print(l_int);
 print(d_int.has(2));
 print(d_int.has(3));
+
+node n1 = node(1);
+node n2 = node(2);
+node n3 = node(3);
+
+dict<graph> d_graph = {n1: n1->n2, n2: n2->n3, n3: n3->n1};
+print(d_graph);
+print(d_graph.get(n1));
+print(d_graph.put(n3, n3->n2));
+print(d_graph.remove(n2));
+print(d_graph.size());
+list<node> l_node = d_graph.keys();
+print(d_graph);
+print(d_graph.has(n2));

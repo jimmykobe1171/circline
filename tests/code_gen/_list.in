@@ -47,6 +47,7 @@ print(l_string.push("x"));
 
 print("------------------test for list of bool type------------------");
 
+
 list<bool> l_bool = [true, false, true];
 print(l_bool);
 l_bool.add(false);
