@@ -18,6 +18,7 @@ let string_of_typ = function
   | List_String_t -> "list<string>"
   | List_Node_t -> "list<node>"
   | List_Graph_t -> "list<graph>"
+  | List_Bool_t -> "list<bool>"
   | List_Null_t -> "list<null>"
   | Dict_Int_t -> "dict<int>" 
   | Dict_Float_t -> "dict<float>" 
@@ -227,6 +228,7 @@ let  match_list_type = function
 | String_t -> List_String_t
 | Node_t -> List_Node_t
 | Graph_t -> List_Graph_t
+| Bool_t -> List_Bool_t
 | _ as t-> invaid_list_type_error (string_of_typ t)
 
 let  reverse_match_list_type = function
@@ -235,6 +237,7 @@ let  reverse_match_list_type = function
 | List_String_t -> String_t
 | List_Node_t -> Node_t
 | List_Graph_t -> Graph_t
+| List_Bool_t -> Bool_t
 
 let  match_dict_type = function
   Int_t -> Dict_Int_t
@@ -253,7 +256,7 @@ let  reverse_match_dict_type = function
 
 (* list check helper function  *)
 let check_valid_list_type typ =
-    if typ = List_Int_t || typ = List_Float_t || typ = List_String_t || typ = List_Node_t || typ = List_Graph_t then typ
+    if typ = List_Int_t || typ = List_Float_t || typ = List_String_t || typ = List_Node_t || typ = List_Graph_t || typ = List_Bool_t then typ
     else invaid_list_type_error (string_of_typ typ)
 
 let check_list_size_method ex es =
@@ -344,7 +347,7 @@ let check_function func_map func =
           Float_t when rvaluet = Int_t -> lvaluet
         | Node_t when rvaluet = Null_t -> lvaluet
         | Graph_t when rvaluet = Null_t -> lvaluet
-        | List_Int_t | List_String_t | List_Float_t | List_Node_t | List_Graph_t when rvaluet = Null_t -> lvaluet
+        | List_Int_t | List_String_t | List_Float_t | List_Node_t | List_Graph_t | List_Bool_t when rvaluet = Null_t -> lvaluet
         | Dict_Int_t | Dict_String_t | Dict_Float_t | Dict_Node_t | Dict_Graph_t when rvaluet = Null_t -> lvaluet
         | List_Int_t | List_String_t | List_Node_t when rvaluet = List_Null_t -> lvaluet
         | _ -> if lvaluet == rvaluet then lvaluet else 
@@ -477,7 +480,7 @@ let check_function func_map func =
                   | _ -> invalid_dict_put_method_error (string_of_typ (reverse_match_dict_type typ)) (string_of_expr ex)
               in
               match typ with
-                  List_Int_t | List_Float_t | List_String_t | List_Node_t | List_Graph_t -> 
+                  List_Int_t | List_Float_t | List_String_t | List_Node_t | List_Graph_t | List_Bool_t -> 
                     (match n with
                       "add" -> ignore(check_list_add_method typ e es); typ
                       | "push"  -> ignore(check_list_push_method typ e es); typ
