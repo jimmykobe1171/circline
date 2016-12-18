@@ -55,6 +55,10 @@ struct List* concatList(struct List* list1, struct List* list2){
 }
 
 struct List* addList(struct List* list, ...) {
+	if (list == NULL) {
+		printf("[Error] addList() - List doesn't exist. \n");
+		exit(1);
+	}
 	va_list ap;
 	va_start(ap, 1);
 	void * data;
@@ -94,11 +98,19 @@ struct List* addList(struct List* list, ...) {
 }
 
 void* getList(struct List* list, int index){
+	if (list == NULL) {
+		printf("[Error] getList() - List doesn't exist. \n");
+		exit(1);
+	}
 	index = rangeHelper(list->curPos, index);
 	return *(list->arr + index);
 }
 
 void* popList(struct List* list){
+	if (list == NULL) {
+		printf("[Error] popList() - List doesn't exist. \n");
+		exit(1);
+	}
 	if(list->curPos-1 < 0){
 		printf("Error! Nothing Can be poped T.T\n");
 		exit(1);
@@ -109,6 +121,10 @@ void* popList(struct List* list){
 }
 
 int32_t setList(struct List* list, int index, ...){
+	if (list == NULL) {
+		printf("[Error] setList() - List doesn't exist. \n");
+		exit(1);
+	}
 	index = rangeHelper(list->curPos, index);
 	va_list ap;
 	va_start(ap, 1);
@@ -149,10 +165,18 @@ int32_t setList(struct List* list, int index, ...){
 }
 
 int getListSize(struct List* list){
+	if (list == NULL) {
+		printf("[Error] getListSize() - List doesn't exist. \n");
+		exit(1);
+	}
 	return list->curPos;
 }
 
 int32_t removeList(struct List* list, int index){
+	if (list == NULL) {
+		printf("[Error] removelist() - List doesn't exist. \n");
+		exit(1);
+	}
 	index =rangeHelper(list->curPos, index);
 	for(int i=index; i < list->curPos; i++){
 		*(list->arr + i) = *(list->arr + i+1);
@@ -162,6 +186,10 @@ int32_t removeList(struct List* list, int index){
 }
 
 int32_t printList(struct List * list){
+	if (list == NULL) {
+		printf("(null)\n");
+		return 0;
+	}
 	int curPos = list->curPos - 1;
 	if (curPos < 0) {
 		printf("list:[]\n");

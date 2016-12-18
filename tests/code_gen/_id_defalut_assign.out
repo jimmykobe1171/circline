@@ -1,0 +1,37 @@
+int a; => 0
+int a; a == 0; => true
+int fun(){ } => 0
+----------------------------------
+float b; => 0.000000
+float b; b == 0; => true
+float fun(){ } => 0.000000
+----------------------------------
+bool c; => false
+bool c; c == false; => true
+bool fun(){ } => false
+----------------------------------
+string d; => (null)
+string d; d == null; => true
+string fun(){ } => (null)
+string fun(){ return null; } => (null)
+string fun(){ return ""; } => 
+----------------------------------
+list<int> e; => (null)
+list<int> e; e == null; => true
+list<int> fun(){ } => (null)
+list<int> fun(){ return null; } => (null)
+----------------------------------
+dict<float> f; => (null)
+dict<float> f; f == null; => true
+dict<float> fun(){ } => (null)
+dict<float> fun(){ return null; } => (null)
+----------------------------------
+node n; => (null)
+node n; n==null; => true
+node fun(){ return null; } => (null)
+node fun(){ } => (null)
+----------------------------------
+graph g; => (null)
+graph n; g==null; => true
+graph fun(){ return null; } => (null)
+graph fun(){ } => (null)

@@ -1,0 +1,40 @@
+a -- 0&b -- 2&c -- [1&a, 3&d, 4&e]     -    e
+******  Graph 0  ******
+Root: a
+Nodes: c, a, d, b
+Edges:
+c -- a : 1
+c -- d : 3
+c -- b : 2
+a -- b : 0
+-----------------------------
+a -- 0&b -- 2&c -- [1&a, 3&d, 4&e]     -    c
+******  Graph 0  ******
+Root: a
+Nodes: a, b
+Edges:
+a -- b : 0
+******  Graph 1  ******
+Root: d
+Nodes: d
+Edges:
+******  Graph 2  ******
+Root: e
+Nodes: e
+Edges:
+-----------------------------
+The subgrpah with the original root is guaranteed to be the first in the list.
+(a -- 0&b -- 2&c -- [1&a, 3&d, 4&e])~d   -  c
+******  Graph 0  ******
+Root: d
+Nodes: d
+Edges:
+******  Graph 1  ******
+Root: a
+Nodes: a, b
+Edges:
+a -- b : 0
+******  Graph 2  ******
+Root: e
+Nodes: e
+Edges:

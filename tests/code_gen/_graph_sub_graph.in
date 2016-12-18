@@ -1,0 +1,57 @@
+node a = node("a");
+node b = node("b");
+node c = node("c");
+node d = node("d");
+node e = node("e");
+
+graph g1 = a -- 0&b -- 2&c -- [1&a, 3&d, 4&e];
+graph g2;
+
+print("a -- 0&b -- 2&c -- [1&a, 3&d, 4&e] - a -- c -- b");
+g2 = a -- c -- b;
+printGraphList(g1 - g2);
+print("-----------------------------");
+
+print("The subgrpah with the original root is guaranteed to be the first in the list.");
+print("(a -- 0&b -- 2&c -- [1&a, 3&d, 4&e])~e - a -- c -- b");
+printGraphList((a -- 0&b -- 2&c -- [1&a, 3&d, 4&e])~e - a -- c -- b);
+
+void printGraphList(list<graph> l) {
+  int i;
+  for (i = 0; i < l.size(); i=i+1 ) {
+    printf("******  Graph %d  ******\n", i);
+    printUndirectedGraph(l.get(i));
+  }
+}
+
+void printUndirectedGraph(graph g) {
+  string getNode(int i) {
+    return string( nodes.get(i) );
+  }
+  printf("Root: %s\n", string(g.root()));
+
+  printf("Nodes: ");
+  list<node> nodes = g.nodes();
+  int size = g.size();
+  int i;
+  int j;
+  for (i=0; i < size - 1; i=i+1) {
+    printf( "%s, ", getNode(i) );
+  }
+  if (size > 0) {
+    print( getNode(i) );
+  }
+
+  printf("Edges:\n");
+  node a;
+  node b;
+  for (i=0; i < size; i=i+1) {
+    for (j=i+1; j<size; j=j+1) {
+      a = nodes.get(i);
+      b = nodes.get(j);
+      if ( g@(a,b) != null ) {
+        printf("%s -- %s : %d\n", string(a), string(b), int(g@(a,b)));
+      }
+    }
+  }
+}

@@ -3,6 +3,8 @@
 
 default: test
 
+all: clean
+	cd ..; make all
 
 test: clean build
 	clang -emit-llvm -o utils.bc -c ../compiler/lib/utils.c -Wno-varargs

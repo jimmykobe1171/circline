@@ -4,6 +4,22 @@ node c = node("c");
 node d = node("d");
 node e = node("e");
 
+print("a -> 0&b +  c -> [1&a, 2&b, 4&d, 3&e]");
+
+graph g = a -> 0&b +  c -> [1&a, 2&b, 4&d, 3&e];
+
+printGraph(g);
+
+print("--------------------------------------");
+print("No shared nodes! Return the first graph.");
+print("a->0&b + c->1&d");
+printGraph( a->0&b + c->1&d );
+
+print("--------------------------------------");
+print("Shared edges. Update the edge value with the second one.");
+print("a -- 0&b -- 2&c -- 1&a + b -- 3&c");
+printGraph( a -- 0&b -- 2&c -- 1&a + b -- 3&c );
+
 void printGraph(graph g) {
   string getNode(int i) {
     return string( nodes.get(i) );
@@ -30,36 +46,8 @@ void printGraph(graph g) {
       a = nodes.get(i);
       b = nodes.get(j);
       if ( g@(a,b) != null ) {
-        printf("%s -> %s\n", string(a), string(b));
+        printf("%s -> %s : %d\n", string(a), string(b), int(g@(a,b)));
       }
     }
   }
 }
-
-print("a->null");
-printGraph(a->null);
-
-print("----------------------------------");
-
-print("a<-b--c->d");
-printGraph(a<-b--c->d);
-
-print("----------------------------------");
-
-print("a<-a--b");
-printGraph(a<-a--b);
-
-print("----------------------------------");
-
-print("a->[b->c, c->d]");
-printGraph(a->[b->c, c->d]);
-
-print("----------------------------------");
-
-print("a->[b, c, d]");
-printGraph(a->[b, c, d]);
-
-print("----------------------------------");
-
-print("a->[b, c<-d]");
-printGraph(a->[b, c<-d]);

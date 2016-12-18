@@ -384,6 +384,10 @@ int hashmap_printhelper(char* key, int32_t type, void* value){
 }
 
 int hashmap_print(struct hashmap_map* m){
+	if (m == NULL) {
+		printf("(null)\n");
+		return 0;
+	}
 	printf("{");
 	for(int i = 0, c=0; i< m->table_size; i++)
 		if(m->data[i].in_use != 0) {

@@ -67,6 +67,7 @@ stmt_list:
 stmt:
 | expr SEMICOLUMN                       { Expr($1) }
 | func_decl                             { Func($1) }
+| RETURN SEMICOLUMN                { Return(Noexpr) }
 | RETURN expr SEMICOLUMN                { Return($2) }
 | FOR LEFTROUNDBRACKET for_expr SEMICOLUMN expr SEMICOLUMN for_expr RIGHTROUNDBRACKET LEFTCURLYBRACKET stmt_list RIGHTCURLYBRACKET
   {For($3, $5, $7, List.rev $10)}

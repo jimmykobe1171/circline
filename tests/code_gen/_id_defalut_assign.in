@@ -1,0 +1,96 @@
+int a;
+printf("int a; => ");
+print(a);
+printf("int a; a == 0; => ");
+print(a == 0);
+printf("int fun(){ } => ");
+int intNull() {  }
+print( intNull() );
+print("----------------------------------");
+
+float b;
+printf("float b; => ");
+print(b);
+printf("float b; b == 0; => ");
+print(b==0);
+printf("float fun(){ } => ");
+float floatNull() {  }
+print( floatNull() );
+print("----------------------------------");
+
+bool c;
+printf("bool c; => ");
+print(c);
+printf("bool c; c == false; => ");
+print(c==false);
+printf("bool fun(){ } => ");
+bool boolNull() {  }
+print( boolNull() );
+print("----------------------------------");
+
+string d;
+printf("string d; => ");
+print(d);
+printf("string d; d == null; => ");
+print(d == null);
+printf("string fun(){ } => ");
+string stringNull() {  }
+print( stringNull() );
+printf("string fun(){ return null; } => ");
+string stringNull2() { return null; }
+print( stringNull2() );
+printf("string fun(){ return \"\"; } => ");
+string stringNull3() { return ""; }
+print( stringNull3() );
+print("----------------------------------");
+
+list<int> e;
+printf("list<int> e; => ");
+print(e);
+printf("list<int> e; e == null; => ");
+print(e == null);
+printf("list<int> fun(){ } => ");
+list<int> listIntNull() {  }
+print( listIntNull() );
+printf("list<int> fun(){ return null; } => ");
+list<int> listIntNull2() { return null; }
+print( listIntNull2() );
+print("----------------------------------");
+
+dict<float> f;
+printf("dict<float> f; => ");
+print(f);
+printf("dict<float> f; f == null; => ");
+print(f==null);
+printf("dict<float> fun(){ } => ");
+dict<float> dictFloatNull() {  }
+print( dictFloatNull() );
+printf("dict<float> fun(){ return null; } => ");
+dict<float> dictFloatNull2() { return null; }
+print( dictFloatNull2() );
+print("----------------------------------");
+
+node n;
+printf("node n; => ");
+print(n);
+printf("node n; n==null; => ");
+print(n==null);
+printf("node fun(){ return null; } => ");
+node nodeNull() { return null; }
+print( nodeNull() );
+printf("node fun(){ } => ");
+node nodeNull2() { }
+print( nodeNull2() );
+print("----------------------------------");
+
+graph g;
+printf("graph g; => ");
+print(g);
+printf("graph n; g==null; => ");
+print(g==null);
+printf("graph fun(){ return null; } => ");
+graph graphNull() { return null; }
+print( graphNull() );
+printf("graph fun(){ } => ");
+graph graphNull2() { }
+print( graphNull2() );

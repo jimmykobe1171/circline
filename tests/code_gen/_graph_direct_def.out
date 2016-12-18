@@ -1,7 +1,9 @@
+a->null
 Root: a
 Nodes: a
 Edges:
 ----------------------------------
+a<-b--c->d
 Root: a
 Nodes: c, d, b, a
 Edges:
@@ -10,13 +12,14 @@ c -> b
 b -> c
 b -> a
 ----------------------------------
+a<-a--b
 Root: a
 Nodes: a, b
 Edges:
-a -> a
 a -> b
 b -> a
 ----------------------------------
+a->[b->c, c->d]
 Root: a
 Nodes: a, b, c, d
 Edges:
@@ -25,6 +28,7 @@ a -> c
 b -> c
 c -> d
 ----------------------------------
+a->[b, c, d]
 Root: a
 Nodes: a, b, c, d
 Edges:
@@ -32,6 +36,7 @@ a -> b
 a -> c
 a -> d
 ----------------------------------
+a->[b, c<-d]
 Root: a
 Nodes: a, b, c, d
 Edges:

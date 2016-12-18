@@ -1,0 +1,13 @@
+graph gh = a->b->c
+gh.root() => a
+gh.size() => 3
+g2 = gh~b => Return a new graph with different root
+gh.root() => a
+gh.nodes() => [b, c, a]
+g2.root() => b
+g2.nodes() => [b, c, a]
+(d<-e).root() => d
+(a--[b,c]).root() => a
+((a--[b,c])~c).root() => c
+(a->[b->c, d<-e]).size() => 5
+(a->[b->c, d<-e]).nodes() =>[a, b, c, d, e]

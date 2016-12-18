@@ -84,6 +84,7 @@ struct Edge createEdge(
 );
 
 int32_t printEdge(struct Edge * edge);
+int32_t printEdgeValue(struct Edge * edge);
 void* edgeGetValue(struct Edge* edge, int32_t type);
 
 /************************************

@@ -232,6 +232,12 @@ let print_node_t  = L.function_type i32_t [| node_t |]
   let print_node node llbuilder =
    L.build_call print_node_f [| node |] "printNode" llbuilder
 
+let print_edge_t  = L.function_type i32_t [| edge_t |]
+  let print_edge_f  = L.declare_function "printEdgeValue" print_edge_t the_module
+  let print_edge edge llbuilder =
+    L.build_call print_edge_f [| edge |] "printEdge" llbuilder
+
+
 (*
 ================================================================
   Dict
@@ -441,11 +447,11 @@ let graph_get_root g llbuilder =
   L.build_call graph_get_root_f [| g |] "rootNode" llbuilder
 
 (* Set the root node of the graph *)
-let graph_set_root_t  = L.function_type i32_t [| graph_t; node_t |]
+let graph_set_root_t  = L.function_type graph_t [| graph_t; node_t |]
 let graph_set_root_f  = L.declare_function "graphSetRoot" graph_set_root_t the_module
 let graph_set_root graph node llbuilder = (
-    ignore(L.build_call graph_set_root_f [| graph; node |] "setRootRes" llbuilder);
-    graph
+      ignore(L.build_call graph_set_root_f [| graph; node |] "setRootRes" llbuilder);
+      graph
   )
 
 (* Add a list of Nodes or Graphs to graph *)
@@ -591,17 +597,13 @@ let translate program =
       let add_formal m (A.Formal(t, n)) p =
         let n' = get_var_name fdecl.A.name n in
         let local = L.define_global n' (get_default_value_of_type t) the_module in
-        ignore (L.build_store p local builder);
-        (* L.set_value_name n p;
-    	  let local = L.build_alloca (ltype_of_typ t) n builder in
-    	    ignore (L.build_store p local builder); *)
+          if L.is_null p then () else ignore (L.build_store p local builder);
     	  StringMap.add n' (local, t) m
       in
 
       let add_local m (A.Formal(t, n)) =
         let n' = get_var_name fdecl.A.name n in
       	let local_var = L.define_global n' (get_default_value_of_type t) the_module in
-      	(* let local_var = L.build_alloca (ltype_of_typ t) n builder in *)
         StringMap.add n' (local_var, t) m
       in
 
@@ -720,10 +722,7 @@ let translate program =
           | hd::ls -> if (snd(expr builder hd)) == A.Float_t then A.Float_t else check_float_typ ls in
           let rec check_graph_typ = function
               [] -> A.Node_t
-            | hd::ls -> (match hd with
-                | A.Graph_Link(_, _, _, _) -> A.Graph_t
-                | _ -> check_graph_typ ls
-              ) in
+            | hd::ls -> if (snd(expr builder hd)) == A.Graph_t then A.Graph_t else check_graph_typ ls in
           let list_typ = snd (expr builder (List.hd ls)) in
           let list_typ = if list_typ == A.Int_t then check_float_typ ls else list_typ in
           let list_typ = if list_typ == A.Node_t then check_graph_typ ls else list_typ in
@@ -823,7 +822,9 @@ let translate program =
               )
           | ( A.Graph_t, A.Node_t ) -> (
                 match  op with
-                | A.RootAs -> (graph_set_root e1' e2' builder, A.Graph_t)
+                | A.RootAs ->
+                    let gh = copy_graph e1' builder in
+                      (graph_set_root gh e2' builder, A.Graph_t)
                 | A.ListNodesAt -> (graph_get_child_nodes e1' e2' builder, A.List_Node_t)
                 | A.Sub -> (graph_remove_node e1' e2' builder, A.List_Graph_t)
                 | _ -> raise (Failure ("[Error] Unsuported Binop Type On Graph * Node."))
@@ -872,6 +873,7 @@ let translate program =
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); eval])
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
               | A.Node_t -> ignore(print_node eval builder)
+              | A.Edge_t -> ignore(print_edge eval builder)
               | A.Dict_Int_t | A.Dict_Float_t | A.Dict_String_t | A.Dict_Node_t
               | A.Dict_Graph_t -> ignore(print_dict eval builder)
               | A.List_Int_t -> ignore(print_list eval builder)
@@ -971,6 +973,7 @@ let translate program =
   	          (A.Void_t, _) -> L.build_ret_void builder
   	        | (t1, t2) when t1 = t2 -> L.build_ret ev builder
             | (A.Float_t, A.Int_t) -> L.build_ret (int_to_float builder ev) builder
+            | (t1, A.Null_t) -> L.build_ret (get_default_value_of_type t1) builder
             | _ -> raise (Failure("[Error] Return type doesn't match."))
           ); builder
       | A.If (predicate, then_stmt, else_stmt) ->

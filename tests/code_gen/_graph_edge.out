@@ -1,5 +1,44 @@
+<node> -> <edge> & <node/graph>
 2
 1.200000
 false
 true
 Hello
+(null)
+<node> -> <edge> & [ <node> ]
+false
+false
+(null)
+<node> -> [ <edge> & <node> ]
+1.000000
+2.000000
+(null)
+<node> -> <edge> & [ <graph> ]
+a->b
+c->d
+EEE
+EEE
+EEE
+EEE
+(null)
+<node> -> [ <edge> & <graph> ]
+a->b
+c->d
+e--a
+e--a
+e--c
+e--c
+(null)
+<node> -> <edge> & [ <node/graph> ]
+2
+2
+2
+3
+(null)
+<node> -> [ <edge> & <node/graph> ]
+a->b
+a->c
+a->d
+(null)
+e->d
+(null)

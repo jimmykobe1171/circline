@@ -98,7 +98,7 @@ void* nodeGetValue(struct Node* node, int32_t type) {
 
 int32_t printNode(struct Node * node) {
 	if (node == NULL) {
-		printf("null\n");
+		printf("(null)\n");
 		return 0;
 	}
 	switch (node->type) {
@@ -194,7 +194,10 @@ void* edgeGetValue(struct Edge* edge, int32_t type) {
 }
 
 int32_t printEdge(struct Edge * edge) {
-	if (edge == NULL) exit(1);
+	if (edge == NULL) {
+		printf("(null)\n");
+		return 0;
+	}
 	switch (edge->type) {
 		case 0:
 			printf("edge%3d->%3d: %d\n", edge->sour->id, edge->dest->id, edge->a);
@@ -210,6 +213,32 @@ int32_t printEdge(struct Edge * edge) {
 			break;
 		default:
 			printf("edge%3d->%3d\n", edge->sour->id, edge->dest->id);
+			break;
+	}
+	return 0;
+}
+
+int32_t printEdgeValue(struct Edge * edge) {
+	if (edge == NULL) {
+		printf("(null)\n");
+		return 0;
+	}
+	switch (edge->type) {
+		case 0:
+			printf("%d\n", edge->a);
+			break;
+		case 1:
+			printf("%f\n", edge->b);
+			break;
+		case 2:
+			printf("%s\n", edge->c ? "true" : "false");
+			break;
+		case 3:
+			printf("%s\n", edge->d);
+			break;
+		default:
+			printf("[Error] Unknown Edge Value Type!\n");
+			exit(1);
 			break;
 	}
 	return 0;
@@ -238,8 +267,9 @@ int32_t graphAddEdgeP( struct Graph* g, struct Node* sour, struct Node* dest, in
 		printf("[Error] Graph doesn't exist!\n");
 		exit(1);
 	}
-	if (g->vn + 1 >= g->vn_len) {
-		printf("[Error] # Graph Nodes reach the limit!\n");
+	if (sour == dest) return 0;
+	if (g->en + 1 >= g->en_len) {
+		printf("[Error] # Graph Edges reach the limit!\n");
 		exit(1);
 	}
 	if (graphAddNode(g, sour) > 0) exit(1);
@@ -291,8 +321,9 @@ int32_t graphAddEdge(
 		printf("[Error] Graph doesn't exist!\n");
 		exit(1);
 	}
-	if (g->vn + 1 >= g->vn_len) {
-		printf("[Error] # Graph Nodes reach the limit!\n");
+	if (sour == dest) return 0;
+	if (g->en + 1 >= g->en_len) {
+		printf("[Error] # Graph Edges reach the limit!\n");
 		exit(1);
 	}
 	if (graphAddNode(g, sour) > 0) exit(1);
@@ -350,6 +381,7 @@ struct List* splitGraph(struct Graph * gh) {
 	if (gh == NULL) return l;
 
 	gh = copyGraph(gh);
+	struct Node* root = gh->root;
 	struct Graph* gh_tmp = NULL;
 	int vn = gh->vn, en = gh->en, max_vn = gh->vn, max_en = gh->en;
 	int i, j, k;
@@ -388,7 +420,22 @@ struct List* splitGraph(struct Graph * gh) {
 				gh->edges[j].type = -9;
 			}
 		}
-		addList(l, gh_tmp);
+		// Adjust the root to the original one
+		bool hasRoot = false;
+		for (i=0; i<gh_tmp->vn; i++) {
+			if (gh_tmp->nodes[i] == root) {
+				gh_tmp -> root = root;
+				hasRoot = true;
+				break;
+			}
+		}
+		// Make sure the subgrpah with original root is the first in the list
+		if (hasRoot && getListSize(l) > 0) {
+			addList(l, (struct Graph*)getList(l, 0));
+			setList(l, 0, gh_tmp);
+		} else {
+			addList(l, gh_tmp);
+		}
 	}
 	free(gh);
 	return l;
@@ -427,8 +474,22 @@ struct Graph* copyGraph(struct Graph* a) {
 struct Graph* mergeGraph(struct Graph* a, struct Graph* b) {
 	if (b == NULL) return copyGraph(a);
 	if (a == NULL) return copyGraph(b);
+
 	struct Graph* gh = copyGraph(a);
-	int i;
+	// Check whether two graph have shared nodes
+	int i; int j;
+	bool hasShared = false;
+	for (i=0; i < a->vn; i++) {
+		for (j=0; j < b->vn; j++) {
+			if (a->nodes[i] == b->nodes[j]) {
+				hasShared = true;
+				break;
+			}
+		}
+		if (hasShared) break;
+	}
+	if (!hasShared) return gh; // Return the copy of graph a
+
 	for (i=0; i< b->vn; i++) {
 		graphAddNode(gh, b->nodes[i]);
 	}
@@ -579,6 +640,7 @@ struct List* graphRemoveNode(struct Graph* gh, struct Node * node) {
 		printf("[Error] Graph doesn't exist!\n");
 		exit(1);
 	}
+	gh = copyGraph(gh);
 	int i, j;
 	// Remove Node
 	for (i=0; i<gh->vn; i++) {
@@ -653,9 +715,10 @@ struct List* graphGetChildNodes(struct Graph* g, struct Node* rt) {
 
 int32_t printGraph(struct Graph* g) {
 	if (g == NULL) {
-		printf("null\n");
+		printf("(null)\n");
 		return 0;
 	}
+	printf("--------------------------------------\n");
 	printf("#Nodes: %d  ", g->vn);
 	if (g->root != NULL) {
 		printf("Root Node: %d\n", g->root->id);
@@ -666,11 +729,11 @@ int32_t printGraph(struct Graph* g) {
 	for (i=0; i<g->vn; i++) {
 		printNode(g->nodes[i]);
 	}
-	printf("--------------------------------------\n");
 	printf("#Edges: %d\n", g->en);
 	for (i=0; i<g->en; i++) {
 		printEdge(&g->edges[i]);
 	}
+	printf("--------------------------------------\n");
 	return 0;
 }
 
