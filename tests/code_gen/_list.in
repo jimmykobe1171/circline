@@ -1,4 +1,38 @@
 list<int> l_int = [1, 2, 3];
+print(l_int);
+
+l_int.add(4);
+print(l_int);
+
+print(l_int.get(0));
+
+l_int.set(0, 4);
+print(l_int);
+
+
+l_int.remove(0);
+print(l_int);
+
+print(l_int.size());
+
+print(l_int.pop());
+print(l_int);
+
+print(l_int.push(5));
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
 list<float> l_float = [1.0, 2.0, 3.0];
 list<string> l_string = ["a", "b", "c"];
 
@@ -10,11 +44,11 @@ list<node> l_node = [n1, n2, n3];
 
 list<graph> l_graph = [n1->n2, n2->n3, n3->n1];
 
-print(l_int);
+
 print(l_float);
 print(l_string);
 print(l_node);
 print(l_graph);
 
 
-
+*/
