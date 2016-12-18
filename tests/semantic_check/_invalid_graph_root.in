@@ -1,0 +1,2 @@
+graph g = a--b--c;
+g.root(1);

@@ -1,0 +1,5 @@
+graph g = a--b--c;
+g.root();
+g.size();
+g.nodes();
+g.edges();

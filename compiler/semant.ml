@@ -195,6 +195,22 @@ let invalid_dict_put_method_error typ ex =
     let msg = sprintf "dict put method should only take two argument of type (int, string or node) and %s: %s" typ ex in
       raise (SemanticError msg)
 
+let invalid_graph_root_method_error ex =
+    let msg = sprintf "graph root method do not take arguments: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_graph_size_method_error ex =
+    let msg = sprintf "graph size method do not take arguments: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_graph_nodes_method_error ex =
+    let msg = sprintf "graph nodes method do not take arguments: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_graph_edges_method_error ex =
+    let msg = sprintf "graph edges method do not take arguments: %s" ex in
+    raise (SemanticError msg)
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -256,6 +272,26 @@ let check_dict_keys_method ex es =
     [] -> ()
     | _ -> invalid_dict_keys_method_error (string_of_expr ex)
 
+(* graph check helper function  *)
+let check_graph_root_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_graph_root_method_error (string_of_expr ex)
+
+let check_graph_size_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_graph_size_method_error (string_of_expr ex)
+
+let check_graph_nodes_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_graph_nodes_method_error (string_of_expr ex)
+
+let check_graph_edges_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_graph_edges_method_error (string_of_expr ex)
 
 (* get function obj from func_map, if not found, raise error *)
 let get_func_obj name func_map = 
@@ -457,6 +493,13 @@ let check_function func_map func =
                       | "size" -> ignore(check_dict_size_method e es); Int_t
                       (* | "keys" -> ignore(check_dict_keys_method e es) reverse_match_dict_type typ *)
                       | _ -> unsupport_operation_error (string_of_typ typ) n
+                    )
+                  | Graph_t ->
+                    (match n with
+                      "root" -> ignore(check_graph_root_method e es); Node_t
+                      | "size" -> ignore(check_graph_size_method e es); Int_t
+                      | "nodes" -> ignore(check_graph_nodes_method e es); List_Node_t
+                      | "edges" -> ignore(check_graph_edges_method e es); List_Int_t
                     )
                   | _ -> unsupport_operation_error (string_of_typ typ) n
     in
