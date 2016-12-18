@@ -1,0 +1,24 @@
+Root: a
+Nodes: a, e, g, b, c, f, d
+Edges:
+a -> b : 1
+a -> c : 5
+a -> d : 3
+e -> g : 4
+e -> c : 2
+g -> b : 1
+b -> e : 1
+c -> g : 1
+c -> f : 1
+f -> c : 1
+d -> c : 2
+d -> f : 3
+
+Dijkstra Results:
+a -> a : 0 [ a ]
+a -> e : 2 [ a, b, e ]
+a -> g : 5 [ a, b, e, c, g ]
+a -> b : 1 [ a, b ]
+a -> c : 4 [ a, b, e, c ]
+a -> f : 5 [ a, b, e, c, f ]
+a -> d : 3 [ a, d ]
