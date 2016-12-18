@@ -1,0 +1,10 @@
+dict<node> d = { a: a}
+d.size() => 1
+d.has(a) => true
+d.get(a) => a
+d.size() => 1
+d.has(b) => false
+d.put(b, b)
+d.size() => 2
+d.has(b) => true
+d.keys() => [ a, b ]
