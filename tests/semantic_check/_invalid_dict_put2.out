@@ -1,0 +1,1 @@
+dict put method should only take two argument of type (int, string or node) and int: a

@@ -159,6 +159,42 @@ let invalid_list_get_method_error ex =
     let msg = sprintf "list get method should only take one argument of type int: %s" ex in
     raise (SemanticError msg)
 
+let invalid_list_add_method_error typ ex =
+    let msg = sprintf "list add method should only take one argument of type %s: %s" typ ex in
+    raise (SemanticError msg)
+
+let invalid_list_push_method_error typ ex =
+    let msg = sprintf "list push method should only take one argument of type %s: %s" typ ex in
+    raise (SemanticError msg)
+
+let invalid_list_remove_method_error ex =
+    let msg = sprintf "list remove method should only take one argument of type int: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_list_set_method_error typ ex =
+    let msg = sprintf "list set method should only take two argument of type int and %s: %s" typ ex in
+    raise (SemanticError msg)
+
+let invalid_dict_get_method_error ex =
+    let msg = sprintf "dict get method should only take one argument of type int, string or node: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_dict_remove_method_error ex =
+    let msg = sprintf "dict remove method should only take one argument of type int, string or node: %s" ex in
+    raise (SemanticError msg)
+
+let invalid_dict_size_method_error ex =
+    let msg = sprintf "dict size method do not take arguments: %s" ex in
+      raise (SemanticError msg)
+
+let invalid_dict_keys_method_error ex =
+    let msg = sprintf "dict keys method do not take arguments: %s" ex in
+      raise (SemanticError msg)
+
+let invalid_dict_put_method_error typ ex =
+    let msg = sprintf "dict put method should only take two argument of type (int, string or node) and %s: %s" typ ex in
+      raise (SemanticError msg)
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -205,16 +241,21 @@ let check_list_pop_method ex es =
     [] -> ()
     | _ -> invalid_list_pop_method_error (string_of_expr ex)
 
-
-
-
-
-
-
 (* dict check helper function  *)
 let check_valid_dict_type typ =
     if typ = Dict_Int_t || typ = Dict_Float_t || typ = Dict_String_t || typ = Dict_Node_t || typ = Dict_Graph_t then typ
     else invaid_dict_type_error (string_of_typ typ)
+
+let check_dict_size_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_dict_size_method_error (string_of_expr ex)
+
+let check_dict_keys_method ex es =
+    match es with
+    [] -> ()
+    | _ -> invalid_dict_keys_method_error (string_of_expr ex)
+
 
 (* get function obj from func_map, if not found, raise error *)
 let get_func_obj name func_map = 
@@ -359,19 +400,62 @@ let check_function func_map func =
                   [x] when (expr x) = Int_t -> ()
                   | _ -> invalid_list_get_method_error (string_of_expr ex)
               in
+              let check_list_add_method typ ex es =
+                  match es with
+                  [x] when (expr x) = (reverse_match_list_type typ) -> ()
+                  | _ -> invalid_list_add_method_error (string_of_typ (reverse_match_list_type typ)) (string_of_expr ex)
+              in
+              let check_list_push_method typ ex es =
+                  match es with
+                  [x] when (expr x) = (reverse_match_list_type typ) -> ()
+                  | _ -> invalid_list_push_method_error (string_of_typ (reverse_match_list_type typ)) (string_of_expr ex)
+              in
+              let check_list_remove_method ex es =
+                  match es with
+                  [x] when (expr x) = Int_t -> ()
+                  | _ -> invalid_list_remove_method_error (string_of_expr ex)
+              in
+              let check_list_set_method typ ex es =
+                  match es with
+                  [index; value] when (expr index) = Int_t && (expr value) = (reverse_match_list_type typ) -> ()
+                  | _ -> invalid_list_set_method_error (string_of_typ (reverse_match_list_type typ)) (string_of_expr ex)
+              in
+              let check_dict_get_method ex es =
+                  match es with
+                  [x] when List.mem (expr x) [Int_t; String_t; Node_t] -> ()
+                  | _ -> invalid_dict_get_method_error (string_of_expr ex)
+              in
+              let check_dict_remove_method ex es =
+                  match es with
+                  [x] when List.mem (expr x) [Int_t; String_t; Node_t] -> ()
+                  | _ -> invalid_dict_remove_method_error (string_of_expr ex)
+              in
+              let check_dict_put_method typ ex es =
+                  match es with
+                  [key; value] when List.mem (expr key) [Int_t; String_t; Node_t] && (expr value) = (reverse_match_dict_type typ) -> ()
+                  | _ -> invalid_dict_put_method_error (string_of_typ (reverse_match_dict_type typ)) (string_of_expr ex)
+              in
               match typ with
                   List_Int_t | List_Float_t | List_String_t | List_Node_t | List_Graph_t -> 
                     (match n with
-                      "add" | "remove" | "push" | "set" -> typ
+                      "add" -> ignore(check_list_add_method typ e es); typ
+                      | "push"  -> ignore(check_list_push_method typ e es); typ
+                      | "remove" -> ignore(check_list_remove_method e es); typ
+                      | "set" -> ignore(check_list_set_method typ e es); typ
+                      (* | "concat" ->  *)
                       | "pop" -> ignore(check_list_pop_method e es); reverse_match_list_type typ
                       | "get" -> ignore(check_list_get_method e es); reverse_match_list_type typ
                       | "size" -> ignore(check_list_size_method e es); Int_t
                       | _ -> unsupport_operation_error (string_of_typ typ) n
                     )
                   | Dict_Int_t | Dict_Float_t | Dict_String_t | Dict_Node_t | Dict_Graph_t ->
+                    (* key support type node, string, int *)
                     (match n with
-                      "put" -> typ
-                      | "get" -> reverse_match_dict_type typ
+                      "put" -> ignore(check_dict_put_method typ e es); typ
+                      | "get" -> ignore(check_dict_get_method e es); reverse_match_dict_type typ
+                      | "remove" -> ignore(check_dict_remove_method e es); typ
+                      | "size" -> ignore(check_dict_size_method e es); Int_t
+                      (* | "keys" -> ignore(check_dict_keys_method e es) reverse_match_dict_type typ *)
                       | _ -> unsupport_operation_error (string_of_typ typ) n
                     )
                   | _ -> unsupport_operation_error (string_of_typ typ) n
