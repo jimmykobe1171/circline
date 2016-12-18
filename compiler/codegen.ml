@@ -297,12 +297,6 @@ let keys_dict dict_ptr llbuilder =
     let actuals = [| dict_ptr |] in
     L.build_call keys_dict_f actuals "hashmap_keys" llbuilder
 
-let print_dict_t = L.var_arg_function_type i32_t [| dict_t |]
-let print_dict_f = L.declare_function "hashmap_print" print_dict_t the_module
-let print_dict dict_ptr llbuilder =
-    let actuals = [| dict_ptr |] in
-    L.build_call print_dict_f actuals "hashmap_print" llbuilder
-
 let key_type_dict_t = L.var_arg_function_type i32_t [| dict_t |]
 let key_type_dict_f = L.declare_function "hashmap_keytype" key_type_dict_t the_module
 let key_type_dict dict_ptr llbuilder =
@@ -553,7 +547,7 @@ let graph_sub_graph_f = L.declare_function "subGraph" graph_sub_graph_t the_modu
 let graph_sub_graph g1 g2 llbuilder =
   L.build_call graph_sub_graph_f [| g1; g2 |] "listOfSubGraphs" llbuilder
 
-let graph_call_default_main llbuilder gh params_list obj_tpy = function
+let graph_call_default_main llbuilder gh = function
   | "root" -> graph_get_root gh llbuilder , A.Node_t
   | "size" -> graph_num_of_nodes gh llbuilder, A.Int_t
   | "nodes" -> graph_get_all_nodes gh llbuilder, A.List_Node_t
@@ -737,7 +731,7 @@ let translate program =
           let list_conversion el =
             let (e_val, e_typ) = expr builder el in
             (   match e_typ with
-              | A.Node_t when list_typ = Graph_t -> (
+              | A.Node_t when list_typ = A.Graph_t -> (
                   let gh = create_graph builder in (
                       ignore(graph_add_node gh e_val builder);
                       (gh, A.Graph_t)
@@ -756,7 +750,9 @@ let translate program =
               A.Int_t -> A.Dict_Int_t
             | A.String_t -> A.Dict_String_t
             | A.Node_t -> A.Dict_Node_t
-            | _ -> raise (Failure "[Error] Unsupported key typ for dict.")
+            | A.Float_t -> A.Dict_Float_t
+            | A.Graph_t -> A.Dict_Graph_t
+            | _ -> raise (Failure "[Error] Unsupported key type for dict.")
           in
           let first_expr_kv = List.hd expr_list in
           (* get type of key and value *)
@@ -889,11 +885,6 @@ let translate program =
               | A.List_String_t -> ignore(print_list eval builder)
               | A.List_Node_t -> ignore(print_list eval builder)
               | A.List_Graph_t -> ignore(print_list eval builder)
-              | A.Dict_Int_t -> ignore(print_dict eval builder)
-              | A.Dict_Float_t -> ignore(print_dict eval builder)
-              | A.Dict_String_t -> ignore(print_dict eval builder)
-              | A.Dict_Node_t -> ignore(print_dict eval builder)
-              | A.Dict_Graph_t -> ignore(print_dict eval builder)
               | A.Graph_t -> ignore(print_graph eval builder)
               | _ -> raise (Failure("[Error] Unsupported type for print."))
           ) in List.iter print_expr el; (L.const_int i32_t 0, A.Void_t)
@@ -954,7 +945,7 @@ let translate program =
           | A.Dict_Int_t | A.Dict_Float_t | A.Dict_String_t | A.Dict_Node_t | A.Dict_Graph_t ->
               dict_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
           | A.Graph_t ->
-              graph_call_default_main builder id_val (List.map (fun e -> fst (expr builder e)) params_list) expr_tpy default_func_name
+              graph_call_default_main builder id_val default_func_name
           | _ -> raise (Failure ("[Error] Default function not support."))
           in
             assign_func_by_typ builder expr_tpy
