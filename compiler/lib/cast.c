@@ -61,8 +61,11 @@ void* GraphtoVoid(struct Graph* val){
 	return (void*) val;
 }
 
-bool isInt(int32_t d){return (d==INT);};
-bool isFloat(int32_t d){return (d==FLOAT);};
+bool isInt(int32_t d){
+	return (d==INT);
+};
+// bool isFloat(int32_t d){return (d==FLOAT);};
+bool isFloat(int32_t d){return null;};
 bool isBool(int32_t d){return (d==BOOL);};
 bool isString(int32_t d){return (d==STRING);};
 bool isNode(int32_t d){return (d==NODE);};

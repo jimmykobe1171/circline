@@ -320,16 +320,6 @@ let haskey_dict dict_ptr key llbuilder =
     let actuals = [| dict_ptr; key |] in
     L.build_call haskey_dict_f actuals "hashmap_haskey" llbuilder
 
-let l_const_zero = L.const_int i32_t 0
-and l_const_three = L.const_int i32_t 3
-and l_const_four = L.const_int i32_t 4
-
-let ast_list_typ_from_key_typ = function
-    l_const_zero -> A.List_Int_t
-  | l_const_three -> A.List_String_t
-  | l_const_four -> A.List_Node_t
-  | _ -> raise (Failure ("[Error] Unsupported key type for dict."))
-
 let rec put_multi_kvs_dict dict_ptr llbuilder = function
   | [] -> dict_ptr
   | hd :: tl -> ignore(put_dict dict_ptr (fst hd) (snd hd) llbuilder); put_multi_kvs_dict dict_ptr llbuilder tl
@@ -339,7 +329,7 @@ let dict_call_default_main builder dict_ptr params_list v_typ = function
   | "put" -> (put_dict dict_ptr (List.hd params_list) (List.nth params_list 1) builder), v_typ
   | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder), v_typ
   | "size" -> (size_dict dict_ptr builder), A.Int_t
-  | "keys" -> (keys_dict dict_ptr builder), (ast_list_typ_from_key_typ (key_type_dict dict_ptr builder))
+  | "keys" -> (keys_dict dict_ptr builder), A.List_null_t
   | "has" -> (haskey_dict dict_ptr (List.hd params_list) builder), A.Bool_t
   | _ as name -> raise (Failure ("[Error] Unsupported default call for dict." ^ name))
 
@@ -875,6 +865,7 @@ let translate program =
           let (var, typ) = lookup s in
           (( match (etyp, typ) with
             | (t1, t2) when t1 = t2 -> ignore (L.build_store e' var builder); e'
+            | (t1, A.List_null_t) -> ignore (L.build_store e' var builder); e' 
             | (A.Null_t, _) -> ignore (L.build_store (get_null_value_of_type typ) var builder); (get_null_value_of_type typ)
             | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
             | _ -> raise (Failure("[Error] Assign Type inconsist."))
