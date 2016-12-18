@@ -384,13 +384,14 @@ int hashmap_printhelper(char* key, int32_t type, void* value){
 }
 
 int hashmap_print(struct hashmap_map* m){
-	printf("[");
-	for(int i = 0; i< m->table_size; i++)
+	printf("{");
+	for(int i = 0, c=0; i< m->table_size; i++)
 		if(m->data[i].in_use != 0) {
 			hashmap_printhelper(m->data[i].key, m->valuetype, m->data[i].data[1]);
-			printf(", ");
+			c++;
+			if (c < m->size) printf(", ");
 		}
-	printf("]\n");
+	printf("}\n");
 	return 0;
 }
 

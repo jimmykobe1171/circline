@@ -1,0 +1,16 @@
+print(23);
+print(-1.2);
+print(1>2);
+print(true);
+print("Hello World!");
+print(null);
+print(node("a"));
+print([1, 2, 3]);
+print({"a": 1, "b": 2});
+print(1, true, "Hello~");
+
+int a = 1;
+float b = 1.2;
+string d = "What!";
+
+printf("%d--\n%.2f--\n%s\n", a, b , d);

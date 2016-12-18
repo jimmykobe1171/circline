@@ -274,6 +274,12 @@ let keys_dict dict_ptr llbuilder =
     let actuals = [| dict_ptr |] in
     L.build_call keys_dict_f actuals "hashmap_keys" llbuilder
 
+let print_dict_t = L.var_arg_function_type i32_t [| dict_t |]
+let print_dict_f = L.declare_function "hashmap_print" print_dict_t the_module
+let print_dict dict_ptr llbuilder =
+    let actuals = [| dict_ptr |] in
+    L.build_call print_dict_f actuals "hashmap_print" llbuilder
+
 let key_type_dict_t = L.var_arg_function_type i32_t [| dict_t |]
 let key_type_dict_f = L.declare_function "hashmap_keytype" key_type_dict_t the_module
 let key_type_dict dict_ptr llbuilder =
@@ -694,13 +700,33 @@ let translate program =
           let rec check_float_typ = function
             [] -> A.Int_t
           | hd::ls -> if (snd(expr builder hd)) == A.Float_t then A.Float_t else check_float_typ ls in
+          let rec check_graph_typ = function
+              [] -> A.Node_t
+            | hd::ls -> (match hd with
+                | A.Graph_Link(_, _, _, _) -> A.Graph_t
+                | _ -> check_graph_typ ls
+              ) in
           let list_typ = snd (expr builder (List.hd ls)) in
           let list_typ = if list_typ == A.Int_t then check_float_typ ls else list_typ in
+          let list_typ = if list_typ == A.Node_t then check_graph_typ ls else list_typ in
+
+          let list_conversion el =
+            let (e_val, e_typ) = expr builder el in
+            (   match e_typ with
+              | A.Node_t when list_typ = Graph_t -> (
+                  let gh = create_graph builder in (
+                      ignore(graph_add_node gh e_val builder);
+                      (gh, A.Graph_t)
+                  )
+                )
+              | _ -> (e_val, e_typ)
+            )
+          in
 
           (* create a new list first *)
           let l_ptr_type = (create_list list_typ builder, from_expr_typ_to_list_typ list_typ) in
           (* then add all initial values to the list *)
-            add_multi_elements_list (fst l_ptr_type) list_typ builder (List.map fst (List.map (expr builder) ls)), (snd l_ptr_type)
+            add_multi_elements_list (fst l_ptr_type) list_typ builder (List.map fst (List.map list_conversion ls)), (snd l_ptr_type)
       | A.DictP(expr_list) ->
           let from_type_to_dict_typ = function
               A.Int_t -> A.Dict_Int_t
@@ -777,11 +803,13 @@ let translate program =
           | ( _, A.Null_t ) -> (
                   match op with
                 | A.Equal -> (L.build_is_null e1' "isNull" builder, A.Bool_t)
+                | A.Neq -> (L.build_is_not_null e1' "isNull" builder, A.Bool_t)
                 | _ -> raise (Failure("[Error] Unsupported Null Type Operation."))
             )
           | ( A.Null_t, _ ) -> (
                   match op with
-                | A.Equal -> (L.build_is_null e2' "isNull" builder, A.Bool_t)
+                | A.Equal -> (L.build_is_null e2' "isNotNull" builder, A.Bool_t)
+                | A.Neq -> (L.build_is_not_null e2' "isNotNull" builder, A.Bool_t)
                 | _ -> raise (Failure("[Error] Unsupported Null Type Operation."))
             )
           | ( t1, t2) when t1 = t2 -> handle_binop e1' op e2' t1 builder
@@ -816,6 +844,8 @@ let translate program =
               | A.Float_t -> ignore(codegen_print builder [(codegen_string_lit "%f\n" builder); eval])
               | A.String_t -> ignore(codegen_print builder [(codegen_string_lit "%s\n" builder); eval])
               | A.Node_t -> ignore(print_node eval builder)
+              | A.Dict_Int_t | A.Dict_Float_t | A.Dict_String_t | A.Dict_Node_t
+              | A.Dict_Graph_t -> ignore(print_dict eval builder)
               | A.List_Int_t -> ignore(print_list eval builder)
               | A.List_Float_t -> ignore(print_list eval builder)
               | A.List_Bool_t -> ignore(print_list eval builder)

@@ -7,7 +7,7 @@ default: circline.native
 circline.native :
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis,llvm.linker,llvm.bitreader,llvm.irreader -cflags -w,+a-4 \
 		circline.native;
-	clang -emit-llvm -o utils.bc -c lib/utils.c
+	clang -emit-llvm -o utils.bc -c lib/utils.c -Wno-varargs
 
 OBJS = organizer.cmx cast.cmx ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx circline.cmx parserize.cmx
 

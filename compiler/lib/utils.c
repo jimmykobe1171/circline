@@ -11,6 +11,7 @@
 
 int32_t printBool(bool a) {
 	printf("%s\n", a ? "true" : "false");
+	return 0;
 }
 
 /************************************
@@ -45,22 +46,50 @@ void* nodeGetValue(struct Node* node, int32_t type) {
 			printf("[Error] Node doesn't exist!\n");
 			exit(1);
 		}
-		if (node->type != type) {
-			printf("[Error] Node Value Type Doesn't Consistent!\n");
-			exit(1);
-		}
 		void* res;
 		switch (type) {
 			case INT:
-				res = InttoVoid(node->a); break;
+				if (node->type == INT)
+					res = InttoVoid(node->a);
+				else if (node->type == FLOAT)
+					res = InttoVoid((int)node->b);
+				else if (node->type == BOOL)
+					res = InttoVoid( node->c ? 1 : 0 );
+				else {
+					res = InttoVoid(0);
+				}
+				break;
 			case FLOAT:
-				res = FloattoVoid(node->b); break;
+				if (node->type == INT)
+					res = FloattoVoid((double)node->a);
+				else if (node->type == FLOAT)
+					res = FloattoVoid(node->b);
+				else if (node->type == BOOL)
+					res = FloattoVoid( node->c ? 1 : 0 );
+				else {
+					res = FloattoVoid(0);
+				}
+				break;
 			case BOOL:
-				res = BooltoVoid(node->c); break;
+				if (node->type == INT)
+					res = BooltoVoid(node->a != 0);
+				else if (node->type == FLOAT)
+					res = BooltoVoid(node->b != 0);
+				else if (node->type == BOOL)
+					res = BooltoVoid(node->c);
+				else {
+					res = BooltoVoid(false);
+				}
+				break;
 			case STRING:
-				res = StringtoVoid(node->d); break;
+				if (node->type == STRING)
+					res = StringtoVoid(node->d);
+				else{
+					res = StringtoVoid("");
+				}
+				break;
 			default:
-				printf("[Error] Node Value Type Error!\n");
+				printf("[Error] Edge Value Type Error!\n");
 				exit(1);
 				break;
 		}
@@ -114,20 +143,48 @@ void* edgeGetValue(struct Edge* edge, int32_t type) {
 		printf("[Error] Edge doesn't exist!\n");
 		exit(1);
 	}
-	if (edge->type != type) {
-		printf("[Error] Edge Value Type Doesn't Consistent!\n");
-		exit(1);
-	}
 	void* res;
 	switch (type) {
 		case INT:
-			res = InttoVoid(edge->a); break;
+			if (edge->type == INT)
+				res = InttoVoid(edge->a);
+			else if (edge->type == FLOAT)
+				res = InttoVoid((int)edge->b);
+			else if (edge->type == BOOL)
+				res = InttoVoid( edge->c ? 1 : 0 );
+			else {
+				res = InttoVoid(0);
+			}
+			break;
 		case FLOAT:
-			res = FloattoVoid(edge->b); break;
+			if (edge->type == INT)
+				res = FloattoVoid((double)edge->a);
+			else if (edge->type == FLOAT)
+				res = FloattoVoid(edge->b);
+			else if (edge->type == BOOL)
+				res = FloattoVoid( edge->c ? 1 : 0 );
+			else {
+				res = FloattoVoid(0);
+			}
+			break;
 		case BOOL:
-			res = BooltoVoid(edge->c); break;
+			if (edge->type == INT)
+				res = BooltoVoid(edge->a != 0);
+			else if (edge->type == FLOAT)
+				res = BooltoVoid(edge->b != 0);
+			else if (edge->type == BOOL)
+				res = BooltoVoid(edge->c);
+			else {
+				res = BooltoVoid(false);
+			}
+			break;
 		case STRING:
-			res = StringtoVoid(edge->d); break;
+			if (edge->type == STRING)
+				res = StringtoVoid(edge->d);
+			else {
+				res = StringtoVoid("");
+			}
+			break;
 		default:
 			printf("[Error] Edge Value Type Error!\n");
 			exit(1);
@@ -746,4 +803,9 @@ int32_t printGraph(struct Graph* g) {
 // 		printGraph( getList(l, i) );
 // 		printf("===============================\n");
 // 	}
+// }
+
+
+// int main() {
+// 	printf("%f", (float)1 );
 // }

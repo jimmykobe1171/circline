@@ -1,0 +1,41 @@
+node a = node(1);
+node b = node(1.2);
+node c = node(true);
+node d = node("Hello");
+graph g = null;
+
+/* int() */
+
+print( int(23) );
+print( int(a) );
+print( int(b) );
+g = a -- 2& b;
+print( int( g@(a,b) ) );
+print( int( (a -- 4.4& b)@(a,b) ) );
+
+/* bool() */
+
+print( bool(1>3) );
+print( bool(1<3) );
+print( bool(a) );
+print( bool(b) );
+print( bool(c) );
+g = a -- (2<3)& b;
+print( bool( g@(a,b) ) );
+print( bool( (a -- 4.4& b)@(a,b) ) );
+
+/* float() */
+
+print( float(23) );
+print( float(3.4) );
+print( float(a) );
+print( float(b) );
+g = a -- 3.2& b;
+print( float( g@(a,b) ) );
+print( float( (a -- 6& b)@(a,b) ) );
+
+/* string() */
+
+print( string("Hello") );
+print( string(d) );
+print( string( (a -- "Edge"& b)@(a,b) ) );

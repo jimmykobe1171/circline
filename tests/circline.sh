@@ -2,7 +2,7 @@
 file="utils.bc"
 if [ ! -e "$file" ]
 then
-	clang -emit-llvm -o utils.bc -c ../compiler/lib/utils.c
+	clang -emit-llvm -o utils.bc -c ../compiler/lib/utils.c -Wno-varargs
 fi
 
 if [ $# -eq 1 ]

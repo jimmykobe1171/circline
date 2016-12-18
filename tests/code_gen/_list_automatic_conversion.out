@@ -1,0 +1,5 @@
+graph 0: root - a, nodes - 1
+graph 1: root - b, nodes - 1
+graph 2: root - c, nodes - 1
+graph 3: root - d, nodes - 2
+list:[1.000000, 2.000000, 3.000000]

@@ -5,7 +5,7 @@ default: test
 
 
 test: clean build
-	clang -emit-llvm -o utils.bc -c ../compiler/lib/utils.c
+	clang -emit-llvm -o utils.bc -c ../compiler/lib/utils.c -Wno-varargs
 	bash ./test_scanner.sh
 	bash ./test_parser.sh
 	bash ./test_semantic.sh

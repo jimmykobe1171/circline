@@ -38,7 +38,9 @@ compiler/run
 tests/semantic_check/semantic_check
 
 
-*.out
+compiler/*.out
+
+compiler/lib/*.out
 
 *.o
 

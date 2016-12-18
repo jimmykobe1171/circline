@@ -1,0 +1,40 @@
+Root: a
+Nodes: a
+Edges:
+----------------------------------
+Root: a
+Nodes: c, d, b, a
+Edges:
+c -> d
+c -> b
+b -> c
+b -> a
+----------------------------------
+Root: a
+Nodes: a, b
+Edges:
+a -> a
+a -> b
+b -> a
+----------------------------------
+Root: a
+Nodes: a, b, c, d
+Edges:
+a -> b
+a -> c
+b -> c
+c -> d
+----------------------------------
+Root: a
+Nodes: a, b, c, d
+Edges:
+a -> b
+a -> c
+a -> d
+----------------------------------
+Root: a
+Nodes: a, b, c, d
+Edges:
+a -> b
+a -> c
+d -> c
