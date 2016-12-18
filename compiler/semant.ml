@@ -18,6 +18,7 @@ let string_of_typ = function
   | List_String_t -> "list<string>"
   | List_Node_t -> "list<node>"
   | List_Graph_t -> "list<graph>"
+  | List_Null_t -> "list<null>"
   | Dict_Int_t -> "dict<int>" 
   | Dict_Float_t -> "dict<float>" 
   | Dict_String_t -> "dict<string>" 
@@ -335,6 +336,7 @@ let check_function func_map func =
           Float_t when rvaluet = Int_t -> lvaluet
         | Node_t when rvaluet = Null_t -> lvaluet
         | Graph_t when rvaluet = Null_t -> lvaluet
+        | List_Int_t | List_String_t | List_Node_t when rvaluet = List_Null_t -> lvaluet
         | _ -> if lvaluet == rvaluet then lvaluet else 
             illegal_assignment_error (string_of_typ lvaluet) (string_of_typ rvaluet) (string_of_expr ex)
     in
@@ -491,7 +493,8 @@ let check_function func_map func =
                       | "get" -> ignore(check_dict_get_method e es); reverse_match_dict_type typ
                       | "remove" -> ignore(check_dict_remove_method e es); typ
                       | "size" -> ignore(check_dict_size_method e es); Int_t
-                      (* | "keys" -> ignore(check_dict_keys_method e es) reverse_match_dict_type typ *)
+                      (* return List_Null_t here to bypass the semantic check *)
+                      | "keys" -> ignore(check_dict_keys_method e es); List_Null_t
                       | _ -> unsupport_operation_error (string_of_typ typ) n
                     )
                   | Graph_t ->

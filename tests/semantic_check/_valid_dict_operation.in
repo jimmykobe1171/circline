@@ -11,3 +11,6 @@ a.remove(1);
 a.remove(n);
 a.size();
 a.keys();
+list<int> c = a.keys();
+list<string> d = a.keys();
+list<node> f = a.keys();
