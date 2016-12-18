@@ -1,0 +1,7 @@
+a--[b, c--[e, f], d]
+dfs(gh, a): [ a, b, c, e, f, d ]
+dfs(gh, b): [ b, a, c, e, f, d ]
+dfs(gh, c): [ c, e, f, a, b, d ]
+dfs(gh, d): [ d, a, b, c, e, f ]
+dfs(gh, e): [ e, c, f, a, b, d ]
+dfs(gh, f): [ f, c, e, a, b, d ]

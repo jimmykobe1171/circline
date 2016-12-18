@@ -113,6 +113,23 @@ and graph_null = L.const_null graph_t
 and list_null = L.const_null list_t
 and dict_null = L.const_null dict_t
 
+let get_null_value_of_type = function
+  | A.String_t -> str_null
+  | A.Node_t -> node_null
+  | A.Graph_t -> graph_null
+  | A.List_Int_t
+  | A.List_Float_t
+  | A.List_String_t
+  | A.List_Node_t
+  | A.List_Graph_t
+  | A.List_Bool_t -> list_null
+  | A.Dict_Int_t
+  | A.Dict_Float_t
+  | A.Dict_String_t
+  | A.Dict_Node_t
+  | A.Dict_Graph_t -> dict_null
+  | _ -> raise (Failure ("[Error] Type Not Found for get_null_value_of_type."))
+
 let get_default_value_of_type = function
   | A.Int_t as t -> L.const_int (ltype_of_typ t) 0
   | A.Bool_t as t -> L.const_int (ltype_of_typ t) 0
@@ -323,8 +340,8 @@ let dict_call_default_main builder dict_ptr params_list v_typ = function
   | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder), v_typ
   | "size" -> (size_dict dict_ptr builder), A.Int_t
   | "keys" -> (keys_dict dict_ptr builder), (ast_list_typ_from_key_typ (key_type_dict dict_ptr builder))
-  | "haskey" -> (haskey_dict dict_ptr (List.hd params_list) builder), A.Bool_t
-  | _ -> raise (Failure ("[Error] Unsupported default call for dict."))
+  | "has" -> (haskey_dict dict_ptr (List.hd params_list) builder), A.Bool_t
+  | _ as name -> raise (Failure ("[Error] Unsupported default call for dict." ^ name))
 
 (*
 ================================================================
@@ -381,7 +398,7 @@ let get_list l_ptr index typ llbuilder =
 
 let concat_list_t  = L.var_arg_function_type list_t [| list_t; list_t |]
 let concat_list_f  = L.declare_function "concatList" concat_list_t the_module
-let concat_list l_ptr1 l_ptr2 llbuilder = 
+let concat_list l_ptr1 l_ptr2 llbuilder =
   let actuals = [| l_ptr1; l_ptr2 |] in
     L.build_call concat_list_f actuals "concatList" llbuilder
 
@@ -858,8 +875,7 @@ let translate program =
           let (var, typ) = lookup s in
           (( match (etyp, typ) with
             | (t1, t2) when t1 = t2 -> ignore (L.build_store e' var builder); e'
-            | (A.Null_t, A.Node_t) -> ignore (L.build_store node_null var builder); node_null
-            | (A.Null_t, A.Graph_t) -> ignore (L.build_store graph_null var builder); graph_null
+            | (A.Null_t, _) -> ignore (L.build_store (get_null_value_of_type typ) var builder); (get_null_value_of_type typ)
             | (A.Int_t, A.Float_t) -> let e' = (int_to_float builder e') in ignore (L.build_store e' var builder); e'
             | _ -> raise (Failure("[Error] Assign Type inconsist."))
           ), typ)

@@ -1,0 +1,7 @@
+a--[b, c--[e, f], d]
+bfs(gh, a): [ a, b, c, d, e, f ]
+bfs(gh, b): [ b, a, c, d, e, f ]
+bfs(gh, c): [ c, e, f, a, b, d ]
+bfs(gh, d): [ d, a, b, c, e, f ]
+bfs(gh, e): [ e, c, f, a, b, d ]
+bfs(gh, f): [ f, c, e, a, b, d ]
