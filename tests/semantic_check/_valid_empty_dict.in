@@ -1,5 +1,0 @@
-dict<int> a = {};
-dict<float> b = {};
-dict<string> c = {};
-dict<node> d = {};
-dict<graph> e = {};

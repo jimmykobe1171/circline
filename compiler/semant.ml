@@ -176,6 +176,10 @@ let invalid_list_set_method_error typ ex =
     let msg = sprintf "list set method should only take two argument of type int and %s: %s" typ ex in
     raise (SemanticError msg)
 
+let invalid_empty_list_decl_error ex =
+    let msg = sprintf "invalid empty list declaration: %s" ex in
+    raise (SemanticError msg)
+
 let invalid_dict_get_method_error ex =
     let msg = sprintf "dict get method should only take one argument of type int, string or node: %s" ex in
     raise (SemanticError msg)
@@ -195,6 +199,10 @@ let invalid_dict_keys_method_error ex =
 let invalid_dict_put_method_error typ ex =
     let msg = sprintf "dict put method should only take two argument of type (int, string or node) and %s: %s" typ ex in
       raise (SemanticError msg)
+
+let invalid_empty_dict_decl_error ex =
+    let msg = sprintf "invalid empty dict declaration: %s" ex in
+    raise (SemanticError msg)
 
 let invalid_graph_root_method_error ex =
     let msg = sprintf "graph root method do not take arguments: %s" ex in
@@ -336,6 +344,8 @@ let check_function func_map func =
           Float_t when rvaluet = Int_t -> lvaluet
         | Node_t when rvaluet = Null_t -> lvaluet
         | Graph_t when rvaluet = Null_t -> lvaluet
+        | List_Int_t | List_String_t | List_Float_t | List_Node_t | List_Graph_t when rvaluet = Null_t -> lvaluet
+        | Dict_Int_t | Dict_String_t | Dict_Float_t | Dict_Node_t | Dict_Graph_t when rvaluet = Null_t -> lvaluet
         | List_Int_t | List_String_t | List_Node_t when rvaluet = List_Null_t -> lvaluet
         | _ -> if lvaluet == rvaluet then lvaluet else 
             illegal_assignment_error (string_of_typ lvaluet) (string_of_typ rvaluet) (string_of_expr ex)
@@ -375,15 +385,10 @@ let check_function func_map func =
             | _ -> illegal_unary_operation_error (string_of_typ t) (string_of_uop op) (string_of_expr ex)
             )
         | Id s -> type_of_identifier func s
-        (* check assignment operation, check cases of empty list and empty dict *)
-        | Assign(var, ListP([])) -> let lt = type_of_identifier func var in check_valid_list_type lt
-        | Assign(var, DictP([])) -> let lt = type_of_identifier func var in check_valid_dict_type lt
         | Assign(var, e) as ex -> let lt = type_of_identifier func var and rt = expr e in
             check_assign lt rt ex
         | Noexpr -> Void_t
-        (* check list element type, if empty, assign List_Int_t here, and check again when encounter
-        assignment operation *)
-        | ListP([]) -> List_Int_t
+        | ListP([]) as ex -> invalid_empty_list_decl_error (string_of_expr ex)
         | ListP(es) -> 
             let element_type =
               let determine_element_type ss = List.fold_left 
@@ -396,9 +401,7 @@ let check_function func_map func =
               List.hd (determine_element_type es)
             in
             match_list_type element_type
-        (* check dictionary element type if empty, assign Dict_Int_t here, and check again when encounter
-        assignment operation *)
-        | DictP([]) -> Dict_Int_t
+        | DictP([]) as ex -> invalid_empty_dict_decl_error (string_of_expr ex)
         | DictP(es) ->
             let element_type =
               let determine_element_type ss = List.fold_left 
