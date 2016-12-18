@@ -47,6 +47,8 @@ extern int hashmap_iterate(struct hashmap_map* m, Func f);
 
 extern int hashmap_print(struct hashmap_map* m);
 
+extern int hashmap_haskey(struct hashmap_map* m,...);
+
 extern struct List* hashmap_keys(struct hashmap_map* m);
 /*
  * Add an element to the hashmap. Return MAP_OK or MAP_OMEM.

@@ -395,6 +395,49 @@ int hashmap_print(struct hashmap_map* m){
 	return 0;
 }
 
+int hashmap_haskey(struct hashmap_map* m,...){
+	int curr;
+	int i;
+	char* key;
+	va_list ap;
+	va_start(ap, 1);
+
+	switch (m->keytype) {
+		case INT:
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, int));
+			break;
+
+		case STRING:
+			key = va_arg(ap, char*);
+			break;
+
+		case NODE:
+			key = malloc(16);
+			snprintf(key, 16, "%d", va_arg(ap, struct Node*)->id);
+			break;
+
+		default:
+			break;
+	}
+	va_end(ap);
+	/* Find data location */
+	curr = hashmap_hash_int(m, key);
+	/* Linear probing, if necessary */
+	for(i = 0; i<MAX_CHAIN_LENGTH; i++){
+        int in_use = m->data[curr].in_use;
+        if (in_use == 1){
+            if (strcmp(m->data[curr].key,key)==0){
+                // *arg = (m->data[curr].data);
+                // return MAP_OK;
+                return 1;
+            }
+		}
+		curr = (curr + 1) % m->table_size;
+	}
+	return 0;
+}
+
 struct List* hashmap_keys(struct hashmap_map* m){
 	if (hashmap_length(m) <= 0){
 		printf("Error! hashmap_getkey: No keys!\n");
