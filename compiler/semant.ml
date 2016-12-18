@@ -229,8 +229,17 @@ let invalid_graph_edge_at_error ex =
     let msg = sprintf "invalid graph edge at: %s" ex in
     raise (SemanticError msg)
 
+let invalid_graph_list_node_at_error ex =
+    let msg = sprintf "invalid graph list node at: %s" ex in
+    raise (SemanticError msg)
 
+let unsupport_graph_list_edge_at_error ex =
+    let msg = sprintf "unsupport graph list edge at: %s" ex in
+    raise (SemanticError msg)
 
+let invalid_graph_root_as_error ex =
+    let msg = sprintf "invalid graph root as: %s" ex in
+    raise (SemanticError msg)
 
 
 let  match_list_type = function
@@ -315,6 +324,15 @@ let check_graph_edges_method ex es =
     match es with
     [] -> ()
     | _ -> invalid_graph_edges_method_error (string_of_expr ex)
+
+let check_graph_list_node_at ex lt rt =
+    if lt = Graph_t && rt = Node_t then () else
+    invalid_graph_list_node_at_error (string_of_expr ex)
+
+let check_graph_root_as ex lt rt =
+    if lt = Graph_t && rt = Node_t then () else
+    invalid_graph_root_as_error (string_of_expr ex)
+
 
 (* get function obj from func_map, if not found, raise error *)
 let get_func_obj name func_map = 
@@ -402,9 +420,9 @@ let check_function func_map func =
             | And | Or when t1 = Bool_t && t2 = Bool_t -> Bool_t
             (* mode *)
             | Mod when t1 = Int_t && t2 = Int_t -> Int_t
-     (*        | ListNodesAt ->
-            | ListEdgesAt ->
-            | RootAs -> *)
+            | ListNodesAt -> ignore(check_graph_list_node_at e t1 t2); List_Node_t;
+            | ListEdgesAt -> unsupport_graph_list_edge_at_error (string_of_expr e)
+            | RootAs -> ignore(check_graph_root_as e t1 t2); Graph_t;
             | _ -> illegal_binary_operation_error (string_of_typ t1) (string_of_typ t2) (string_of_op op) (string_of_expr e)
             )
         | Unop(op, e) as ex -> let t = expr e in
