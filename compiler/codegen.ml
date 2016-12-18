@@ -291,6 +291,12 @@ let print_dict_f  = L.declare_function "hashmap_print" print_dict_t the_module
 let print_dict d llbuilder =
   L.build_call print_dict_f [| d |] "hashmap_print" llbuilder
 
+let haskey_dict_t = L.var_arg_function_type i1_t [| dict_t |]
+let haskey_dict_f = L.declare_function "hashmap_haskey" haskey_dict_t the_module
+let haskey_dict dict_ptr key llbuilder =
+    let actuals = [| dict_ptr; key |] in
+    L.build_call haskey_dict_f actuals "hashmap_haskey" llbuilder
+
 let l_const_zero = L.const_int i32_t 0
 and l_const_three = L.const_int i32_t 3
 and l_const_four = L.const_int i32_t 4
@@ -311,6 +317,7 @@ let dict_call_default_main builder dict_ptr params_list v_typ = function
   | "remove" -> (remove_dict dict_ptr (List.hd params_list) builder), v_typ
   | "size" -> (size_dict dict_ptr builder), A.Int_t
   | "keys" -> (keys_dict dict_ptr builder), (ast_list_typ_from_key_typ (key_type_dict dict_ptr builder))
+  | "haskey" -> (haskey_dict dict_ptr (List.hd params_list) builder), A.Bool_t
   | _ -> raise (Failure ("[Error] Unsupported default call for dict."))
 
 (*
@@ -365,6 +372,12 @@ let get_list l_ptr index typ llbuilder =
   let actuals = [| l_ptr; index|] in
   let value_void_ptr = L.build_call get_list_f actuals "getList" llbuilder in
   void_start_to_tpy value_void_ptr llbuilder typ
+
+let concat_list_t  = L.var_arg_function_type list_t [| list_t; list_t |]
+let concat_list_f  = L.declare_function "concatList" concat_list_t the_module
+let concat_list l_ptr1 l_ptr2 llbuilder = 
+  let actuals = [| l_ptr1; l_ptr2 |] in
+    L.build_call size_list_f actuals "concatList" llbuilder
 
 let cast_float data typ builder = if typ == A.Float_t then int_to_float builder data else data
 
@@ -654,7 +667,7 @@ let translate program =
         | A.And     -> L.build_and e1 e2 "andtmp" llbuilder
         | A.Or      -> L.build_or  e1 e2 "ortmp" llbuilder
         | _ -> raise (Failure("[Error] Unrecognized int binop opreation."))
-      in
+        in
       let type_handler d = match d with
         | A.Float_t -> float_ops op e1 e2
         | A.Bool_t
@@ -792,6 +805,16 @@ let translate program =
         and (e2', t2) = expr builder e2 in
         (* Handle Automatic Binop Type Converstion *)
         (match (t1, t2) with
+          | (A.List_Int_t, A.List_Int_t)
+          | (A.List_Float_t, A.List_Float_t)
+          | (A.List_Bool_t, A.List_Bool_t)
+          | (A.List_String_t, A.List_String_t)
+          | (A.List_Node_t, A.List_Node_t)
+          | (A.List_Graph_t, A.List_Graph_t) -> (
+                match op with
+                | A.Add -> (concat_list e1' e2' builder, t1)
+                | _ -> raise (Failure ("[Error] Unsuported Binop Type On List."))
+              )
           | ( A.Graph_t, A.Graph_t) -> (
                 match op with
                 | A.Add -> (merge_graph e1' e2' builder, A.Graph_t)

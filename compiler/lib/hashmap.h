@@ -47,7 +47,7 @@ extern int hashmap_iterate(struct hashmap_map* m, Func f);
 
 extern int hashmap_print(struct hashmap_map* m);
 
-extern int hashmap_haskey(struct hashmap_map* m,...);
+extern bool hashmap_haskey(struct hashmap_map* m,...);
 
 extern struct List* hashmap_keys(struct hashmap_map* m);
 /*

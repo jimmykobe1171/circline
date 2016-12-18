@@ -395,7 +395,7 @@ int hashmap_print(struct hashmap_map* m){
 	return 0;
 }
 
-int hashmap_haskey(struct hashmap_map* m,...){
+bool hashmap_haskey(struct hashmap_map* m,...){
 	int curr;
 	int i;
 	char* key;
