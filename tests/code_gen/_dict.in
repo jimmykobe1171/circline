@@ -1,0 +1,10 @@
+dict<int> d_int = {1: 11, 2: 22, 3: 33};
+print(d_int);
+print(d_int.get(1));
+print(d_int.put(4, 44));
+print(d_int.remove(2));
+print(d_int.size());
+list<int> l_int = d_int.keys();
+print(l_int);
+print(d_int.has(2));
+print(d_int.has(3));
