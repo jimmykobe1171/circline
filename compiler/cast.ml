@@ -48,6 +48,7 @@ type var_type =
 | List_String_t
 | List_Node_t
 | List_Graph_t
+| List_Null_t
 | Void_t
 | Null_t
 
