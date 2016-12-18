@@ -25,18 +25,16 @@ printf("d.size() => %d\n", d.size());
 printf("d.has(b) => ");
 print(d.has(b));
 
-list<node> l = d.keys();
 
-/*
 int i;
 list<node> l = d.keys();
-printf("[ ");
+printf("d.keys() => [ ");
 for (i=0; i<d.size()-1; i=i+1) {
   printf("%s, ", string(l.get(i)));
 }
 if (d.size() > 0) {
-  printf("%s]", string(l.get(i)));
+  printf("%s ]\n", string(l.get(i)));
 } else {
-  printf("]");
+  print("]");
 }
-*/
+
