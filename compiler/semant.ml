@@ -242,6 +242,10 @@ let invalid_graph_root_as_error ex =
     let msg = sprintf "invalid graph root as: %s" ex in
     raise (SemanticError msg)
 
+let wrong_func_return_type_error typ1 typ2 =
+    let msg = sprintf "wrong function return type: %s, expect %s" typ1 typ2 in
+    raise (SemanticError msg)
+
 
 let  match_list_type = function
   Int_t -> List_Int_t
@@ -336,6 +340,20 @@ let check_graph_list_node_at ex lt rt =
 let check_graph_root_as ex lt rt =
     if lt = Graph_t && rt = Node_t then () else
     invalid_graph_root_as_error (string_of_expr ex)
+
+let check_return_type func typ =
+    let lvaluet = func.returnType and rvaluet = typ in
+    match lvaluet with
+        Float_t when rvaluet = Int_t -> ()
+        | String_t when rvaluet = Null_t -> ()
+        | Node_t when rvaluet = Null_t -> ()
+        | Graph_t when rvaluet = Null_t -> ()
+        | List_Int_t | List_String_t | List_Float_t | List_Node_t | List_Graph_t | List_Bool_t when rvaluet = Null_t -> ()
+        | Dict_Int_t | Dict_String_t | Dict_Float_t | Dict_Node_t | Dict_Graph_t when rvaluet = Null_t -> ()
+        (* for dict.keys() *)
+        | List_Int_t | List_String_t | List_Node_t when rvaluet = List_Null_t -> ()
+        | _ -> if lvaluet == rvaluet then () else 
+            wrong_func_return_type_error (string_of_typ rvaluet) (string_of_typ lvaluet)
 
 
 (* get function obj from func_map, if not found, raise error *)
@@ -574,7 +592,7 @@ let check_function func_map func =
     (* check statement *)
     let rec stmt = function
             Expr(e) -> ignore (expr e)
-            | Return e -> ignore (expr e)
+            | Return e -> ignore (check_return_type func (expr e))
             | For(e1, e2, e3, stls) -> 
                 ignore (expr e1); ignore (expr e2); ignore (expr e3); ignore(stmt_list stls)
             | If(e, stls1, stls2) -> ignore(e); ignore(stmt_list stls1); ignore(stmt_list stls2)

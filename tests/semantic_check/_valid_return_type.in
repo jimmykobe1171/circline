@@ -1,0 +1,74 @@
+float f1() {
+    return 1;
+}
+
+string f2() {
+    return null;
+}
+
+node f3() {
+    return null;
+}
+
+graph f4() {
+    return null;
+}
+
+list<int> f5() {
+    return null;
+}
+
+list<string> f6() {
+    return null;
+}
+
+list<float> f7() {
+    return null;
+}
+
+list<node> f8() {
+    return null;
+}
+
+list<graph> f9() {
+    return null;
+}
+
+list<bool> f10() {
+    return null;
+}
+
+dict<int> f11() {
+    return null;
+}
+
+dict<float> f12() {
+    return null;
+}
+
+dict<string> f13() {
+    return null;
+}
+
+dict<node> f14() {
+    return null;
+}
+
+dict<graph> f15() {
+    return null;
+}
+
+list<int> f16() {
+    dict<int> g = {"a": 1};
+    return g.keys();
+}
+
+list<string> f17() {
+    dict<int> g = {"a": 1};
+    return g.keys();
+}
+
+list<node> f18() {
+    dict<int> g = {"a": 1};
+    return g.keys();
+}
