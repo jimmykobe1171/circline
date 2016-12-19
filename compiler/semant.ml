@@ -1,6 +1,5 @@
 open Cast
 open Printf
-open Str
 
 
 module StringMap = Map.Make(String)
@@ -11,7 +10,7 @@ let string_of_typ = function
   | Float_t -> "float"
   | String_t -> "string"
   | Bool_t -> "bool" 
-  | Node_t -> "node" 
+  | Node_t -> "node"
   | Graph_t -> "graph" 
   | List_Int_t -> "list<int>"
   | List_Float_t -> "list<float>"
@@ -27,6 +26,7 @@ let string_of_typ = function
   | Dict_Graph_t -> "dict<graph>" 
   | Void_t -> "void"
   | Null_t -> "null"
+  | Edge_t -> "edge"
 
 let string_of_op = function
     Add -> "+"
@@ -63,6 +63,7 @@ let rec string_of_expr = function
   | Bool_lit(true) -> "true"
   | Bool_lit(false) -> "false"
   | Node(_, e) -> "node(" ^ string_of_expr e ^ ")"
+  | EdgeAt(e, n1, n2) -> string_of_expr e ^ "@" ^ "(" ^ string_of_expr n1 ^ "," ^ string_of_expr n2 ^ ")"
   | Graph_Link(e1, op, e2, e3) -> 
       "graph_link(" ^ string_of_expr e1 ^ " " ^ string_of_graph_op op ^ " " ^ string_of_expr e2 ^ " " ^ string_of_expr e3 ^ ")"
   | Binop(e1, o, e2) ->
@@ -72,10 +73,10 @@ let rec string_of_expr = function
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Noexpr -> ""
   (* TODO: maybe revise to a more meaningful name *)
-  | ListP(es) -> "list" 
-  | DictP(es) -> "dict"
-  | Call(n, es) -> "function call " ^ n
-  | CallDefault(e, n, es) -> "function call " ^ string_of_expr e ^ "." ^ n
+  | ListP(_) -> "list" 
+  | DictP(_) -> "dict"
+  | Call(n, _) -> "function call " ^ n
+  | CallDefault(e, n, _) -> "function call " ^ string_of_expr e ^ "." ^ n
   
 
 exception SemanticError of string
@@ -258,6 +259,7 @@ let  reverse_match_list_type = function
 | List_Node_t -> Node_t
 | List_Graph_t -> Graph_t
 | List_Bool_t -> Bool_t
+| _ as t-> invaid_list_type_error (string_of_typ t)
 
 let  match_dict_type = function
   Int_t -> Dict_Int_t
@@ -273,6 +275,8 @@ let  reverse_match_dict_type = function
 | Dict_String_t -> String_t
 | Dict_Node_t -> Node_t
 | Dict_Graph_t -> Graph_t
+| _ as t-> invaid_dict_type_error (string_of_typ t)
+
 
 (* list check helper function  *)
 let check_valid_list_type typ =
@@ -351,11 +355,11 @@ let report_duplicate exceptf list =
 (* check function *)
 let check_function func_map func =
     (* check duplicate formals *)
-    let args = List.map (fun (Formal(t, n)) -> n) func.args in
+    let args = List.map (fun (Formal(_, n)) -> n) func.args in
     report_duplicate (duplicate_formal_decl_error func) args;
 
     (* check duplicate locals *)
-    let locals = List.map (fun (Formal(t, n)) -> n) func.locals in
+    let locals = List.map (fun (Formal(_, n)) -> n) func.locals in
     report_duplicate (duplicate_local_decl_error func) locals;
 
     
@@ -389,16 +393,16 @@ let check_function func_map func =
         | Null -> Null_t
         | String_Lit _ -> String_t 
         | Bool_lit _ -> Bool_t
-        (* TODO: check node and graph *)
-        | Node(_, e) -> Node_t
-        | Graph_Link(e1, op, e2, e3) -> 
-            let check_graph_link e1 op e2 e3 =
+        (* check node and graph *)
+        | Node(_, _) -> Node_t
+        | Graph_Link(e1, _, _, _) -> 
+            let check_graph_link e1 =
                 let typ = expr e1 in
                 match typ with
                 Node_t -> ()
                 |_ -> invalid_graph_link_error (string_of_expr e1)
             in
-            ignore(check_graph_link e1 op e2 e3); Graph_t
+            ignore(check_graph_link e1); Graph_t
         | EdgeAt(e, n1, n2) -> 
             let check_edge_at e n1 n2 =
                 if (expr e) = Graph_t && (expr n1) = Node_t && (expr n2) = Node_t then ()
@@ -446,10 +450,10 @@ let check_function func_map func =
               let determine_element_type ss = List.fold_left 
                 (fun l e -> (match l with
                   [] -> [expr e]
-                | [t] when t = (expr e) -> [t]
-                | [t] when (t = Graph_t && (expr e) = Node_t) || (t = Node_t && (expr e) = Graph_t) -> [Graph_t]
-                | [t] when (t = Float_t && (expr e) = Int_t) || (t = Int_t && (expr e) = Float_t) -> [Float_t]
-                | [t] -> inconsistent_list_element_type_error (string_of_typ t) (string_of_typ (expr e))
+                | t :: _ when t = (expr e) -> [t]
+                | t :: _ when (t = Graph_t && (expr e) = Node_t) || (t = Node_t && (expr e) = Graph_t) -> [Graph_t]
+                | t :: _ when (t = Float_t && (expr e) = Int_t) || (t = Int_t && (expr e) = Float_t) -> [Float_t]
+                | t :: _ -> inconsistent_list_element_type_error (string_of_typ t) (string_of_typ (expr e))
                 )) [] ss
               in
               List.hd (determine_element_type es)
@@ -459,10 +463,10 @@ let check_function func_map func =
         | DictP(es) ->
             let element_type =
               let determine_element_type ss = List.fold_left 
-                (fun l (n, e) -> (match l with
+                (fun l (_, e) -> (match l with
                   [] -> [expr e]
-                | [t] when t = (expr e) -> [t]
-                | [t] -> inconsistent_dict_element_type_error (string_of_typ t) (string_of_typ (expr e))
+                | t :: _  when t = (expr e) -> [t]
+                | t :: _ -> inconsistent_dict_element_type_error (string_of_typ t) (string_of_typ (expr e))
                 )) [] ss
               in
               List.hd (determine_element_type es)
@@ -479,7 +483,7 @@ let check_function func_map func =
                   (* l_arg is a list of Formal(typ, name), r_arg is a list of expr *)
                   let check_args_type l_arg r_arg =
                       List.iter2 
-                          (fun (Formal(t, n)) r -> let r_typ = expr r in if t = r_typ then () else
+                          (fun (Formal(t, _)) r -> let r_typ = expr r in if t = r_typ then () else
                             incompatible_func_arg_type_error (string_of_typ r_typ) (string_of_typ t)
                           )
                           l_arg r_arg
@@ -563,6 +567,7 @@ let check_function func_map func =
                       | "size" -> ignore(check_graph_size_method e es); Int_t
                       | "nodes" -> ignore(check_graph_nodes_method e es); List_Node_t
                       | "edges" -> ignore(check_graph_edges_method e es); List_Int_t
+                      | _ -> unsupport_operation_error (string_of_typ typ) n
                     )
                   | _ -> unsupport_operation_error (string_of_typ typ) n
     in
@@ -597,10 +602,10 @@ let check program =
     then redefine_print_func_error "_" else ();
     (* check duplicate function *)
     let m = StringMap.empty in
-    List.map (fun f ->
+    ignore(List.map (fun f ->
         if StringMap.mem f.name m 
         then (duplicate_func_error f.name)
-        else StringMap.add f.name true m) program;
+        else StringMap.add f.name true m) program);
     (* Function declaration for a named function *)
     let built_in_funcs =
       let funcs = [
