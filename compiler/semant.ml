@@ -447,6 +447,8 @@ let check_function func_map func =
                 (fun l e -> (match l with
                   [] -> [expr e]
                 | [t] when t = (expr e) -> [t]
+                | [t] when (t = Graph_t && (expr e) = Node_t) || (t = Node_t && (expr e) = Graph_t) -> [Graph_t]
+                | [t] when (t = Float_t && (expr e) = Int_t) || (t = Int_t && (expr e) = Float_t) -> [Float_t]
                 | [t] -> inconsistent_list_element_type_error (string_of_typ t) (string_of_typ (expr e))
                 )) [] ss
               in
