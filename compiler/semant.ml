@@ -472,7 +472,7 @@ let check_function func_map func =
                   let check_args_length l_arg r_arg = if (List.length l_arg) = (List.length r_arg)
                       then () else (unmatched_func_arg_len_error func.name)
                   in
-                  if List.mem func.name ["printb"; "print"; "printf"; "string"; "float"; "bool"] then ()
+                  if List.mem func.name ["printb"; "print"; "printf"; "string"; "float"; "int"; "bool"] then ()
                   else check_args_length func.args args;
                   (* l_arg is a list of Formal(typ, name), r_arg is a list of expr *)
                   let check_args_type l_arg r_arg =
@@ -483,7 +483,7 @@ let check_function func_map func =
                           l_arg r_arg
                   in
                   (* do not check args type of function print, do conversion in codegen *)
-                  if List.mem func.name ["printb"; "print"; "printf"; "string"; "float"; "bool"] then () 
+                  if List.mem func.name ["printb"; "print"; "printf"; "string"; "float"; "int"; "bool"] then () 
                   else check_args_type func.args args
               in
               ignore(check_funciton_call func_obj args); func_obj.returnType
