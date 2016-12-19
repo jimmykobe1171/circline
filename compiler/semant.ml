@@ -412,6 +412,10 @@ let check_function func_map func =
             |Add | Sub | Mult | Div when t1 = Float_t && t2 = Float_t -> Float_t
             |Add | Sub | Mult | Div when t1 = Int_t && t2 = Float_t -> Float_t
             |Add | Sub | Mult | Div when t1 = Float_t && t2 = Int_t -> Float_t
+            (* + - for graph *)
+            | Add when t1 = Graph_t && t2 = Graph_t -> Graph_t
+            | Sub when t1 = Graph_t && t2 = Graph_t -> List_Graph_t
+            | Sub when t1 = Graph_t && t2 = Node_t -> List_Graph_t
             (* ==, != *)
             | Equal | Neq when t1 = t2 -> Bool_t
             (* <, <=, >, >= *)
