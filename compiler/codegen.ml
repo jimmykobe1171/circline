@@ -461,7 +461,7 @@ let graph_add_list_f = L.declare_function "graphAddList" graph_add_list_t the_mo
 let graph_add_list graph vals (edges, etyp) dir llbuilder =
   let edges = (
     match etyp with
-    | A.List_Int_t | A.List_Float_t | A.List_String_t | A.List_Bool_t
+    | A.List_Int_t | A.List_Float_t | A.List_String_t
     | A.List_Node_t | A.List_Graph_t | A.List_Bool_t -> edges
     | _ -> list_null
   ) in
@@ -710,7 +710,6 @@ let translate program =
           let from_expr_typ_to_list_typ = function
               A.Int_t -> A.List_Int_t
             | A.Float_t -> A.List_Float_t
-            | A.Bool_t -> A.List_Bool_t
             | A.String_t -> A.List_String_t
             | A.Node_t -> A.List_Node_t
             | A.Graph_t -> A.List_Graph_t
@@ -950,8 +949,8 @@ let translate program =
           in
             assign_func_by_typ builder expr_tpy
 
-      | _ -> (L.const_int i32_t 0, A.Void_t)
-    in
+(*       | _ -> (L.const_int i32_t 0, A.Void_t)
+ *)    in
 
     (* Invoke "f builder" if the current block doesn't already
        have a terminal (e.g., a branch). *)
