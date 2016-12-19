@@ -472,7 +472,8 @@ let check_function func_map func =
                   let check_args_length l_arg r_arg = if (List.length l_arg) = (List.length r_arg)
                       then () else (unmatched_func_arg_len_error func.name)
                   in
-                  check_args_length func.args args;
+                  if List.mem func.name ["printb"; "print"; "printf"; "string"; "float"; "bool"] then ()
+                  else check_args_length func.args args;
                   (* l_arg is a list of Formal(typ, name), r_arg is a list of expr *)
                   let check_args_type l_arg r_arg =
                       List.iter2 
@@ -482,7 +483,8 @@ let check_function func_map func =
                           l_arg r_arg
                   in
                   (* do not check args type of function print, do conversion in codegen *)
-                  if func.name = "print" then () else check_args_type func.args args
+                  if List.mem func.name ["printb"; "print"; "printf"; "string"; "float"; "bool"] then () 
+                  else check_args_type func.args args
               in
               ignore(check_funciton_call func_obj args); func_obj.returnType
               (* TODO: implement call default *)
@@ -597,11 +599,49 @@ let check program =
         then (duplicate_func_error f.name)
         else StringMap.add f.name true m) program;
     (* Function declaration for a named function *)
-    let built_in_funcs =  StringMap.add "print"
-       { returnType = Void_t; name = "print"; args = [Formal(String_t, "x")];
-         locals = []; body = []; pname = "main"} (StringMap.singleton "printb"
-       { returnType = Void_t; name = "printb"; args = [Formal(Bool_t, "x")];
-         locals = []; body = []; pname = "main"})
+    let built_in_funcs =
+      let funcs = [
+          (
+            "print",
+           { returnType = Void_t; name = "print"; args = [Formal(String_t, "x")];
+             locals = []; body = []; pname = "main"}
+          );
+          (
+            "printb",
+           { returnType = Void_t; name = "printb"; args = [Formal(Bool_t, "x")];
+             locals = []; body = []; pname = "main"}
+          );
+          (
+          "printf",
+           { returnType = Void_t; name = "printf"; args = [Formal(String_t, "x")];
+             locals = []; body = []; pname = "main"}
+          );
+          (
+          "string",
+           { returnType = Void_t; name = "string"; args = [Formal(String_t, "x")];
+             locals = []; body = []; pname = "main"}
+          );
+          (
+          "int",
+           { returnType = Void_t; name = "int"; args = [Formal(String_t, "x")];
+             locals = []; body = []; pname = "main"}
+          );
+          (
+          "float",
+           { returnType = Void_t; name = "float"; args = [Formal(String_t, "x")];
+             locals = []; body = []; pname = "main"}
+          );
+          (
+          "bool",
+           { returnType = Void_t; name = "bool"; args = [Formal(String_t, "x")];
+             locals = []; body = []; pname = "main"}
+          )
+      ]
+      in
+      let add_func funcs m =
+          List.fold_left (fun m (n, func) -> StringMap.add n func m) m funcs
+      in
+      add_func funcs StringMap.empty
     in
     (* collect all functions and store in map with key=name, value=function *)
     let func_map = List.fold_left (fun m f -> StringMap.add f.name f m) built_in_funcs program in
