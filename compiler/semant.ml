@@ -396,6 +396,7 @@ let check_function func_map func =
     he given lvalue type, noted that int could be assinged to float type variable *)
     let check_assign lvaluet rvaluet ex = match lvaluet with
           Float_t when rvaluet = Int_t -> lvaluet
+        | String_t when rvaluet = Null_t -> lvaluet
         | Node_t when rvaluet = Null_t -> lvaluet
         | Graph_t when rvaluet = Null_t -> lvaluet
         | List_Int_t | List_String_t | List_Float_t | List_Node_t | List_Graph_t | List_Bool_t when rvaluet = Null_t -> lvaluet

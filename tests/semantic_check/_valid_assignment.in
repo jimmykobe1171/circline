@@ -1,0 +1,22 @@
+float v1 = 1;
+string v2 = null;
+node v3 = null;
+graph v4 = null;
+
+list<int> v5 = null;
+list<float> v6 = null;
+list<string> v7 = null;
+list<node> v8 = null;
+list<graph> v9 = null;
+list<bool> v10 = null;
+
+dict<int> v11 = null;
+dict<float> v12 = null;
+dict<string> v13 = null;
+dict<node> v14 = null;
+dict<graph> v15 = null;
+
+dict<int> a = {"a":1};
+list<int> v16 = a.keys();
+list<string> v17 = a.keys();
+list<node> v18 = a.keys();
