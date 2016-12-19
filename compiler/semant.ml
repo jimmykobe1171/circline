@@ -529,7 +529,8 @@ let check_function func_map func =
               in
               let check_dict_put_method typ ex es =
                   match es with
-                  [key; value] when List.mem (expr key) [Int_t; String_t; Node_t] && (expr value) = (reverse_match_dict_type typ) -> ()
+                  [key; value] when List.mem (expr key) [Int_t; String_t; Node_t] 
+                                    && ((expr value) = (reverse_match_dict_type typ) || (expr value) = Null_t) -> ()
                   | _ -> invalid_dict_put_method_error (string_of_typ (reverse_match_dict_type typ)) (string_of_expr ex)
               in
               match typ with
@@ -620,22 +621,22 @@ let check program =
           );
           (
           "string",
-           { returnType = Void_t; name = "string"; args = [Formal(String_t, "x")];
+           { returnType = String_t; name = "string"; args = [Formal(String_t, "x")];
              locals = []; body = []; pname = "main"}
           );
           (
           "int",
-           { returnType = Void_t; name = "int"; args = [Formal(String_t, "x")];
+           { returnType = Int_t; name = "int"; args = [Formal(String_t, "x")];
              locals = []; body = []; pname = "main"}
           );
           (
           "float",
-           { returnType = Void_t; name = "float"; args = [Formal(String_t, "x")];
+           { returnType = Float_t; name = "float"; args = [Formal(String_t, "x")];
              locals = []; body = []; pname = "main"}
           );
           (
           "bool",
-           { returnType = Void_t; name = "bool"; args = [Formal(String_t, "x")];
+           { returnType = Bool_t; name = "bool"; args = [Formal(String_t, "x")];
              locals = []; body = []; pname = "main"}
           )
       ]

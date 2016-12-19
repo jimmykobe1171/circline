@@ -1,0 +1,7 @@
+print("a");
+printf("a");
+printb(true);
+int("a");
+string(1);
+float(1);
+bool(1);
