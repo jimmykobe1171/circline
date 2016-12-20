@@ -49,6 +49,7 @@ let txt_of_var_type = function
   | Dict_Graph_t -> "dict<graph>"
   | List_Int_t -> "list<int>"
   | List_Float_t -> "list<float>"
+  | List_Bool_t -> "list<bool>"
   | List_String_t -> "list<string>"
   | List_Node_t -> "list<node>"
   | List_Graph_t -> "list<graph>"
@@ -73,6 +74,7 @@ let rec txt_of_expr = function
   | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
   | String_Lit(x) -> sprintf "String_Lit(%s)" x
   | Null -> sprintf "Null"
+  | EdgeAt(g, a, b) -> sprintf "%s@(%s, %s)" (txt_of_expr g) (txt_of_expr a) (txt_of_expr b) 
   | Node(x) -> sprintf "Node(%s)" (txt_of_expr x)
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
