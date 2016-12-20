@@ -1,8 +1,0 @@
-node a = node("a");
-node b = node("b");
-node c = node("c");
-node d = node("d");
-
-list<node> l = [b, c];
-
-print(l);

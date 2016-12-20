@@ -7,34 +7,35 @@ Language Guru: Zehao Song
 
 Tester: Qing Lan
 
-## Install LLVM
 
-### Create soft link
+## Prerequisite
+
+LLVM & Clang
+
+Create a soft-link to lli
 
 ```
 sudo ln -s /usr/local/opt/llvm38/bin/lli-3.8 /usr/local/bin/lli
-sudo ln -s /usr/local/opt/llvm38/bin/llvm-link-3.8 /usr/local/bin/llvm-link
 ```
-### How to run
+
+## Compile & Test
 
 ```
 make all
-sh compiler/circline.sh program.file
-./complier/test.in.exe
+make test
 ```
 
-## Current Target
-- Build the Travis CI (done in 24-Oct)
-- Build the Ocaml Compiler
-- BUild the make file and test the program
+### Hello World
 
-## Recent Update 2016-10-22
-Figure out the major obstacle on the Scanner Part. User can run the test module by doing the follows:
+Create the following `test.in` file
 ```
-sh test_scanner.sh
+print("Hello World!");
 ```
-This work is the same as to do:
+
+Run `sh circline.sh test.in` in terminal
+
+Output
+
 ```
-scanner/tokenize < $input_file | $output_file -
+Hello World!
 ```
-After Comparing the difference between the standard output file, we will see the difference if the scanner parsing procedure are not doing well
