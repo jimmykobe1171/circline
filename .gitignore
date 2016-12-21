@@ -57,3 +57,5 @@ compiler/test_codegen_tmp.in
 compiler/utils.bc
 
 tests/utils.bc
+
+*.bc
